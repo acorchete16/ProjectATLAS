@@ -336,6 +336,35 @@ details.tech>.tin{padding:0 12px 12px;display:flex;flex-direction:column;gap:12p
 .pp-row span{font-size:12px;color:var(--mid)}.pp-row b{font-size:14px}.pp-row small{font-size:11px;color:var(--dim)}
 .pl-warn{margin:0;font-size:12px;line-height:1.45;color:#ffd29a;padding:9px 12px;border-radius:12px;background:rgba(255,177,59,.08);border:1px solid rgba(255,177,59,.25)}
 @media (max-width:1100px){#app.simple .sbtn{min-width:0;flex:1}#app.simple .sbtn::after{content:''}#app.simple #expertBtn{display:none}#app.simple .top{flex-wrap:nowrap}#app.simple .brand small{display:none}}
+
+/* ---- buscador limpio ---- */
+.sbar{display:flex;gap:8px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--edge);flex-wrap:nowrap}
+.sseg{display:flex;padding:3px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--edge);flex:none}
+.sseg .sc-chip{border:0;background:none;min-height:30px;padding:5px 12px;border-radius:9px}
+.sseg .sc-chip.on{background:rgba(255,255,255,.12);color:var(--fg);box-shadow:none}
+.sbar .sfit{margin-left:auto}.sbar .sfit.on{background:rgba(61,220,132,.14);border-color:rgba(61,220,132,.6);color:#bff5d6}
+.sfbtn em{font-style:normal;display:inline-grid;place-items:center;min-width:17px;height:17px;border-radius:9px;background:#9ff8ff;color:#0b0b18;font-size:10.5px;font-weight:700;margin-left:4px}
+.sfil{padding:12px 16px;gap:12px;border-bottom:1px solid var(--edge)}.sfil[hidden]{display:none}
+.sgrp{display:flex;flex-direction:column;gap:7px}.sgrp .slbl{width:auto}
+.scount{display:flex;justify-content:space-between;padding:10px 20px 6px;font-size:11px;color:var(--dim);letter-spacing:.02em}.scount:empty{display:none}
+.shd{display:flex;justify-content:space-between;align-items:baseline;margin:14px 6px 4px;font-size:12px;font-weight:600;color:var(--mid);letter-spacing:.02em}.shd span{font-weight:400;font-size:11px;color:var(--dim)}
+.stiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.sc-chip.stile{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:8px;text-align:left;border-radius:12px;padding:10px 12px;min-height:48px;color:var(--fg)}
+.stile .sti{font-size:18px;line-height:1}.stile b{font-weight:500;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stile small{color:var(--dim);font-size:11px}
+.sr{grid-template-columns:42px 1fr auto;padding:8px 10px;border-color:transparent;background:rgba(255,255,255,.025)}
+.sr-logo{width:42px;height:42px;font-size:10px;background:color-mix(in srgb,var(--c) 22%,#14122a);color:var(--c);border:1px solid color-mix(in srgb,var(--c) 45%,transparent)}
+.sr-r{flex-direction:row;align-items:center;gap:8px}.sr-r b{font-size:14.5px;min-width:44px;text-align:right}
+.sr-dot{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:700;background:rgba(61,220,132,.16);color:#5ee69a}
+.sr-dot.plan{background:rgba(255,210,74,.18);color:#ffd24a}.sr-dot.off{background:none}
+.sempty{padding:36px 20px;text-align:center;color:var(--dim);font-size:13px;line-height:1.6}
+/* ---- ficha de ciudad limpia ---- */
+.cv{align-self:flex-start;font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:999px;border:1px solid var(--edge2)}
+.cv.ok{color:#ffd24a;background:rgba(255,210,74,.1);border-color:rgba(255,210,74,.4)}.cv.mid{color:#5ee69a;background:rgba(61,220,132,.1);border-color:rgba(61,220,132,.4)}.cv.no{color:var(--mid)}
+#card .cs-about{font-size:12.5px;color:var(--mid);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#card .cs-list{gap:6px;margin:0}
+.cs-more{font:inherit;font-size:12.5px;padding:9px;border-radius:10px;border:1px dashed var(--edge2);background:none;color:var(--mid);cursor:pointer}.cs-more:hover{color:var(--fg)}
+#app.simple #card .ctabs{display:none}#app.simple #card .co{display:none}
+@media (max-width:700px){.sbar{padding:8px 12px;gap:6px}.sseg .sc-chip{padding:5px 9px}.stiles{grid-template-columns:1fr 1fr}.sbar .sc-chip{font-size:12px}}
 </style>
 </head>
 <body>
@@ -756,7 +785,7 @@ const PHASE_PCT={idle:0,search:18,analyze:45,eval:70,report:88,done:100};
 document.getElementById('mBars').innerHTML='<i id="mProg" style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.08);position:relative;overflow:hidden"><b style="position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#9ff8ff,#ff9fd0);border-radius:2px;transition:width .4s"></b></i>';
 const S={};const resetS=()=>AGENTS.forEach(a=>S[a.id]={status:'idle',rows:null,top:null,live:false,signal:'',flags:[],sources:[],entry:'',action:'',asOf:''});resetS();
 let cao={status:'idle',macro:null,sources:[],entry:'',action:''};
-let profile='ag',basis='hist',monthly=150,running=false,completed=false,apiKey='',queries=0,launchT=null,cardOpen=null;
+let profile='ag',basis='hist',monthly=150,running=false,completed=false,apiKey='',queries=0,launchT=null,cardOpen=null,litNode=null;
 const $=s=>document.querySelector(s);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const rnd=(a,b)=>a+Math.random()*(b-a);
@@ -1003,7 +1032,7 @@ function makeRobot(hex,id,scale=1){
 /* ---------- city builders (local frame: y up) ---------- */
 function orient(group,lat,lon,rot=0){const n=ll2v(lat,lon,1).normalize();group.position.copy(n.clone().multiplyScalar(R));group.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),n);group.rotateY(rot)}
 function buildCity(id){
-  const n=NODES[id],sty=n.sty||'generic',hex=n.color,g=new THREE.Group(),ll=hubLL(id);orient(g,ll.lat,ll.lon,sty==='clean'?.4:0);globeGroup.add(g);
+  const ch0=globeGroup.children.length;const n=NODES[id],sty=n.sty||'generic',hex=n.color,g=new THREE.Group(),ll=hubLL(id);orient(g,ll.lat,ll.lon,sty==='clean'?.4:0);globeGroup.add(g);
   const nEnt=(STOCKS[id]||[]).length+UNIV.filter(e=>e.node===id).length,BIGS=sty!=='generic';
   const ring=platform(g,hex,sty==='hq'?7.2:BIGS?5.6:3.0);const anim={ring};
   let roof;
@@ -1233,7 +1262,9 @@ function buildCity(id){
   // invisible hit volume
   const hit=new THREE.Mesh(new THREE.SphereGeometry(sty==='hq'?8:BIGS?6.5:3.6,12,8),new THREE.MeshBasicMaterial({visible:false}));hit.position.y=3;hit.userData.id=id;g.add(hit);hitMeshes.push(hit);
   const sc=sty==='hq'?.9:BIGS?.78:1;g.scale.setScalar(sc);
-  cityObjs[id]={group:g,anim,beam,pulse,light,pinG,labelH:(sty==='hq'?12:BIGS?11:4.2+Math.min(1,nEnt/8)*4)};
+  const mm=new Map(),recs=[];globeGroup.children.slice(ch0).forEach(root=>root.traverse(o=>{const m=o.material;if(!m||Array.isArray(m)||m.isShaderMaterial||m.visible===false||!m.color)return;
+    let c2=mm.get(m);if(!c2){c2=m.clone();mm.set(m,c2);recs.push({m:c2,c:c2.color.clone(),e:c2.emissiveIntensity})}o.material=c2}));
+  cityObjs[id]={recs,lit:.25,group:g,anim,beam,pulse,light,pinG,labelH:(sty==='hq'?12:BIGS?11:4.2+Math.min(1,nEnt/8)*4)};
 }
 
 /* ---------- data arcs ---------- */
@@ -1243,12 +1274,12 @@ function buildArc(id){
   const curve=new THREE.QuadraticBezierCurve3(p0,mid,p1);
   const mat=new THREE.ShaderMaterial({uniforms:{t:{value:0},ca:{value:new THREE.Color(NODES[id].color)},cb:{value:new THREE.Color('#f5c542')},k:{value:.5}},
     vertexShader:'varying float u;void main(){u=uv.x;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
-    fragmentShader:'uniform float t;uniform vec3 ca;uniform vec3 cb;uniform float k;varying float u;void main(){float head=fract(u*2.-t);float p=pow(smoothstep(.0,1.,head),10.);vec3 c=mix(ca,cb,u);float a=(.18+p*1.6)*k;gl_FragColor=vec4(c*(1.+p*1.5),a);}',
+    fragmentShader:'uniform float t;uniform vec3 ca;uniform vec3 cb;uniform float k;varying float u;void main(){float head=fract(u*2.-t);float p=pow(smoothstep(.0,1.,head),10.);vec3 c=mix(ca,cb,u);float a=(.12+p*1.1)*k;gl_FragColor=vec4(c*(1.+p*.6),a);}',
     transparent:true,blending:THREE.AdditiveBlending,depthWrite:false});
   const tube=new THREE.Mesh(new THREE.TubeGeometry(curve,120,.12,6,false),mat);globeGroup.add(tube);arcs[id]={curve,mat};
 }
-function burst(id){for(let i=0;i<10;i++)setTimeout(()=>spawnPacket(id,true),i*120)}
-function spawnPacket(id,big){if(!gl_ok)return;const m=new THREE.Mesh(new THREE.SphereGeometry(big?.55:.35,10,8),glowMat(NODES[id].color));globeGroup.add(m);packets.push({m,id,t:0,v:big?.55:.35})}
+function burst(id){for(let i=0;i<10;i++)setTimeout(()=>spawnPacket(id,true),i*300)}
+function spawnPacket(id,big){if(!gl_ok)return;const m=new THREE.Mesh(new THREE.SphereGeometry(big?.55:.35,10,8),glowMat(NODES[id].color));globeGroup.add(m);packets.push({m,id,t:0,v:big?.2:.11})}
 
 /* ---------- camera rig (Google-Earth-style tilt on zoom) ---------- */
 const cam={lat:36,lon:-52,dist:520,heading:0};let camTarget=null;
@@ -1314,8 +1345,8 @@ function updateLabelText(){const o=buildPlan(profile);Object.keys(NODES).forEach
 
 /* ---------- profile-reactive lighting ---------- */
 function applyProfileVisuals(){if(!gl_ok)return;const o=buildPlan(profile);atmoMat.uniforms.c.value.set(PROFILES[profile].color);
-  Object.keys(NODES).forEach(id=>{const c=cityObjs[id];const w=id==='cao'?1:nodeW(o,id);c.targetW=id==='cao'?1:Math.max(.08,w)});
-  if(bloom)bloom.strength=.6+.35*({cons:0,mod:.35,ag:.7,alpha:1}[profile])}
+  Object.keys(NODES).forEach(id=>{const c=cityObjs[id];const w=id==='cao'?1:nodeW(o,id);c.inPlan=id!=='cao'&&w>0;c.targetW=id==='cao'?1:Math.max(.08,w)});
+  if(bloom)bloom.strength=.38+.18*({cons:0,mod:.35,ag:.7,alpha:1}[profile])}
 
 /* ---------- render loop ---------- */
 let lastNow=performance.now();
@@ -1323,11 +1354,13 @@ function loop(now){
   const dt=Math.min(.05,(now-lastNow)/1000);lastNow=now;const t=now/1000;
   if(gl_ok){
     if(camTarget&&camTarget.tick(now))camTarget=null;applyCam();
+    const selN=cardOpen||litNode;
     // arcs & packets
-    AGENTS.forEach(a=>{const st=S[a.id].status,m=arcs[a.id].mat;m.uniforms.t.value=(t*(st==='idle'?.15:st==='done'?.3:.7))%1;m.uniforms.k.value+=((st==='idle'?.35:st==='done'?.7:1.15)-m.uniforms.k.value)*.05;
-      if(st!=='idle'&&st!=='done'&&!reduced&&Math.random()<.035)spawnPacket(a.id,false)});
+    AGENTS.forEach(a=>{const st=S[a.id].status,m=arcs[a.id].mat;m.uniforms.t.value=(t*(st==='idle'?.035:st==='done'?.06:.16))%1;m.uniforms.k.value+=((st==='idle'?.1:st==='done'?.18:.45)*(a.id===selN?3:1)-m.uniforms.k.value)*.04;
+      if(st!=='idle'&&st!=='done'&&!reduced&&Math.random()<.01)spawnPacket(a.id,false)});
     for(let i=packets.length-1;i>=0;i--){const p=packets[i];p.t+=p.v*dt;if(p.t>=1){globeGroup.remove(p.m);p.m.geometry.dispose();packets.splice(i,1);continue}p.m.position.copy(arcs[p.id].curve.getPoint(p.t))}
-    // cities
+    // cities: apagadas por defecto, se encienden al pulsarlas
+    Object.entries(cityObjs).forEach(([id,c])=>{const tgt=id===selN?1:id==='cao'?.45:c.inPlan?.42:.2;c.lit+=(tgt-c.lit)*Math.min(1,dt*3);c.recs.forEach(r=>{r.m.color.copy(r.c);if(r.e!=null)r.m.emissiveIntensity=r.e*c.lit})});
     Object.entries(cityObjs).forEach(([id,c])=>{const A=c.anim,tw=c.targetW??.3;
       c.beam.scale.y+=((3+tw*38)-c.beam.scale.y)*.06;c.beam.position.y=c.beam.scale.y/2;c.beam.material.opacity=.1+Math.min(.3,tw*.5);
       const ph=(t*.6+id.length*.13)%1;c.pulse.scale.setScalar(1+ph*5);c.pulse.material.opacity=(1-ph)*.9;
@@ -1363,6 +1396,7 @@ A.ring.material.opacity=.6+.4*Math.sin(t*2+id.length);
       if(mode==='done')u.bodyG.rotation.z=Math.sin(t*4)*.12;else u.bodyG.rotation.z=0;
       u.tip.material.color.set(mode==='work'?(Math.floor(t*3)%2?'#ff5d6c':'#ffb13b'):mode==='done'?'#3ddc84':'#55606c');u.visor.material.color.set(mode==='idle'?'#3d6f78':mode==='done'?'#9dffb8':'#9ff8ff');
       if(mode==='work'&&now>bubbles[id].until-600&&Math.random()<.004){const list=id==='cao'?['Equilibrando Sharpe ratio…','Rebalanceando core S&P 500…','Midiendo erosión por volatilidad…']:AGENTS.find(a=>a.id===id).chat;robotSay(id,list[Math.floor(Math.random()*list.length)],2600)}});
+    Object.values(cityObjs).forEach(c=>{if(c.lit<.995)c.recs.forEach(r=>r.m.color.multiplyScalar(c.lit))});
     lifeTick(t,dt,now);projectOverlays(now);
     composer?composer.render():renderer.render(scene,camera);
   }
@@ -1590,7 +1624,7 @@ async function loadNews(q,box){
     if(j.status==='ok'&&j.items&&j.items.length){render(j.items.map(it=>{const m=String(it.title).match(/^(.*) - ([^-]+)$/);return{title:m?m[1]:it.title,source:m?m[2]:(it.author||''),date:String(it.pubDate||'').slice(0,10).split('-').reverse().join('/'),url:it.link}}));return}}catch(e){}
   if(apiKey){try{const res=await gemini(`Hoy es ${new Date().toISOString().slice(0,10)}. Busca las 5 noticias más recientes e importantes sobre "${q}" (preferiblemente en español). Responde SOLO con JSON: {"news":[{"title":"...","source":"...","date":"DD/MM/AAAA","url":"https://..."}]}`);const j=parseJSON(res.text);if(j.news&&j.news.length){render(j.news);return}}catch(e){}}
   box.innerHTML=`<p class="mp-note">No he podido cargar titulares desde aquí. Ábrelos directamente:</p>`+links}
-function openDetail(kind,t,node){const d=$('#detail');let html='';
+function openDetail(kind,t,node){litNode=node;const d=$('#detail');let html='';
   if(kind==='s'){const l=STOCKS[node]||Object.values(STOCKS).flat(),s=(STOCKS[node]||[]).find(x=>x.t===t)||Object.values(STOCKS).flat().find(x=>x.t===t);if(!s)return;const info=stockInfo(s),an=annStats(s.t),color=NODES[node].color;
     html=`<div class="dhead" style="--c:${color}"><div class="dlogo">${esc(dispT(s).slice(0,4))}</div><div class="dtit"><h3>${esc(s.n)}</h3><p>${esc(dispT(s))} · ${esc(s.sec||'')} · Sede: ${esc(s.hq||NODES[node].city)}</p></div><button class="x-close" data-close aria-label="Cerrar">✕</button></div>
      <div class="dbody"><div class="dprice"><b>${s.cur==='USD'?'$':''}${s.px.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})}${s.cur!=='USD'?' '+(s.cur==='EUR'?'€':s.cur):''}</b>${s.ch52!=null?`<span class="dtag" style="--b:${s.ch52>=0?'var(--good)':'var(--bad)'}">${fmtPct(s.ch52,0)} en 12 meses</span>`:''}${fitPill(info,true)}</div>
@@ -1616,7 +1650,7 @@ function openDetail(kind,t,node){const d=$('#detail');let html='';
     d.innerHTML=`<div class="dbox">${html}</div>`;d.hidden=false;loadNews(`${e.u?e.u.n:e.n} ETF`,$('#dNews'))}
   d.querySelector('[data-close]').addEventListener('click',closeDetail);d.scrollTop=0;
 }
-function closeDetail(){const d=$('#detail');d.hidden=true;d.innerHTML=''}
+function closeDetail(){litNode=null;const d=$('#detail');d.hidden=true;d.innerHTML=''}
 function entityTiles(id){const o=buildPlan(profile),P=PROFILES[profile],color=NODES[id].color;
   const st=nodeStocks(id),et=o.all.filter(x=>x.e.node===id).sort((a,b)=>((b.e.ann?b.e.ann.mean:-99)-(a.e.ann?a.e.ann.mean:-99)));
   const mx=Math.max(10,...st.map(x=>{const a=annStats(x.s.t);return a?Math.abs(a.mean):0}),...et.map(x=>x.e.ann?Math.abs(x.e.ann.mean):0));
@@ -1627,12 +1661,6 @@ function entityTiles(id){const o=buildPlan(profile),P=PROFILES[profile],color=NO
   return `${st.length?`<div><span class="lbl">Empresas con sede aquí · ${st.length}</span><div class="cs-list">${sH}</div></div>`:''}
    ${et.length?`<div><span class="lbl">ETFs de gestoras de aquí · ${et.length}</span><div class="cs-list">${eH}</div></div>`:''}
    <p class="mp-note">La cifra es la media anual 2021–25. ★ en tu plan · ✓ encaja con tu perfil ${P.label} · ✗ descartado. Toca cualquiera para ver su ficha completa.</p>`}
-function cityBody(id){const n=NODES[id],info=nodeInfo(id),o=buildPlan(profile),P=PROFILES[profile],inPlan=o.items.filter(x=>x.e.node===id),wIn=inPlan.reduce((a,x)=>a+x.w,0);
-  const okS=nodeStocks(id).filter(x=>x.band===profile&&x.ok).length,okE=o.all.filter(x=>x.e.node===id&&x.band===profile&&x.ok).length;
-  const verdict=inPlan.length?`<div class="cs-verdict ok"><b>Tu plan ${P.label} invierte aquí</b> un ${Math.round(wIn*100)} % (${Math.round(wIn*monthly)} €/mes) con <b>${inPlan.map(x=>esc(x.e.u?x.e.u.t:x.e.t)).join(' y ')}</b>.</div>`
-    :okS||okE?`<div class="cs-verdict mid">Aquí ${okE?`<b>${okE} ETF${okE>1?'s':''}</b>`:''}${okE&&okS?' y ':''}${okS?`<b>${okS} empresa${okS>1?'s':''}</b>`:''} encaja${okS+okE>1?'n':''} con tu perfil ${P.label}.</div>`
-    :`<div class="cs-verdict no">Nada de aquí encaja con tu perfil ${P.label}, pero puedes consultar todas las fichas.</div>`;
-  return `<div class="cb"><p class="cs-about">${esc(info.about||'')}</p>${verdict}${entityTiles(id)}</div>`}
 
 /* ================= BUSCADOR CON FILTROS ================= */
 const SEC_OF_GRP={semis:'Tecnología',usbig:'Tecnología',sw:'Tecnología',robo:'Tecnología',def:'Defensa y espacio',spnew:'Defensa y espacio',health:'Salud',biotech:'Salud',medtech:'Salud',
@@ -1646,40 +1674,62 @@ function searchEntities(){if(_ents)return _ents;const out=[];
   Object.entries(STOCKS).forEach(([node,l])=>l.forEach(s=>out.push({k:'s',t:s.t,tk:dispT(s),name:s.n,sec:s.sec||'Otros',node,obj:s,txt:norm([s.t,dispT(s),s.n,s.sec,s.hq,NODES[node].city,NODES[node].sub,s.thesis].join(' '))})));
   UNIV.forEach(e=>{const sec=SEC_OF_GRP[e.grp]||'Otros';out.push({k:'e',t:e.t,tk:e.u?e.u.t:e.t,name:THEME[e.t]||e.n,sec,node:e.node,obj:e,txt:norm([e.t,e.n,e.u&&e.u.t,e.u&&e.u.n,e.u&&e.u.isin,e.iss,THEME[e.t],sec,NODES[e.node].city,e.w,'etf fondo'].join(' '))})});
   return _ents=out}
+const SEC_ICON={'Tecnología':'💻','Salud':'🧬','Energía':'⚡','Finanzas':'🏦','Consumo':'🛒','Defensa y espacio':'🚀','Infraestructuras':'🏗️','Mercado amplio':'🌍','Regiones y países':'🗺️','Bonos y oro':'🪙','Automoción':'🚗','Industria':'🏭','Lujo':'💎','Materias primas':'⛏️','Telecomunicaciones':'📡','Inmobiliario':'🏢','Otros':'◆'};
+function entEnrich(list){const o=buildPlan(profile),sp=buildStockPlan(profile),pw={};o.items.forEach(x=>pw['e'+x.e.t]=x.w);sp.items.forEach(x=>pw['s'+x.s.t]=x.w);
+  return list.map(x=>{const info=x.k==='s'?stockInfo(x.obj):etfInfo(x.obj),an=annStats(x.t);return{...x,info,an,fit:info.band===profile&&info.ok,inPlan:pw[x.k+x.t]||0}})}
+function entRow(x,showCity=true){const c=NODES[x.node].color,m=x.an?x.an.mean:null;
+  const nm=x.k==='s'?x.name:x.name,sub=x.k==='e'?`ETF · ${x.obj.iss||x.sec}`:x.sec;
+  return `<button class="sr" data-k="${x.k}" data-t="${esc(x.t)}" data-n="${x.node}"><span class="sr-logo" style="--c:${c}">${esc(String(x.tk).slice(0,4))}</span>
+    <span class="sr-mid"><b>${esc(nm)}</b><small>${esc(sub)}${showCity?` · ${esc(NODES[x.node].city.split(' ·')[0])}`:''}</small></span>
+    <span class="sr-r"><b style="color:${m==null?'var(--dim)':m<0?'var(--bad)':'var(--fg)'}">${m==null?'—':p1(m,0)}</b>${x.inPlan?'<i class="sr-dot plan" title="En tu plan">★</i>':x.fit?'<i class="sr-dot" title="Encaja con tu perfil">✓</i>':'<i class="sr-dot off"></i>'}</span></button>`}
 function openSearch(){const d=$('#search');d.hidden=false;renderSearch();setTimeout(()=>{const i=$('#sQ');if(i&&!mobile())i.focus()},50)}
 function closeSearch(){$('#search').hidden=true}
 function renderSearch(){
   const d=$('#search'),P=PROFILES[profile],ents=searchEntities();
-  const secs=[...new Set(ents.filter(x=>sq.type==='all'||x.k===(sq.type==='etf'?'e':'s')).map(x=>x.sec))].sort((a,b)=>a.localeCompare(b,'es'));
+  const ofType=x=>sq.type==='all'||x.k===(sq.type==='etf'?'e':'s');
+  const secCount={};ents.filter(ofType).forEach(x=>secCount[x.sec]=(secCount[x.sec]||0)+1);
+  const secs=Object.keys(secCount).sort((a,b)=>secCount[b]-secCount[a]);
   if(sq.sec!=='all'&&!secs.includes(sq.sec))sq.sec='all';
-  const words=norm(sq.q).split(/\s+/).filter(Boolean);
-  let res=ents.filter(x=>(sq.type==='all'||x.k===(sq.type==='etf'?'e':'s'))&&(sq.sec==='all'||x.sec===sq.sec)&&words.every(w=>x.txt.includes(w)))
-    .map(x=>{const info=x.k==='s'?stockInfo(x.obj):etfInfo(x.obj),an=annStats(x.t);return{...x,info,an,fit:info.band===profile&&info.ok}});
-  if(sq.fit)res=res.filter(x=>x.fit);
+  const words=norm(sq.q).split(/\s+/).filter(Boolean),home=!words.length&&sq.sec==='all'&&!sq.fit;
+  let res=entEnrich(ents.filter(x=>ofType(x)&&(sq.sec==='all'||x.sec===sq.sec)&&words.every(w=>x.txt.includes(w))));
+  if(sq.fit)res=res.filter(x=>x.fit||x.inPlan);
   const exact=x=>words.length&&(norm(x.tk)===words.join(' ')||norm(x.t)===words.join(' ')||norm(x.name).startsWith(words.join(' ')))?1:0;
   const key={mean:x=>x.an?x.an.mean:-999,risk:x=>-(x.info.vol??999),worst:x=>x.an?x.an.worst:-999,az:null}[sq.sort];
   res.sort((a,b)=>exact(b)-exact(a)||(key?key(b)-key(a):a.name.localeCompare(b.name,'es')));
-  const chip=(grp,val,lbl,on)=>`<button class="sc-chip${on?' on':''}" data-g="${grp}" data-v="${esc(val)}">${lbl}</button>`;
-  const row=x=>{const c=NODES[x.node].color,m=x.an?x.an.mean:null,b=x.info.band;
-    return `<button class="sr" data-k="${x.k}" data-t="${esc(x.t)}" data-n="${x.node}"><span class="sr-logo" style="--c:${c}">${esc(String(x.tk).slice(0,4))}</span>
-      <span class="sr-mid"><b>${esc(x.k==='s'?x.name:(x.obj.u?x.obj.u.n:x.obj.n))}</b><small>${x.k==='e'?'ETF':'Acción'} · ${esc(x.sec)} · <span style="color:${c}">${esc(NODES[x.node].city)}</span>${x.k==='e'?' · '+esc(x.obj.iss||''):''}</small></span>
-      <span class="sr-r"><b style="color:${m==null?'var(--dim)':m<0?'var(--bad)':'var(--good)'}">${m==null?'n/d':p1(m,0)}</b><small>media anual</small>${x.fit?`<span class="cs-b" style="--b:var(--good)">✓ encaja</span>`:`<span class="cs-b" style="--b:${b?PROFILES[b].color:'#8a8fb0'}">${b?PROFILES[b].short:'—'}</span>`}</span></button>`};
-  const head=!d.querySelector('.sbox');
-  if(head){d.innerHTML=`<div class="sbox"><div class="shead"><span class="sic">⌕</span><input id="sQ" type="search" placeholder="Busca por nombre, ticker, ciudad o ISIN: NVIDIA, Santander, IWDA…" autocomplete="off" enterkeyhint="search"><button class="x-close" data-sclose aria-label="Cerrar">✕</button></div>
-    <div class="sfil" id="sFil"></div><div class="scount" id="sCount"></div><div class="slistr" id="sList"></div></div>`;
+  const chip=(grp,val,lbl,on,cls='')=>`<button class="sc-chip${cls}${on?' on':''}" data-g="${grp}" data-v="${esc(val)}">${lbl}</button>`;
+  if(!d.querySelector('.sbox')){d.innerHTML=`<div class="sbox"><div class="shead"><span class="sic">⌕</span><input id="sQ" type="search" placeholder="Busca NVIDIA, Santander, IWDA…" autocomplete="off" enterkeyhint="search"><button class="x-close" data-sclose aria-label="Cerrar">✕</button></div>
+    <div class="sbar" id="sBar"></div><div class="sfil" id="sFil" hidden></div><div class="scount" id="sCount"></div><div class="slistr" id="sList"></div></div>`;
     $('#sQ').addEventListener('input',e=>{sq.q=e.target.value;renderSearch()});
     d.querySelector('[data-sclose]').addEventListener('click',closeSearch);
     d.addEventListener('click',e=>{if(e.target===d)closeSearch()});
-    $('#sFil').addEventListener('click',e=>{const b=e.target.closest('.sc-chip');if(!b)return;const g=b.dataset.g,v=b.dataset.v;if(g==='fit')sq.fit=!sq.fit;else sq[g]=v;renderSearch()});
+    const onChip=e=>{const b=e.target.closest('.sc-chip');if(!b)return;const g=b.dataset.g,v=b.dataset.v;
+      if(g==='fit')sq.fit=!sq.fit;else if(g==='open')sq.open=!sq.open;else if(g==='sec')sq.sec=sq.sec===v&&v!=='all'?'all':v;else sq[g]=v;renderSearch();if(g==='sec'&&b.classList.contains('stile'))$('#sList').scrollTop=0};
+    ['#sBar','#sFil','#sList'].forEach(s=>$(s).addEventListener('click',onChip));
     $('#sList').addEventListener('click',e=>{const b=e.target.closest('.sr');if(!b)return;const nd=b.dataset.n;if(gl_ok){const ll=hubLL(nd);flyTo({lat:ll.lat,lon:ll.lon,dist:NODES[nd].sty==='generic'?30:42,heading:0},1400)}openDetail(b.dataset.k,b.dataset.t,nd)})}
-  $('#sQ').value=sq.q;
-  $('#sFil').innerHTML=`<div class="srow2"><span class="slbl">Qué</span>${chip('type','all','Todo',sq.type==='all')}${chip('type','etf','ETFs',sq.type==='etf')}${chip('type','stk','Acciones',sq.type==='stk')}${chip('fit','1',`✓ Solo lo que encaja (${P.short})`,sq.fit)}</div>
-    <div class="srow2"><span class="slbl">Sector</span>${chip('sec','all','Todos',sq.sec==='all')}${secs.map(x=>chip('sec',x,esc(x),sq.sec===x)).join('')}</div>
-    <div class="srow2"><span class="slbl">Orden</span>${chip('sort','mean','Mejor media anual',sq.sort==='mean')}${chip('sort','risk','Menos riesgo',sq.sort==='risk')}${chip('sort','worst','Mejor peor año',sq.sort==='worst')}${chip('sort','az','A–Z',sq.sort==='az')}</div>`;
-  $('#sCount').textContent=`${res.length} resultado${res.length===1?'':'s'}${sq.type!=='all'?' · '+(sq.type==='etf'?'ETFs':'acciones'):''}${sq.sec!=='all'?' · '+sq.sec:''}${sq.fit?` · que encajan con tu perfil ${P.label}`:''}`;
-  {const on=$('#sFil').querySelector('.sc-chip.on[data-g=sec]');if(on&&mobile())on.scrollIntoView({block:'nearest',inline:'center'})}
-  $('#sList').innerHTML=res.length?res.map(row).join(''):`<p class="mp-note" style="padding:20px;text-align:center">No hay nada con esos filtros. Prueba a quitar alguno o a buscar otra palabra.</p>`;
+  if($('#sQ').value!==sq.q)$('#sQ').value=sq.q;
+  const nAdv=(sq.sec!=='all')+(sq.sort!=='mean');
+  $('#sBar').innerHTML=`<div class="sseg">${chip('type','all','Todo',sq.type==='all')}${chip('type','etf','ETFs',sq.type==='etf')}${chip('type','stk','Acciones',sq.type==='stk')}</div>
+    ${chip('fit','1','✓ Para mí',sq.fit,' sfit')}${chip('open','1',`Filtros${nAdv?` <em>${nAdv}</em>`:''}`,sq.open,' sfbtn')}`;
+  const f=$('#sFil');f.hidden=!sq.open;
+  f.innerHTML=`<div class="sgrp"><span class="slbl">Sector</span><div class="srow2">${chip('sec','all','Todos',sq.sec==='all')}${secs.map(x=>chip('sec',x,`${SEC_ICON[x]||'◆'} ${esc(x)}`,sq.sec===x)).join('')}</div></div>
+    <div class="sgrp"><span class="slbl">Ordenar por</span><div class="srow2">${chip('sort','mean','Más rentable',sq.sort==='mean')}${chip('sort','risk','Menos riesgo',sq.sort==='risk')}${chip('sort','worst','Mejor peor año',sq.sort==='worst')}${chip('sort','az','A–Z',sq.sort==='az')}</div></div>`;
+  const L=$('#sList');
+  if(home){const best=entEnrich(ents.filter(ofType)).filter(x=>x.fit||x.inPlan).sort((a,b)=>(b.inPlan-a.inPlan)||((b.an?b.an.mean:-99)-(a.an?a.an.mean:-99))).slice(0,5);
+    $('#sCount').innerHTML='';
+    L.innerHTML=`<h5 class="shd">Explora por sector</h5><div class="stiles">${secs.map(x=>`<button class="sc-chip stile" data-g="sec" data-v="${esc(x)}"><span class="sti">${SEC_ICON[x]||'◆'}</span><b>${esc(x)}</b><small>${secCount[x]}</small></button>`).join('')}</div>
+      ${best.length?`<h5 class="shd">Lo mejor para tu perfil ${esc(P.label)} <span>media anual</span></h5>${best.map(x=>entRow(x)).join('')}`:''}`;return}
+  $('#sCount').innerHTML=`<span>${res.length} resultado${res.length===1?'':'s'}${sq.sec!=='all'?` en ${esc(sq.sec)}`:''}</span><span>media anual</span>`;
+  L.innerHTML=res.length?res.map(x=>entRow(x)).join(''):`<p class="sempty">Nada con esos filtros.<br>Prueba otra palabra o quita alguno.</p>`;
 }
+let cardAll={};
+function cityBody(id){const info=nodeInfo(id),P=PROFILES[profile];
+  const list=entEnrich(searchEntities().filter(x=>x.node===id)).sort((a,b)=>(b.inPlan-a.inPlan)||(b.fit-a.fit)||((b.an?b.an.mean:-99)-(a.an?a.an.mean:-99)));
+  const wIn=list.filter(x=>x.k==='e').reduce((a,x)=>a+x.inPlan,0),nFit=list.filter(x=>x.fit||x.inPlan).length;
+  const v=wIn>0?['ok',`★ ${Math.round(wIn*100)} % de tu plan${monthly>0?` · ${Math.round(wIn*monthly)} €/mes`:''}`]:nFit?['mid',`✓ ${nFit} ${nFit>1?'encajan':'encaja'} con tu perfil ${P.label}`]:['no',`Nada de aquí encaja con tu perfil ${P.label}`];
+  const all=cardAll[id],show=all?list:list.slice(0,4);
+  return `<div class="cb"><div class="cv ${v[0]}">${v[1]}</div>${info.about?`<p class="cs-about">${esc(info.about)}</p>`:''}
+    <div class="cs-list">${show.map(x=>entRow(x,false)).join('')}</div>
+    ${list.length>4?`<button class="cs-more" data-more>${all?'Ver menos':`Ver las ${list.length}`}</button>`:''}</div>`}
 function renderStrategy(){
   const o=buildPlan(profile),s=o.st,P=PROFILES[profile];
   $('#gBig').textContent=p1(s.g);$('#gBig').style.color=P.color;
@@ -2047,7 +2097,7 @@ function spark(tk,end,color){const r=seededStr(tk),n=26;let acc=0;const wk=[0];f
 function openCard(id,tab){cardOpen=id;cardTab=tab||'sum';const c=$('#card');c.style.setProperty('--c',NODES[id].color);c.hidden=false;renderCard();requestAnimationFrame(()=>c.classList.add('on'));renderNodes()}
 function closeCard(){cardOpen=null;$('#card').classList.remove('on');$('#card').hidden=true;renderNodes()}
 function renderCard(){
-  const id=cardOpen;if(!id)return;const n=NODES[id],c=$('#card');const o=buildPlan(profile);
+  const id=cardOpen;if(!id)return;if($('#app').classList.contains('simple')&&id!=='cao')cardTab='sum';const n=NODES[id],c=$('#card');const o=buildPlan(profile);
   if(id==='cao'){if(cardTab==='sum')cardTab=planView==='stk'?'sp':'etf';const nStk=(STOCKS.cao||[]).length,nS=(STOCKS.cao||[]).filter(s=>{const q=stockInfo(s);return q.band===profile&&q.ok}).length;
     const head=`<div class="ch"><div><h3 style="color:${n.color}">Polo Norte · Base de datos</h3><div class="co">${n.coord} · PLAN ${PROFILES[profile].label.toUpperCase()}</div></div><button class="x-close" aria-label="Cerrar">✕</button></div>
     <div class="ctabs" role="tablist"><button role="tab" data-ct="etf" aria-selected="${cardTab==='etf'}">Plan de ETFs</button><button role="tab" data-ct="sp" aria-selected="${cardTab==='sp'}">Plan de acciones</button></div>`;
@@ -2071,7 +2121,7 @@ function renderCard(){
   c.querySelectorAll('.srow').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();stockSel[b.dataset.k]=b.dataset.t;renderCard()}));
   c.querySelectorAll('.cs-row').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();stockSel[id+profile+'e']=b.dataset.t;cardTab='etf';renderCard()}));
   c.querySelectorAll('.cb .mp-sk').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();stockSel[id+profile]=b.dataset.t;cardTab='stk';renderCard()}));
-  c.querySelectorAll('.ent').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();openDetail(b.dataset.k,b.dataset.t,id)}));
+  c.querySelectorAll('.ent,#card .sr').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();openDetail(b.dataset.k,b.dataset.t,id)}));c.querySelector('[data-more]')?.addEventListener('click',e=>{e.stopPropagation();cardAll[id]=!cardAll[id];renderCard()});
   c.querySelector('.x-close').addEventListener('click',closeCard);
 }
 function refreshNode(id){renderNodes();updateLabelText();if(cardOpen===id)renderCard()}
