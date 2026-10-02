@@ -2,7 +2,7 @@
 // - index.html y archivos propios: red primero (si hay conexión, siempre la versión nueva), caché como respaldo.
 // - Librerías externas (Three.js, Chart.js, fuentes): caché primero para que cargue rápido y funcione sin red.
 // Para forzar que todos los usuarios limpien la caché antigua, sube el número de VERSION.
-const VERSION = 'atlas-v12';
+const VERSION = 'atlas-v13';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-64.png'];
 
 self.addEventListener('install', e => {
@@ -24,6 +24,8 @@ self.addEventListener('fetch', e => {
 
   // Nunca interceptar llamadas a APIs de datos (Gemini, etc.)
   if (url.hostname.endsWith('googleapis.com') && url.pathname.startsWith('/v1')) return;
+  // Ni datos que cambian (precios, geocodificación, noticias) ni teselas del mapa (cachea el navegador)
+  if (/(^|\.)(eodhd\.com|nominatim\.openstreetmap\.org|rss2json\.com|openfreemap\.org)$/.test(url.hostname)) return;
 
   if (url.origin === location.origin) {
     // Red primero, caché de respaldo

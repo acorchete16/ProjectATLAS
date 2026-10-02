@@ -423,6 +423,8 @@ details.tech>.tin{padding:0 12px 12px;display:flex;flex-direction:column;gap:12p
 }
 body.mapmode #searchFab{display:none!important}
 @media (max-width:1100px){body.mapmode #stage{height:68vh}.mb-search{padding:10px 14px;font-size:14px}.mb-chip{font-size:12.5px;padding:6px 12px;min-height:34px}.mb-hint,.mb-res{font-size:12px}}
+.lv-top{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}.lv-l{display:block;font-size:11.5px;color:var(--dim)}.lv-p{font-size:26px;font-weight:700;font-family:var(--mono)}
+.lv-ch{display:flex;flex-direction:column;align-items:flex-end;font-family:var(--mono);font-size:12.5px;gap:2px}.lv-svg{width:100%;height:auto;margin-top:8px}.lv-off{margin:0;font-size:12.5px;color:var(--mid)}
 </style>
 </head>
 <body>
@@ -531,7 +533,13 @@ body.mapmode #searchFab{display:none!important}
 </div>
 
 <div class="modal" id="settings" hidden>
-  <div class="box glass" role="dialog" aria-label="Uplink Gemini">
+  <div class="box glass" role="dialog" aria-label="Conexiones">
+    <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:17px;font-weight:700">Precios diarios · EODHD</div><span id="eodState" class="pill s-idle">Sin conectar</span></div>
+    <p style="font-size:13px;line-height:1.55;color:var(--mid);margin:0">Pega tu clave de <a href="https://eodhd.com/register" target="_blank" rel="noopener" style="color:#9ff8ff">eodhd.com</a> (gratis: 20 consultas al día). Cada ficha que abras gasta una y se guarda hasta el día siguiente.</p>
+    <label class="lbl" for="eodKey">API key de EODHD</label><input id="eodKey" type="password" placeholder="tu clave" autocomplete="off">
+    <p id="eodMsg" class="mono" style="font-size:11px;line-height:1.55;color:var(--dim);margin:0"></p>
+    <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn2" id="eodTest">Probar</button><button class="btn" id="eodSave">Guardar</button></div>
+    <hr style="border:0;border-top:1px solid var(--edge);margin:6px 0">
     <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:17px;font-weight:700">Uplink Gemini</div><span id="upState" class="pill s-idle">Offline</span></div>
     <p style="font-size:13px;line-height:1.55;color:var(--mid);margin:0">Con clave, cada nodo consulta Gemini con búsqueda de Google (precio, YTD, 6 meses, volumen, top holdings) y NY HQ toma el tipo de depósito del BCE como tasa libre de riesgo.</p>
     <label class="lbl" for="apiKey">API key de Google AI Studio</label><input id="apiKey" type="password" placeholder="AIza…" autocomplete="off">
@@ -1718,6 +1726,8 @@ function openDetail(kind,t,node){litNode=node;const d=$('#detail');let html='';i
      <div class="dsec"><h4>Noticias</h4><div id="dNews"></div></div>
      <p class="mp-note">Rentabilidad y volatilidad: PortfoliosLab, 29 sep.–2 oct. 2026. No es asesoramiento financiero.</p></div>`;
     d.innerHTML=`<div class="dbox">${html}</div>`;d.hidden=false;loadNews(`${e.u?e.u.n:e.n} ETF`,$('#dNews'))}
+  {const db=d.querySelector('.dbody'),o=kind==='f'?FUNDS.find(x=>x.t===t):kind==='s'?((STOCKS[node]||[]).find(x=>x.t===t)||Object.values(STOCKS).flat().find(x=>x.t===t)):UNIV.find(x=>x.t===t);
+   if(db&&o){db.insertAdjacentHTML('afterbegin','<div class="dsec lv" id="dLive"></div>');loadLive($('#dLive'),kind,o,(NODES[node]||NODES[o.node]||{color:'#9ff8ff'}).color)}}
   d.querySelector('[data-close]').addEventListener('click',closeDetail);d.scrollTop=0;
 }
 $('#detail').addEventListener('click',e=>{if(e.target.id==='detail')closeDetail()});
@@ -1854,6 +1864,38 @@ async function refineGeo(g,coord){ // geocodifica la dirección en el móvil (Op
 function closePlace(){const p=$('#mcard');if(!p||p.hidden)return;p.classList.remove('on');p.hidden=true;mapFocus=null;if(hqMarker){hqMarker.remove();hqMarker=null}}
 function focusEntOnMap(k,t){const x=searchEntities().find(y=>y.k===k&&y.t===t);if(!x||!mapReady)return false;const g=entGeo(x);if(!g)return false;
   showPlace([g[1],g[0]],[{k:x.k,t:x.t}]);return true}
+
+/* ================= PRECIOS DIARIOS (EODHD) ================= */
+const EOD_LOCAL={SAN:'SAN.MC',FER:'FER.MC',AENA:'AENA.MC',ACS:'ACS.MC',IBE:'IBE.MC',ITX:'ITX.MC',MC:'MC.PA',RMS:'RMS.PA',OR:'OR.PA',DG:'DG.PA',RHM:'RHM.XETRA',ALV:'ALV.XETRA',LSEG:'LSEG.LSE',VWS:'VWS.CO','8035':'8035.TSE','6857':'6857.TSE','9983':'9983.TSE','8058':'8058.TSE','3690':'3690.HK',RELIANCE:'RELIANCE.NSE',TCS:'TCS.NSE',LT:'LT.NSE',BHARTIARTL:'BHARTIARTL.NSE'};
+const EOD_CUR={US:'$',MC:'€',PA:'€',XETRA:'€',LSE:'p',CO:' kr',TSE:'¥',HK:' HK$',NSE:'₹',EUFUND:'€'};
+function eodKey(){try{return localStorage.getItem('atlas_eod_key')||''}catch(_){return''}}
+function eodSym(k,o){if(k==='f')return o.isin+'.EUFUND';if(k==='e')return o.t+'.US';return EOD_LOCAL[o.t]||o.t.replace('.','-')+'.US'}
+const today=()=>new Date().toISOString().slice(0,10);
+function eodUsed(){try{return +(localStorage.getItem('atlas_eod_n_'+today())||0)}catch(_){return 0}}
+function eodCount(){try{localStorage.setItem('atlas_eod_n_'+today(),eodUsed()+1)}catch(_){}}
+async function eodFetch(sym,key){const from=new Date(Date.now()-400*864e5).toISOString().slice(0,10);
+  const r=await fetch(`https://eodhd.com/api/eod/${encodeURIComponent(sym)}?api_token=${encodeURIComponent(key)}&fmt=json&period=d&from=${from}`);
+  if(!r.ok){const t=await r.text().catch(()=>'');const e=new Error(r.status===402||/limit/i.test(t)?'limit':r.status===401||r.status===403?'auth':'http '+r.status);throw e}
+  const j=await r.json();if(!Array.isArray(j)||!j.length)throw new Error('empty');return j.map(x=>[x.date,+(x.adjusted_close??x.close)]).filter(x=>x[1]>0)}
+function liveSpark(rows,color){const W=340,H=96,v=rows.map(r=>r[1]),mn=Math.min(...v),mx=Math.max(...v),rg=mx-mn||1,sx=i=>4+i/(rows.length-1)*(W-8),sy=x=>8+(mx-x)/rg*(H-22);
+  const pts=rows.map((r,i)=>`${sx(i).toFixed(1)},${sy(r[1]).toFixed(1)}`).join(' ');
+  return `<svg viewBox="0 0 ${W} ${H}" class="lv-svg" role="img" aria-label="Precio del último año"><defs><linearGradient id="lvg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity=".35"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    <polygon points="4,${H-14} ${pts} ${W-4},${H-14}" fill="url(#lvg)"/><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round"/>
+    <circle cx="${sx(rows.length-1)}" cy="${sy(v[v.length-1])}" r="3.5" fill="${color}"/>
+    <text x="4" y="${H-2}" font-size="9" fill="#6b8096">${rows[0][0].slice(2,7).split('-').reverse().join('/')}</text><text x="${W-4}" y="${H-2}" font-size="9" fill="#6b8096" text-anchor="end">${rows[rows.length-1][0].split('-').reverse().slice(0,2).join('/')}</text></svg>`}
+function liveHTML(rows,sym,color,cached){const cur=EOD_CUR[sym.split('.').pop()]||'',last=rows[rows.length-1],prev=rows[rows.length-2]||last,d1=(last[1]/prev[1]-1)*100;
+  const y=rows.filter(r=>r[0]>=new Date(Date.now()-365*864e5).toISOString().slice(0,10)),y1=(last[1]/y[0][1]-1)*100;
+const fmt=v=>`${cur==='$'?'$':''}${v.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})}${cur!=='$'?cur.replace('€',' €'):''}`;
+  return `<div class="lv-top"><div><span class="lv-l">${sym.endsWith('EUFUND')?'Valor liquidativo':'Precio'} · cierre del ${last[0].split('-').reverse().join('/')}</span><b class="lv-p">${fmt(last[1])}</b></div>
+    <div class="lv-ch"><span style="color:${d1<0?'var(--bad)':'var(--good)'}">${d1>=0?'+':''}${p1(d1,2)} día</span><span style="color:${y1<0?'var(--bad)':'var(--good)'}">${y1>=0?'+':''}${p1(y1,1)} 12 meses</span></div></div>
+    ${liveSpark(y,color)}<p class="mp-note">Datos diarios de EODHD (${esc(sym)})${cached?' · guardado de hoy':''}. Te quedan ${Math.max(0,20-eodUsed())} consultas gratis hoy.</p>`}
+async function loadLive(el,k,o,color){if(!el)return;const key=eodKey(),sym=eodSym(k,o);
+  if(!key){el.innerHTML=`<p class="lv-off">Conecta EODHD en ⚙ para ver el precio del último cierre y su gráfico del año.</p>`;return}
+  const ck='atlas_eod_'+sym;try{const c=JSON.parse(localStorage.getItem(ck)||'null');if(c&&c.d===today()&&c.rows&&c.rows.length>1){el.innerHTML=liveHTML(c.rows,sym,color,true);return}}catch(_){}
+  if(eodUsed()>=20&&key!=='demo'){el.innerHTML=`<p class="lv-off">Has gastado las 20 consultas gratis de hoy. Mañana se renuevan.</p>`;return}
+  el.innerHTML=`<p class="lv-off">Cargando precio…</p>`;
+  try{const rows=await eodFetch(sym,key);eodCount();try{localStorage.setItem(ck,JSON.stringify({d:today(),rows}))}catch(_){}if(el.isConnected)el.innerHTML=liveHTML(rows,sym,color,false)}
+  catch(e){const m=e.message;if(el.isConnected)el.innerHTML=`<p class="lv-off">${m==='auth'?'La clave de EODHD no es válida. Revísala en ⚙.':m==='limit'?'Has llegado al límite de consultas de EODHD por hoy.':m==='empty'?`EODHD no tiene datos de ${esc(sym)}.`:'No se pudo conectar con EODHD ahora mismo.'}</p>`}}
 
 const SEC_ICON={'Gestión activa':'🎯','Tecnología':'💻','Salud':'🧬','Energía':'⚡','Finanzas':'🏦','Consumo':'🛒','Defensa y espacio':'🚀','Infraestructuras':'🏗️','Mercado amplio':'🌍','Regiones y países':'🗺️','Bonos y oro':'🪙','Automoción':'🚗','Industria':'🏭','Lujo':'💎','Materias primas':'⛏️','Telecomunicaciones':'📡','Inmobiliario':'🏢','Otros':'◆'};
 function entEnrich(list){const o=buildPlan(profile),sp=buildStockPlan(profile),pw={};o.items.forEach(x=>pw['e'+x.e.t]=x.w);sp.items.forEach(x=>pw['s'+x.s.t]=x.w);
@@ -2167,7 +2209,12 @@ $('#settings').addEventListener('click',e=>{if(e.target.id==='settings')$('#sett
 $('#saveUp').addEventListener('click',()=>{syncMode();$('#settings').hidden=true;renderSources();stream('sys',apiKey?'Clave Gemini cargada: la próxima misión usará datos LIVE.':'Sin clave: misión en simulación.',apiKey?'lv':'')});
 $('#testBtn').addEventListener('click',async()=>{syncMode();if(!apiKey){$('#upMsg').textContent='Pega primero tu API key.';return}setUp('run','Probando');$('#upMsg').textContent='Probando conexión…';
   try{const r=await gemini('Responde solo con el JSON {"ok":true}');setUp('done','Online');$('#upMsg').textContent='Conexión correcta: '+r.text.slice(0,80)}catch(e){setUp('err',e.blocked?'Bloqueado':'Fallo');$('#upMsg').textContent=e.message}});
-$('#searchBtn').addEventListener('click',openSearch);$('#sheetX').addEventListener('click',()=>{if(!$('#detail').hidden)closeDetail();else closeSearch()});
+$('#searchBtn').addEventListener('click',openSearch);
+{const st=()=>{const k=eodKey();$('#eodState').textContent=k?'Conectado':'Sin conectar';$('#eodState').className='pill '+(k?'live':'s-idle');$('#eodKey').value=k};st();
+ $('#eodSave').addEventListener('click',()=>{try{const k=$('#eodKey').value.trim();k?localStorage.setItem('atlas_eod_key',k):localStorage.removeItem('atlas_eod_key')}catch(_){}st();$('#eodMsg').textContent=eodKey()?'Guardada. Abre cualquier ficha para ver su precio.':'Clave borrada.'});
+ $('#eodTest').addEventListener('click',async()=>{const k=$('#eodKey').value.trim();if(!k){$('#eodMsg').textContent='Pega primero la clave.';return}$('#eodMsg').textContent='Probando con Apple (AAPL.US)…';
+   try{const r=await eodFetch('AAPL.US',k);eodCount();$('#eodMsg').style.color='var(--good)';$('#eodMsg').textContent=`Funciona: Apple cerró a $${r[r.length-1][1].toFixed(2)} el ${r[r.length-1][0].split('-').reverse().join('/')}. Pulsa Guardar.`}
+   catch(e){$('#eodMsg').style.color='var(--bad)';$('#eodMsg').textContent=e.message==='auth'?'Clave no válida.':e.message==='limit'?'Límite diario alcanzado.':'No se pudo conectar ('+e.message+'). Si persiste, puede ser un bloqueo CORS del navegador.'}})}$('#sheetX').addEventListener('click',()=>{if(!$('#detail').hidden)closeDetail();else closeSearch()});
 $('#setBtn').addEventListener('click',()=>{$('#settings').hidden=false});
 $('#expertBtn').addEventListener('click',()=>{const app=$('#app'),on=app.classList.toggle('simple');$('#expertBtn').setAttribute('aria-pressed',String(!on));$('#expertBtn').textContent=on?'Vista experta':'Vista simple';try{localStorage.setItem('atlas_view',on?'simple':'expert')}catch(_){}setTimeout(resize3d,60);refreshAll()});
 try{if(localStorage.getItem('atlas_view')==='expert'){$('#app').classList.remove('simple');$('#expertBtn').textContent='Vista simple';$('#expertBtn').setAttribute('aria-pressed','true')}}catch(_){}$('#searchFab').addEventListener('click',openSearch);
