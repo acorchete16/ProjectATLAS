@@ -23,6 +23,8 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
 <style>
 /* Layout: full-bleed WebGL globe; glass command bar (top), node roster (left), NY HQ strategy (right), log terminal (bottom). Below 1100px the panels stack under a 62vh globe. Single dark look by design. */
 :root{
@@ -385,6 +387,42 @@ details.tech>.tin{padding:0 12px 12px;display:flex;flex-direction:column;gap:12p
   #sheetX:not([hidden]){display:flex;align-items:center;gap:6px;position:fixed;z-index:80;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));padding:14px 26px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(30,26,56,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font:600 15px Inter,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5);touch-action:manipulation}
   #search:not([hidden])~#searchFab,#detail:not([hidden])~#searchFab{display:none}
 }
+
+/* ---- mapa georreferenciado ---- */
+#map{position:absolute;inset:0;display:none}
+#stage.maponly{cursor:auto;touch-action:auto;background:#07061a}
+#stage.maponly #map{display:block}
+#stage.maponly #gl,#stage.maponly #labels,#stage.maponly .vign,#stage.maponly #stageHint,#stage.maponly #mapctl{display:none}
+#app.simple #stage.maponly~.hint,#stage.maponly~.hint{display:none}
+.maplibregl-ctrl-attrib{background:rgba(10,8,26,.6)!important;color:#8a8fb0}.maplibregl-ctrl-attrib a{color:#a9aed0!important}
+.mapbar{position:absolute;z-index:5;top:96px;left:18px;width:min(560px,calc(100% - 470px));display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.mapbar>*{pointer-events:auto}
+.mb-search{display:flex;align-items:center;gap:8px;width:100%;text-align:left;font:inherit;font-size:14px;padding:12px 16px;border-radius:14px;border:1px solid var(--edge2);background:rgba(16,14,36,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--mid);cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.mb-search span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mb-row{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.mb-row::-webkit-scrollbar{display:none}
+.mb-chip{flex:none;font:inherit;font-size:13px;padding:8px 14px;border-radius:999px;border:1px solid var(--edge2);background:rgba(16,14,36,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:var(--fg);cursor:pointer;min-height:36px}
+.mb-chip.on{background:#e9fbff;color:#0b0a1c;border-color:#e9fbff;font-weight:600}
+.mb-res{display:flex;align-items:center;gap:8px;align-self:flex-start;font-size:12.5px;padding:6px 6px 6px 14px;border-radius:999px;background:rgba(16,14,36,.86);border:1px solid var(--edge2);color:var(--mid)}
+.mb-res b{color:#b9f6ff}.mb-res button{font:inherit;font-size:12px;padding:6px 11px;border-radius:999px;border:1px solid var(--edge2);background:rgba(255,255,255,.06);color:var(--fg);cursor:pointer}
+.mb-hint{align-self:flex-start;font-size:12.5px;color:var(--mid);padding:7px 14px;border-radius:999px;background:rgba(16,14,36,.7)}
+#mapMsg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:var(--mid);font-size:13px;pointer-events:none}
+#mcard{position:absolute;z-index:6;left:18px;bottom:18px;width:min(400px,calc(100% - 470px));max-height:58%;overflow-y:auto;border-radius:16px;opacity:0;transform:translateY(10px);transition:opacity .25s,transform .25s}
+#mcard.on{opacity:1;transform:none}#mcard[hidden]{display:none}
+.mc-h{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:14px 14px 10px 16px;background:rgba(18,16,38,.97);border-bottom:1px solid var(--edge)}
+.mc-h h3{margin:0;font-size:16px}.mc-h p{margin:4px 0 0;font-size:12.5px;color:var(--mid)}
+.mc-prec{font-size:11.5px!important}.mc-prec.edificio{color:#5ee69a!important}.mc-prec.direccion{color:#ffd24a!important}.mc-prec.ciudad{color:#ff9a3c!important}
+.mc-list{display:flex;flex-direction:column;gap:6px;padding:10px}
+.hq-pin{position:relative;width:26px;height:90px;pointer-events:none}
+.hq-pin i{position:absolute;left:12px;bottom:8px;width:2px;height:82px;background:linear-gradient(to top,#b9f6ff,rgba(185,246,255,0));box-shadow:0 0 12px #b9f6ff}
+.hq-pin b{position:absolute;left:5px;bottom:0;width:16px;height:16px;border-radius:50%;background:#b9f6ff;box-shadow:0 0 0 0 rgba(185,246,255,.7);animation:hqp 1.8s infinite}
+@keyframes hqp{0%{box-shadow:0 0 0 0 rgba(185,246,255,.7)}100%{box-shadow:0 0 0 22px rgba(185,246,255,0)}}
+#sheetX.mapgo:not([hidden]){display:flex;align-items:center;gap:6px;position:fixed;z-index:80;left:50%;transform:translateX(-50%);bottom:calc(22px + env(safe-area-inset-bottom,0px));padding:14px 26px;border-radius:999px;border:0;background:#e9fbff;color:#0b0a1c;font:700 15px Inter,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5);cursor:pointer}
+@media (max-width:1100px){
+  .mapbar{top:10px;left:10px;right:10px;width:auto}
+  #mcard{position:fixed;left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));width:auto;max-height:58vh;z-index:30}
+}
+body.mapmode #searchFab{display:none!important}
+@media (max-width:1100px){body.mapmode #stage{height:68vh}.mb-search{padding:10px 14px;font-size:14px}.mb-chip{font-size:12.5px;padding:6px 12px;min-height:34px}.mb-hint,.mb-res{font-size:12px}}
 </style>
 </head>
 <body>
@@ -392,6 +430,7 @@ details.tech>.tin{padding:0 12px 12px;display:flex;flex-direction:column;gap:12p
 <div id="app" class="simple">
   <div id="stage" aria-label="Globo 3D interactivo con skylines de San Francisco, Cabo Cañaveral, Boston, Copenhague y el cuartel general de Nueva York. Arrastra para girar, rueda para acercar.">
     <canvas id="gl"></canvas>
+    <div id="map"></div><div id="mapBar" class="mapbar"></div><div id="mapMsg"></div><div id="mcard" class="glass" hidden></div>
     <div class="vign"></div>
     <div id="labels"></div>
     <div class="glass mapctl" id="mapctl"><button id="zIn" aria-label="Acercar">+</button><button id="zOut" aria-label="Alejar">−</button><button id="zHome" aria-label="Vista global">⌂</button></div>
@@ -1321,7 +1360,7 @@ function focusCity(id,tab){const ll=hubLL(id);flyTo({lat:ll.lat,lon:ll.lon,dist:
 {const st=$('#stage');let drag=null,pinch=null;const ptrs=new Map();
   const two=()=>{const a=[...ptrs.values()];return a.length>=2?{d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)}:null};
   const hideHint=()=>{const h=$('#stageHint');if(h)h.classList.add('off')};
-  st.addEventListener('pointerdown',e=>{life.lastInteract=performance.now();if(e.target.closest('.clab,.mapctl'))return;hideHint();ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});try{st.setPointerCapture(e.pointerId)}catch(_){}camTarget=null;
+  st.addEventListener('pointerdown',e=>{life.lastInteract=performance.now();if(MAPMODE||e.target.closest('.clab,.mapctl'))return;hideHint();ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});try{st.setPointerCapture(e.pointerId)}catch(_){}camTarget=null;
     if(ptrs.size>=2){pinch=two();drag=null}else{drag={x:e.clientX,y:e.clientY,moved:false,btn:e.button,sh:e.shiftKey};st.classList.add('drag')}});
   st.addEventListener('pointermove',e=>{const p=ptrs.get(e.pointerId);if(p){p.x=e.clientX;p.y=e.clientY}
     if(ptrs.size>=2&&pinch){const t=two();if(t&&pinch.d>8&&t.d>8)cam.dist=Math.max(30,Math.min(700,cam.dist*pinch.d/t.d));if(t)pinch=t;return}
@@ -1336,7 +1375,7 @@ function focusCity(id,tab){const ll=hubLL(id);flyTo({lat:ll.lat,lon:ll.lon,dist:
   st.addEventListener('pointerup',end);st.addEventListener('pointercancel',end);
   st.addEventListener('gesturestart',e=>e.preventDefault());
   st.addEventListener('contextmenu',e=>e.preventDefault());
-  st.addEventListener('wheel',e=>{life.lastInteract=performance.now();e.preventDefault();hideHint();camTarget=null;cam.dist=Math.max(30,Math.min(700,cam.dist*Math.exp(e.deltaY*.0012)))},{passive:false});}
+  st.addEventListener('wheel',e=>{if(MAPMODE)return;life.lastInteract=performance.now();e.preventDefault();hideHint();camTarget=null;cam.dist=Math.max(30,Math.min(700,cam.dist*Math.exp(e.deltaY*.0012)))},{passive:false});}
 let ray=null,mouse=null;
 function pick(e){if(!gl_ok)return null;if(!ray){ray=new THREE.Raycaster();mouse=new THREE.Vector2()}const r=$('#stage').getBoundingClientRect();mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mouse,camera);const h=ray.intersectObjects(hitMeshes,false);return h.length?h[0].object.userData.id:null}
 let hoverId=null;function hoverPick(e){const id=pick(e);if(id!==hoverId){hoverId=id;$('#stage').style.cursor=id?'pointer':'grab'}}
@@ -1687,7 +1726,7 @@ function closeDetail(fromPop){const d=$('#detail');if(d.hidden)return;if(fromPop
 let _sheetN=0;
 function sheetPush(){try{history.pushState({atlasSheet:++_sheetN},'')}catch(_){}setTimeout(sheetBtn,0)}
 function sheetPop(){if(history.state&&history.state.atlasSheet){history.back();return true}return false}
-function sheetBtn(){const b=$('#sheetX');if(b)b.hidden=$('#detail').hidden&&$('#search').hidden}
+function sheetBtn(){const b=$('#sheetX');if(!b)return;b.hidden=$('#detail').hidden&&$('#search').hidden;const go=MAPMODE&&$('#detail').hidden&&!$('#search').hidden&&filterActive();b.classList.toggle('mapgo',go);b.textContent=go?`🌍 Ver ${mapEntities().length} en el mapa`:'✕ Cerrar'}
 window.addEventListener('popstate',()=>{if(!$('#detail').hidden)closeDetail(true);else if(!$('#search').hidden)closeSearch(true)});
 function entityTiles(id){const o=buildPlan(profile),P=PROFILES[profile],color=NODES[id].color;
   const st=nodeStocks(id),et=o.all.filter(x=>x.e.node===id).sort((a,b)=>((b.e.ann?b.e.ann.mean:-99)-(a.e.ann?a.e.ann.mean:-99)));
@@ -1705,7 +1744,8 @@ const SEC_OF_GRP={semis:'Tecnología',usbig:'Tecnología',sw:'Tecnología',robo:
   renov:'Energía',uran:'Energía',nucl:'Energía',util:'Energía',grid:'Energía',finus:'Finanzas',fineu:'Finanzas',fintech:'Finanzas',cdisc:'Consumo',staples:'Consumo',infra:'Infraestructuras',pave:'Infraestructuras',
   core:'Mercado amplio',div:'Mercado amplio',small:'Mercado amplio',eu:'Regiones y países',em:'Regiones y países',jp:'Regiones y países',cn:'Regiones y países',in:'Regiones y países',latam:'Regiones y países',
   bond:'Bonos y oro',tbill:'Bonos y oro',tips:'Bonos y oro',gold:'Bonos y oro'};
-const sq={q:'',type:'all',sec:'all',fit:false,sort:'mean'};
+const sq={q:'',type:'all',sec:'all',fit:false,sort:'mean',active:false};
+let _mapT=0;function updateMapSoon(){if(!MAPMODE)return;clearTimeout(_mapT);_mapT=setTimeout(()=>updateMap(),250)}
 const norm=x=>String(x||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 let _ents=null;
 function searchEntities(){if(_ents)return _ents;const out=[];
@@ -1713,6 +1753,108 @@ function searchEntities(){if(_ents)return _ents;const out=[];
   UNIV.forEach(e=>{const sec=SEC_OF_GRP[e.grp]||'Otros';out.push({k:'e',t:e.t,tk:e.u?e.u.t:e.t,name:THEME[e.t]||e.n,sec,node:e.node,obj:e,txt:norm([e.t,e.n,e.u&&e.u.t,e.u&&e.u.n,e.u&&e.u.isin,e.iss,THEME[e.t],sec,NODES[e.node].city,e.w,'etf fondo'].join(' '))})});
   FUNDS.forEach(f=>out.push({k:'f',t:f.t,tk:f.tk,name:f.n,sec:f.sec,node:f.node,obj:f,txt:norm([f.tk,f.n,f.full,f.isin,f.iss,f.sede,f.sec,f.idx,f.cat,f.w,NODES[f.node].city,'fondo fondos indexado',f.kind==='act'?'activo gestion activa value':'indexado'].join(' '))}));
   return _ents=out}
+const GEO_S={"AVGO":[37.4005,-122.1446,"3421 Hillview Ave, Palo Alto, CA","direccion"],"NVDA":[37.37064,-121.96708,"2788 San Tomas Expy, Santa Clara, CA (Endeavor)","edificio"],"AMD":[37.383,-121.97,"2485 Augustine Dr, Santa Clara, CA","direccion"],"ISRG":[37.374,-121.999,"1020 Kifer Rd, Sunnyvale, CA","direccion"],"OKLO":[37.3765,-121.9625,"3190 Coronado Dr, Santa Clara, CA","ciudad"],"ENPH":[37.488,-121.944,"47281 Bayside Pkwy, Fremont, CA","ciudad"],"V":[37.7752,-122.3893,"300 Toni Stone Crossing, San Francisco, CA (Mission Rock)","direccion"],"COIN":[40.7413,-73.9871,"One Madison Ave, Suite 2400, New York, NY","direccion"],"JOBY":[36.9862,-122.0303,"333 Encinal St, Santa Cruz, CA","direccion"],"AAPL":[37.3349,-122.009,"One Apple Park Way, Cupertino, CA (Apple Park)","edificio"],"GOOGL":[37.422,-122.084,"1600 Amphitheatre Pkwy, Mountain View, CA (Googleplex)","edificio"],"META":[37.4848,-122.1484,"1 Hacker Way, Menlo Park, CA","edificio"],"RKLB":[33.8245,-118.1455,"3881 McGowen St, Long Beach, CA","ciudad"],"AMGN":[34.1617,-118.8889,"One Amgen Center Dr, Thousand Oaks, CA","direccion"],"RIVN":[33.6997,-117.8128,"14600 Myford Rd, Irvine, CA","ciudad"],"KTOS":[32.911,-117.112,"10680 Treena St, San Diego, CA (Scripps Ranch)","ciudad"],"AMZN":[47.61605,-122.34015,"Day 1, 2121 7th Ave, Seattle, WA","edificio"],"COST":[47.5484,-122.0505,"999 Lake Dr, Issaquah, WA","edificio"],"MSFT":[47.64194,-122.12722,"One Microsoft Way, Redmond, WA","edificio"],"MU":[43.5267,-116.1455,"8000 S Federal Way, Boise, ID","direccion"],"PLTR":[25.9575,-80.143,"19505 Biscayne Blvd, Suite 2350, Aventura, FL","direccion"],"FSLR":[33.5091,-111.9875,"4300 E Camelback Rd, Suite 220, Phoenix, AZ","direccion"],"SCCO":[33.5418,-112.0475,"7310 N 16th St, Suite 135, Phoenix, AZ","direccion"],"TXN":[32.912,-96.7525,"12500 TI Blvd, Dallas, TX","direccion"],"VST":[32.8958,-96.964,"6555 Sierra Dr, Irving, TX","ciudad"],"CAT":[32.8697,-96.9393,"5205 N O'Connor Blvd, Suite 100, Irving, TX","direccion"],"SCHW":[32.9867,-97.1786,"3000 Schwab Way, Westlake, TX","direccion"],"CRWD":[30.2707,-97.74,"206 E 9th St, Suite 1400, Austin, TX","direccion"],"TSLA":[30.22087,-97.61865,"1 Tesla Rd, Austin, TX (Gigafactory Texas)","edificio"],"PWR":[29.8085,-95.447,"2727 North Loop West, Houston, TX","ciudad"],"XOM":[30.0779,-95.4196,"22777 Springwoods Village Pkwy, Spring, TX","direccion"],"SPCX":[25.9875,-97.18639,"1 Rocket Rd, Starbase, TX","direccion"],"ASTS":[31.9425,-102.2019,"2901 Enterprise Ln, Midland Intl Air & Space Port, TX","ciudad"],"BRK.B":[41.2585,-95.9685,"3555 Farnam St, Omaha, NE (Blackstone Plaza, ex Kiewit Plaza)","direccion"],"WMT":[36.366,-94.199,"1 Customer Dr, Bentonville, AR (nuevo Home Office)","direccion"],"VMC":[33.444,-86.718,"1200 Urban Center Dr, Vestavia Hills (Birmingham), AL","ciudad"],"MCD":[41.8838,-87.6533,"110 N Carpenter St, Chicago, IL","edificio"],"CME":[41.881,-87.6372,"20 S Wacker Dr, Chicago, IL","edificio"],"LLY":[39.757,-86.1535,"Lilly Corporate Center, 893 S Delaware St, Indianapolis, IN","direccion"],"GE":[39.2585,-84.418,"1 Neumann Way, Evendale, OH","direccion"],"PG":[39.10334,-84.50563,"1 P&G Plaza (301 E 6th St), Cincinnati, OH","edificio"],"ETN":[41.464,-81.496,"Eaton Center, 1000 Eaton Blvd, Beachwood (Cleveland), OH","direccion"],"KO":[33.7708,-84.397,"One Coca-Cola Plaza NW, Atlanta, GA","edificio"],"ICE":[33.902,-84.44,"5660 New Northside Dr, Atlanta, GA","direccion"],"NEE":[26.8765,-80.0563,"700 Universe Blvd, Juno Beach, FL","direccion"],"IONQ":[38.986,-76.93,"4505 Campus Dr, College Park, MD","direccion"],"RTX":[38.89432,-77.06965,"1000 Wilson Blvd, Arlington, VA","edificio"],"LMT":[39.0262,-77.1357,"6801 Rockledge Dr, Bethesda, MD","direccion"],"NOC":[38.86711,-77.21505,"2980 Fairview Park Dr, Falls Church, VA","edificio"],"GD":[38.9548,-77.346,"11011 Sunset Hills Rd, Reston, VA","direccion"],"CEG":[39.2827,-76.5959,"1310 Point St, Baltimore, MD (Harbor Point)","direccion"],"REGN":[41.072,-73.832,"777 Old Saw Mill River Rd, Tarrytown, NY","direccion"],"MA":[41.042,-73.7135,"2000 Purchase St, Purchase, NY","direccion"],"EME":[41.1356,-73.4207,"301 Merritt Seven, Norwalk, CT","direccion"],"JPM":[40.756,-73.976,"270 Park Ave, New York, NY","edificio"],"GS":[40.71472,-74.01444,"200 West St, New York, NY","edificio"],"MS":[40.76,-73.98556,"1585 Broadway, New York, NY","edificio"],"BLK":[40.75434,-74.0,"50 Hudson Yards, New York, NY","edificio"],"BX":[40.7578,-73.9725,"345 Park Ave, New York, NY","edificio"],"SPGI":[40.70333,-74.00944,"55 Water St, New York, NY","edificio"],"AXP":[40.71361,-74.01472,"200 Vesey St, New York, NY","edificio"],"JNJ":[40.49778,-74.44278,"One Johnson & Johnson Plaza, New Brunswick, NJ","edificio"],"ALNY":[42.3652,-71.0867,"675 West Kendall St, Cambridge, MA","direccion"],"BEAM":[42.3625,-71.0845,"238 Main St, Cambridge, MA","direccion"],"VRTX":[42.3526,-71.0442,"50 Northern Ave, Boston, MA (Fan Pier)","direccion"],"MRNA":[42.3667,-71.0832,"325 Binney St, Cambridge MA (Moderna Science Center)","direccion"],"GEV":[42.3699,-71.0781,"58 Charles St, Cambridge MA","direccion"],"CCJ":[52.11415,-106.70232,"2121 11th St W, Saskatoon SK","edificio"],"HSBC":[51.505,-0.0186,"8 Canada Square, Canary Wharf (traslado a 81 Newgate St previsto 2027)","direccion"],"LSEG":[51.51472,-0.09944,"10 Paternoster Square, London EC4M","edificio"],"BCS":[51.50528,-0.01444,"1 Churchill Place, Canary Wharf","edificio"],"MC":[48.8662,2.3048,"22 avenue Montaigne, 75008 Paris","direccion"],"RMS":[48.8689,2.3214,"24 rue du Faubourg Saint-Honoré, 75008 Paris","direccion"],"OR":[48.903,2.305,"41 rue Martre, 92110 Clichy","direccion"],"DG":[48.90014,2.21972,"L'Archipel, 1973 bd de la Défense, Nanterre","edificio"],"ING":[52.316,4.953,"Cedar, Bijlmerdreef 106, Amsterdam Zuidoost","ciudad"],"ASML":[51.4034,5.4141,"De Run 6501, 5504 DR Veldhoven (campus)","direccion"],"RHM":[51.25166,6.78267,"Rheinmetall Platz 1, 40476 Düsseldorf","direccion"],"ALV":[48.152,11.585,"Königinstraße 28, 80802 München","direccion"],"CRSP":[47.1729,8.516,"Baarerstrasse 14, 6300 Zug","direccion"],"RACE":[44.5326,10.863,"Via Abetone Inferiore 4, Maranello","direccion"],"NVO":[55.7547,12.4571,"Novo Allé 1, 2880 Bagsværd (campus)","direccion"],"VWS":[56.1875,10.16,"Hedeager 42, 8200 Aarhus N","ciudad"],"SAN":[40.39302,-3.86609,"Ciudad Grupo Santander, Av. de Cantabria s/n, Boadilla del Monte","edificio"],"FER":[40.4452,-3.6772,"C/ Príncipe de Vergara 135, 28002 Madrid (sede legal: Gustav Mahlerplein 61-63, Ámsterdam)","direccion"],"AENA":[40.462,-3.619,"C/ Peonías 12, 28042 Madrid","ciudad"],"ACS":[40.472,-3.6765,"Av. de Pío XII 102, 28036 Madrid","direccion"],"IBE":[43.2675,-2.93861,"Torre Iberdrola, Plaza Euskadi 5, Bilbao","edificio"],"ITX":[43.299,-8.512,"Av. da Deputación s/n, 15143 Arteixo","ciudad"],"SONY":[35.63111,139.74361,"Sony City, 1-7-1 Konan, Minato, Tokyo","edificio"],"MUFG":[35.68,139.7637,"2-7-1 Marunouchi, Chiyoda, Tokyo","direccion"],"HTHIY":[35.6842,139.767,"1-6-6 Marunouchi, Chiyoda, Tokyo","direccion"],"SFTBY":[35.6532,139.7609,"Tokyo Portcity Takeshiba, 1-7-1 Kaigan, Minato, Tokyo","direccion"],"8035":[35.67333,139.73661,"Akasaka Biz Tower, 5-3-1 Akasaka, Minato, Tokyo","edificio"],"6857":[35.6844,139.7665,"Shin Marunouchi Center Bldg, 1-6-2 Marunouchi, Tokyo","direccion"],"9983":[35.6657,139.7313,"Midtown Tower, 9-7-1 Akasaka, Tokyo (sede registrada: Yamaguchi)","direccion"],"8058":[35.6791,139.76311,"Marunouchi Park Bldg / Mitsubishi Shoji Bldg, 2-6-1/2-3-1 Marunouchi, Tokyo","edificio"],"TM":[35.0546,137.1563,"1 Toyota-cho, Toyota City, Aichi","direccion"],"NTDOY":[34.9697,135.7565,"11-1 Hokotate-cho, Kamitoba, Minami-ku, Kyoto","direccion"],"JD":[39.7865,116.561,"Building A, No. 18 Kechuang 11th St, Yizhuang, Beijing","ciudad"],"XIACY":[40.0275,116.31,"Xiaomi Campus, Anningzhuang Rd, Haidian, Beijing","ciudad"],"BIDU":[40.0568,116.3074,"Baidu Campus, 10 Shangdi 10th St, Haidian, Beijing","direccion"],"3690":[39.999,116.483,"Hengjiweiye Bldg B&C, 4 Wangjing East Rd, Chaoyang, Beijing","ciudad"],"PDD":[31.211,121.4055,"Jin Hongqiao Intl Center, 533 Loushanguan Rd, Shanghai (sede legal: Dublín)","ciudad"],"TCOM":[31.2215,121.3575,"968 Jin Zhong Rd, Changning, Shanghai","ciudad"],"BABA":[30.2795,120.0265,"Xixi Campus, 969 West Wen Yi Rd, Yuhang, Hangzhou","direccion"],"NTES":[30.19,120.189,"NetEase Bldg, 599 Wangshang Rd, Binjiang, Hangzhou","ciudad"],"TCEHY":[22.5255,113.9305,"Tencent Binhai Mansion, 33 Haitian 2nd Rd, Nanshan, Shenzhen","edificio"],"BYDDY":[22.69,114.344,"3009 BYD Rd, Pingshan, Shenzhen","ciudad"],"TSM":[24.774,121.01,"8 Li-Hsin Rd 6, Hsinchu Science Park","ciudad"],"HDB":[18.9985,72.8255,"HDFC Bank House, Senapati Bapat Marg, Lower Parel, Mumbai","ciudad"],"IBN":[19.065,72.868,"ICICI Bank Towers, Bandra-Kurla Complex, Mumbai","direccion"],"RELIANCE":[18.9257,72.8233,"Maker Chambers IV, 222 Nariman Point, Mumbai","direccion"],"TCS":[18.9322,72.8344,"TCS House, Raveline St, Fort, Mumbai","direccion"],"LT":[18.9388,72.8405,"L&T House, N.M. Marg, Ballard Estate, Mumbai","direccion"],"INFY":[12.8455,77.664,"44 Electronics City, Hosur Rd, Bengaluru","direccion"],"WIT":[12.9105,77.681,"Doddakannelli, Sarjapur Rd, Bengaluru","ciudad"],"RDY":[17.418,78.441,"8-2-337 Road No. 3, Banjara Hills, Hyderabad","ciudad"],"MMYT":[28.501,77.085,"Tower A, SP Infocity, 243 Udyog Vihar Ph 1, Gurugram","ciudad"],"BHARTIARTL":[28.5345,77.1565,"Bharti Crescent, 1 Nelson Mandela Rd, Vasant Kunj, New Delhi","ciudad"],"NU":[-23.556,-46.6735,"Rua Capote Valente 39, Pinheiros, São Paulo","ciudad"],"ITUB":[-23.6355,-46.6415,"Praça Alfredo Egydio de Souza Aranha 100 (CEIC), Jabaquara, São Paulo","direccion"],"ABEV":[-23.586,-46.6808,"Rua Dr. Renato Paes de Barros 1017, Itaim Bibi, São Paulo","direccion"],"EMBJ":[-23.225,-45.865,"Av. Brigadeiro Faria Lima 2170, São José dos Campos","ciudad"],"BBD":[-23.534,-46.7705,"Núcleo Cidade de Deus, Vila Yara, Osasco","direccion"],"PBR":[-22.9111,-43.1868,"Av. Henrique Valadares 28, Centro, Rio de Janeiro","direccion"],"VALE":[-22.9462,-43.1823,"Praia de Botafogo 186, Botafogo, Rio de Janeiro","direccion"],"MELI":[-34.549,-58.487,"Oficinas Saavedra (ex-fábrica Philips, junto a Av. General Paz), Buenos Aires · sede legal Montevideo","ciudad"],"BAP":[-12.076,-76.953,"Calle Centenario 156, La Molina, Lima","ciudad"],"FMX":[25.6935,-100.32,"General Anaya 601 Pte., Col. Bella Vista, Monterrey","ciudad"]};
+const GEO_M={"VanEck":[40.7509,-73.9737,"666 Third Avenue, New York, NY 10017, EE. UU. (esquina 3rd Ave / E 42nd St)","direccion"],"iShares / BlackRock":[40.75434,-74.0,"50 Hudson Yards, New York, NY 10001, EE. UU.","edificio"],"SPDR / State Street Global Advisors":[42.3628,-71.0586,"One Congress Street, Boston, MA 02114, EE. UU. (State Street Investment Management)","edificio"],"Global X":[40.74901,-73.97512,"605 Third Avenue, 43rd Floor, New York, NY 10158, EE. UU.","edificio"],"Direxion":[40.76198,-73.97984,"1301 Avenue of the Americas, 28th Floor, New York, NY 10019, EE. UU.","edificio"],"Invesco":[33.79139,-84.38889,"Midtown Union, 1331 Spring Street NW, Atlanta, GA 30309, EE. UU.","edificio"],"Procure ETFs":[40.155,-74.83,"16 Firebush Road, Levittown, PA 19056, EE. UU. (NO esta en Nueva York; domicilio de ProcureAM / Procure ETF Trust II segun SEC 2026)","ciudad"],"ARK Invest":[27.7709,-82.6372,"200 Central Avenue, St. Petersburg, FL 33701, EE. UU.","direccion"],"First Trust":[41.8637,-88.1055,"120 E Liberty Drive, Suite 400, Wheaton, IL 60187, EE. UU.","direccion"],"Sprott":[43.64653,-79.38014,"Royal Bank Plaza, South Tower, 200 Bay Street, Suite 2600, Toronto, ON M5J 2J1, Canada","edificio"],"Vanguard":[40.0625,-75.528,"100 Vanguard Boulevard, Malvern, PA 19355, EE. UU. (campus)","direccion"],"ProShares":[38.9815,-77.0945,"7272 Wisconsin Avenue, 21st Floor, Bethesda, MD 20814, EE. UU. (edificio The Wilson, Wisconsin Ave / Elm St)","direccion"],"WisdomTree":[40.75139,-73.9925,"250 West 34th Street, 3rd Floor (One Penn Plaza), New York, NY 10119, EE. UU.","edificio"],"KraneShares":[40.75642,-73.97508,"280 Park Avenue, 32nd Floor, New York, NY 10017, EE. UU.","edificio"],"Fidelity International (FIL)":[51.5134,-0.0968,"4 Cannon Street, London EC4M 5AB, Reino Unido","direccion"],"Amundi":[48.8417,2.313,"91-93 Boulevard Pasteur, 75015 Paris, Francia","direccion"],"MyInvestor (Andbank España)":[40.4377,-3.6908,"Paseo de la Castellana 55, 28046 Madrid (Andbank España / Andbank Wealth Management SGIIC, 3a planta)","direccion"],"Cobas Asset Management":[40.4382,-3.693,"Calle José Abascal 45, 3o, 28003 Madrid","direccion"],"azValor Asset Management":[40.4455,-3.6903,"Paseo de la Castellana 110, 3o, 28046 Madrid","direccion"],"Magallanes Value Investors":[40.4296,-3.6852,"Calle Lagasca 88, 28001 Madrid","direccion"],"Bestinver":[40.4185,-3.6912,"Calle Juan de Mena 8, 1o dcha., 28014 Madrid","direccion"],"True Value Investments":[40.437,-3.6875,"Calle Serrano 111, bajo izq., 28001 Madrid (la SGIIC se ha relanzado como Inveready Public Markets, SGIIC; registro CNMV n. 275)","direccion"],"Baelo Patrimonio":[40.4377,-3.6908,"Fondo asesorado por Antonio R. Rico sin oficina publica; gestora: Andbank Wealth Management SGIIC, Paseo de la Castellana 55, 28046 Madrid","ciudad"],"Fundsmith LLP":[51.5167,-0.1456,"33 Cavendish Square, London W1G 0PW, Reino Unido","direccion"],"Seilern Investment Management":[51.5085,-0.1233,"Burdett House, 15-16 Buckingham Street, London WC2N 6DU, Reino Unido","direccion"],"Hamco Asset Management":[40.458,-3.6915,"Paseo de la Castellana 141, planta 19, 28046 Madrid (Hamco AM, SGIIC, S.A.)","direccion"],"Cartesio Inversiones":[40.433,-3.6923,"Glorieta de Rubén Darío 3, 5o izq., 28010 Madrid","direccion"]};
+const ISS_GEO={"VanEck": "VanEck", "iShares (BlackRock)": "iShares / BlackRock", "SPDR (State Street)": "SPDR / State Street Global Advisors", "Global X": "Global X", "Direxion": "Direxion", "Invesco": "Invesco", "Procure": "Procure ETFs", "ARK Invest": "ARK Invest", "First Trust": "First Trust", "Sprott": "Sprott", "Vanguard": "Vanguard", "ProShares": "ProShares", "WisdomTree": "WisdomTree", "KraneShares": "KraneShares"};
+const FUND_GEO={"FIDW": "Fidelity International (FIL)", "FIDS": "Fidelity International (FIL)", "AMWD": "Amundi", "AMEM": "Amundi", "ISDW": "iShares / BlackRock", "ISEM": "iShares / BlackRock", "MYEW": "MyInvestor (Andbank España)", "MYNQ": "MyInvestor (Andbank España)", "COBA": "Cobas Asset Management", "AZVA": "azValor Asset Management", "MAGA": "Magallanes Value Investors", "BEST": "Bestinver", "TRUV": "True Value Investments", "BAEL": "Baelo Patrimonio", "FSMT": "Fundsmith LLP", "SEIL": "Seilern Investment Management", "HAMC": "Hamco Asset Management", "CART": "Cartesio Inversiones", "VGLB": "Vanguard", "VUS5": "Vanguard", "VEM": "Vanguard", "VSML": "Vanguard", "VEUZ": "Vanguard", "VBND": "Vanguard"};
+
+/* ================= MAPA GEORREFERENCIADO (MapLibre + OpenFreeMap) ================= */
+const MAPMODE=!/[?&]globe=3d/.test(location.search)&&!!window.maplibregl;
+const MAP_STYLE='https://tiles.openfreemap.org/styles/dark';
+const KIND_C={e:'#7ff6ff',f:'#ff9be0',s:'#ffd24a'},KIND_L={e:'ETF',f:'Fondo',s:'Acción'};
+let map=null,mapReady=false,hqMarker=null,mapFocus=null;
+const PREC_TXT={edificio:'Ubicación exacta del edificio',direccion:'Dirección verificada · punto aproximado (±200 m)',ciudad:'Solo a nivel de ciudad'};
+function entGeo(x){ // [lat,lon,addr,prec,key,who]
+  if(x.k==='s'){const g=GEO_S[x.t];return g?[...g,'s:'+x.t,x.obj.n]:null}
+  const key=x.k==='e'?ISS_GEO[x.obj.iss]:FUND_GEO[x.obj.tk],g=key&&GEO_M[key];
+  return g?[...g,'m:'+key,key.replace(/ \(.*\)$/,'')]:null}
+function geoCached(key){try{const v=JSON.parse(localStorage.getItem('atlas_geo_'+key)||'null');return v}catch(_){return null}}
+function filterActive(){return sq.active===true}
+function mapEntities(){ // entidades que cumplen el filtro actual
+  if(!filterActive())return[];const ents=searchEntities(),words=norm(sq.q).split(/\s+/).filter(Boolean);
+  const ofType=x=>sq.type==='all'||x.k===({etf:'e',stk:'s',fnd:'f'}[sq.type]);
+  let r=entEnrich(ents.filter(x=>ofType(x)&&(sq.sec==='all'||x.sec===sq.sec)&&words.every(w=>x.txt.includes(w))));
+  if(sq.fit)r=r.filter(x=>x.fit||x.inPlan);return r}
+function mapGeoJSON(list){const fs=[];list.forEach(x=>{const g=entGeo(x);if(!g)return;const c=geoCached(g[4]);const lat=c?c[0]:g[0],lon=c?c[1]:g[1];
+  fs.push({type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{k:x.k,t:x.t,tk:String(x.tk),name:x.name,node:x.node,c:KIND_C[x.k],gk:g[4],fit:x.fit||x.inPlan?1:0}})});
+  return{type:'FeatureCollection',features:fs}}
+function initMap(){
+  const st=$('#stage');st.classList.add('maponly');document.body.classList.add('mapmode');
+  map=new maplibregl.Map({container:'map',style:MAP_STYLE,center:[-25,32],zoom:mobile()?0.9:1.7,maxPitch:75,attributionControl:{compact:true},fadeDuration:150});
+  map.on('style.load',()=>{
+    try{map.setProjection({type:'globe'})}catch(_){}
+    try{map.setSky({'sky-color':'#0d0a24','horizon-color':'#3a2050','fog-color':'#140f2c','sky-horizon-blend':.6,'horizon-fog-blend':.5,'fog-ground-blend':.4,'atmosphere-blend':['interpolate',['linear'],['zoom'],0,1,6,.6,9,0]})}catch(_){}
+    // edificios 3D (OpenMapTiles: capa "building")
+    const srcId=Object.entries(map.getStyle().sources||{}).find(([k,v])=>v.type==='vector')?.[0];
+    if(srcId&&!map.getLayer('b3d'))try{map.addLayer({id:'b3d',type:'fill-extrusion',source:srcId,'source-layer':'building',minzoom:13.5,
+      paint:{'fill-extrusion-color':['interpolate',['linear'],['coalesce',['get','render_height'],10],0,'#1c1a3a',60,'#2c2858',200,'#433c7c'],'fill-extrusion-height':['coalesce',['get','render_height'],10],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':.9}})}catch(_){}
+    map.addSource('ents',{type:'geojson',data:mapGeoJSON(mapEntities()),cluster:true,clusterRadius:42,clusterMaxZoom:13});
+    const fade={duration:700,delay:0};
+    map.addLayer({id:'cl-glow',type:'circle',source:'ents',filter:['has','point_count'],paint:{'circle-color':'#b9f6ff','circle-radius':['step',['get','point_count'],20,5,26,20,34],'circle-blur':1,'circle-opacity':.0,'circle-opacity-transition':fade}});
+    map.addLayer({id:'cl',type:'circle',source:'ents',filter:['has','point_count'],paint:{'circle-color':'#171338','circle-radius':['step',['get','point_count'],11,5,14,20,18],'circle-stroke-color':'#b9f6ff','circle-stroke-width':2,'circle-opacity':0,'circle-stroke-opacity':0,'circle-opacity-transition':fade,'circle-stroke-opacity-transition':fade}});
+    map.addLayer({id:'cl-n',type:'symbol',source:'ents',filter:['has','point_count'],layout:{'text-field':['get','point_count_abbreviated'],'text-font':['Noto Sans Bold'],'text-size':12,'text-allow-overlap':true},paint:{'text-color':'#ffffff'}});
+    map.addLayer({id:'pt-glow',type:'circle',source:'ents',filter:['!',['has','point_count']],paint:{'circle-color':['get','c'],'circle-radius':16,'circle-blur':1,'circle-opacity':0,'circle-opacity-transition':fade}});
+    map.addLayer({id:'pt',type:'circle',source:'ents',filter:['!',['has','point_count']],paint:{'circle-color':['get','c'],'circle-radius':['interpolate',['linear'],['zoom'],2,4,12,7],'circle-stroke-color':'#ffffff','circle-stroke-width':1.5,'circle-opacity':0,'circle-stroke-opacity':0,'circle-opacity-transition':fade,'circle-stroke-opacity-transition':fade}});
+    map.addLayer({id:'pt-l',type:'symbol',source:'ents',minzoom:6,filter:['!',['has','point_count']],layout:{'text-field':['get','tk'],'text-font':['Noto Sans Bold'],'text-size':11,'text-offset':[0,1.3],'text-anchor':'top'},paint:{'text-color':['get','c'],'text-halo-color':'#0b0a1c','text-halo-width':1.4}});
+    ['cl','pt'].forEach(l=>{map.on('mouseenter',l,()=>map.getCanvas().style.cursor='pointer');map.on('mouseleave',l,()=>map.getCanvas().style.cursor='')});
+    map.on('click','cl',e=>{const f=e.features[0],src=map.getSource('ents');
+      src.getClusterExpansionZoom(f.properties.cluster_id).then(z=>{
+        if(z>13.5||map.getZoom()>=12.5){src.getClusterLeaves(f.properties.cluster_id,200,0).then(lv=>showPlace(f.geometry.coordinates,lv.map(l=>l.properties)))}
+        else map.easeTo({center:f.geometry.coordinates,zoom:Math.min(z+.3,14),duration:900,padding:mapPad()})})});
+    map.on('click','pt',e=>{const f=e.features[0],same=mapEntities().filter(x=>{const g=entGeo(x);return g&&g[4]===f.properties.gk});showPlace(f.geometry.coordinates,same.length?same.map(x=>({k:x.k,t:x.t,tk:x.tk,name:x.name,node:x.node,gk:f.properties.gk})):[f.properties],true)});
+    map.on('click',e=>{const hit=map.queryRenderedFeatures(e.point,{layers:['cl','pt']});if(!hit.length)closePlace()});
+    mapReady=true;updateMap(true)});
+  map.on('error',e=>{if(e&&e.error&&/style|Failed to fetch/i.test(String(e.error.message||'')))$('#mapMsg').textContent='No se pudo cargar el mapa base. Comprueba la conexión.'});
+  window.addEventListener('resize',()=>map&&map.setPadding(mapPad()));map.setPadding(mapPad());
+}
+function mapPad(){const r=$('#stage').getBoundingClientRect();return mobile()||r.width<900?{top:110,bottom:20,left:0,right:0}:{top:120,bottom:20,left:0,right:430}}
+function updateMap(first){if(!mapReady)return;const list=mapEntities(),gj=mapGeoJSON(list);map.getSource('ents').setData(gj);
+  const on=gj.features.length>0;
+  ['cl-glow','pt-glow'].forEach(l=>map.setPaintProperty(l,'circle-opacity',0));['cl','pt'].forEach(l=>{map.setPaintProperty(l,'circle-opacity',0);map.setPaintProperty(l,'circle-stroke-opacity',0)});
+  if(on)setTimeout(()=>{map.setPaintProperty('cl-glow','circle-opacity',.45);map.setPaintProperty('pt-glow','circle-opacity',.55);['cl','pt'].forEach(l=>{map.setPaintProperty(l,'circle-opacity',.95);map.setPaintProperty(l,'circle-stroke-opacity',1)})},60);
+  renderMapBar(gj.features.length,list.length);
+  if(on&&!first&&!mapFocus){const b=new maplibregl.LngLatBounds();gj.features.forEach(f=>b.extend(f.geometry.coordinates));
+    if(gj.features.length===1)map.flyTo({center:gj.features[0].geometry.coordinates,zoom:5,duration:1200,padding:mapPad()});
+    else map.fitBounds(b,{padding:{...mapPad(),top:mapPad().top+30,left:40,bottom:40,right:mapPad().right+40},maxZoom:5,duration:1200})}
+  if(!on)closePlace()}
+function renderMapBar(nPts,nEnt){const b=$('#mapBar');if(!b)return;const chip=(g,v,l,on)=>`<button class="mb-chip${on?' on':''}" data-g="${g}" data-v="${v}">${l}</button>`,a=filterActive();
+  b.innerHTML=`<button class="mb-search" data-g="open">⌕ <span>${sq.q?esc(sq.q):'Buscar empresa, ETF o fondo'}</span></button>
+   <div class="mb-row">${chip('type','etf','ETFs',a&&sq.type==='etf')}${chip('type','fnd','Fondos',a&&sq.type==='fnd')}${chip('type','stk','Acciones',a&&sq.type==='stk')}${chip('type','all','Todo',a&&sq.type==='all')}${chip('fit','1','✓ Para mí',a&&sq.fit)}${chip('sec','pick',sq.sec!=='all'&&a?`${SEC_ICON[sq.sec]||''} ${esc(sq.sec)} ▾`:'Sector ▾',a&&sq.sec!=='all')}</div>
+   ${a?`<div class="mb-res"><span><b>${nEnt}</b> resultado${nEnt===1?'':'s'} encendido${nEnt===1?'':'s'}</span><button data-g="list">Ver lista</button><button data-g="clear" aria-label="Quitar filtros">✕</button></div>`:`<div class="mb-hint">Elige qué quieres ver y se encenderán en el mapa</div>`}`}
+function mapBarClick(e){const b=e.target.closest('button[data-g]');if(!b)return;const g=b.dataset.g,v=b.dataset.v;
+  if(g==='open'||g==='list'){openSearch();return}
+  if(g==='clear'){sq.active=false;sq.q='';sq.type='all';sq.sec='all';sq.fit=false;closePlace();updateMap();if(map)map.flyTo({center:[-25,32],zoom:mobile()?0.9:1.7,pitch:0,bearing:0,duration:1400});return}
+  if(g==='sec'){sq.open=true;openSearch();return}
+  if(g==='type'){if(sq.active&&sq.type===v&&v!=='all'){sq.type='all'}else{sq.type=v}sq.active=true}
+  if(g==='fit'){sq.fit=!sq.fit;sq.active=true}
+  closePlace();updateMap()}
+function showPlace(coord,items,exact){const p=$('#mcard');if(!items.length)return;const first=items[0];
+  const ent=searchEntities().find(x=>x.k===first.k&&x.t===first.t);const g=ent&&entGeo(ent);const ck=g&&geoCached(g[4]);
+  const prec=ck?'edificio':g?g[3]:'ciudad',addr=g?g[2]:'';const who=g?g[5]:'';
+  mapFocus=g?g[4]:null;
+  const rows=entEnrich(items.map(it=>searchEntities().find(x=>x.k===it.k&&x.t===it.t)).filter(Boolean)).sort((a,b)=>(b.inPlan-a.inPlan)||(b.fit-a.fit)||((b.an?b.an.mean:-99)-(a.an?a.an.mean:-99)));
+  const sameSpot=new Set(rows.map(x=>{const q=entGeo(x);return q&&q[4]})).size===1;
+  p.innerHTML=`<div class="mc-h"><div><h3>${sameSpot?esc(who):`${rows.length} resultados en esta zona`}</h3>${sameSpot&&addr?`<p>📍 ${esc(addr)}</p><p class="mc-prec ${prec}">${PREC_TXT[prec]||''}</p>`:''}</div><button class="x-close" data-mclose aria-label="Cerrar">✕</button></div>
+    <div class="mc-list">${rows.map(x=>entRow(x)).join('')}</div>`;
+  p.hidden=false;requestAnimationFrame(()=>p.classList.add('on'));
+  p.querySelector('[data-mclose]').addEventListener('click',closePlace);
+  p.querySelectorAll('.sr').forEach(r=>r.addEventListener('click',()=>openDetail(r.dataset.k,r.dataset.t,r.dataset.n)));
+  if(sameSpot&&g){const c=ck?[ck[1],ck[0]]:[g[1],g[0]];flyHQ(c);if(!ck&&prec!=='edificio')refineGeo(g,coord)}
+  else map.easeTo({center:coord,zoom:Math.max(map.getZoom(),11),duration:900,padding:mapPad()})}
+function flyHQ(c){if(hqMarker)hqMarker.remove();const el=document.createElement('div');el.className='hq-pin';el.innerHTML='<i></i><b></b>';
+  hqMarker=new maplibregl.Marker({element:el,anchor:'bottom'}).setLngLat(c).addTo(map);
+  map.flyTo({center:c,zoom:16.4,pitch:62,bearing:-28,duration:2200,essential:true,padding:{...mapPad(),bottom:mobile()?Math.round(innerHeight*.18):20}})}
+async function refineGeo(g,coord){ // geocodifica la dirección en el móvil (OpenStreetMap) para afinar al edificio
+  if(!g[2])return;try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(g[2].replace(/\(.*?\)/g,'')),{headers:{'Accept-Language':'es'}});
+    const j=await r.json();if(!j||!j[0])return;const lat=+j[0].lat,lon=+j[0].lon;const d=Math.hypot((lat-g[0])*111,(lon-g[1])*111*Math.cos(g[0]*Math.PI/180));
+    if(d>3)return; // demasiado lejos: no nos fiamos
+    try{localStorage.setItem('atlas_geo_'+g[4],JSON.stringify([lat,lon]))}catch(_){}
+    if(mapFocus===g[4]){hqMarker&&hqMarker.setLngLat([lon,lat]);map.easeTo({center:[lon,lat],duration:800,padding:map.getPadding()});const pe=$('#mcard .mc-prec');if(pe){pe.className='mc-prec edificio';pe.textContent='Ubicación afinada con OpenStreetMap'}}
+    updateMap(true)}catch(_){}}
+function closePlace(){const p=$('#mcard');if(!p||p.hidden)return;p.classList.remove('on');p.hidden=true;mapFocus=null;if(hqMarker){hqMarker.remove();hqMarker=null}}
+function focusEntOnMap(k,t){const x=searchEntities().find(y=>y.k===k&&y.t===t);if(!x||!mapReady)return false;const g=entGeo(x);if(!g)return false;
+  showPlace([g[1],g[0]],[{k:x.k,t:x.t}]);return true}
+
 const SEC_ICON={'Gestión activa':'🎯','Tecnología':'💻','Salud':'🧬','Energía':'⚡','Finanzas':'🏦','Consumo':'🛒','Defensa y espacio':'🚀','Infraestructuras':'🏗️','Mercado amplio':'🌍','Regiones y países':'🗺️','Bonos y oro':'🪙','Automoción':'🚗','Industria':'🏭','Lujo':'💎','Materias primas':'⛏️','Telecomunicaciones':'📡','Inmobiliario':'🏢','Otros':'◆'};
 function entEnrich(list){const o=buildPlan(profile),sp=buildStockPlan(profile),pw={};o.items.forEach(x=>pw['e'+x.e.t]=x.w);sp.items.forEach(x=>pw['s'+x.s.t]=x.w);
   return list.map(x=>{const info=x.k==='s'?stockInfo(x.obj):x.k==='f'?fundInfo(x.obj):etfInfo(x.obj),an=annStats(x.t);return{...x,info,an,fit:info.band===profile&&info.ok,inPlan:pw[x.k+x.t]||0}})}
@@ -1757,13 +1899,13 @@ function renderSearch(){
   const chip=(grp,val,lbl,on,cls='')=>`<button class="sc-chip${cls}${on?' on':''}" data-g="${grp}" data-v="${esc(val)}">${lbl}</button>`;
   if(!d.querySelector('.sbox')){d.innerHTML=`<div class="sbox"><div class="shead"><span class="sic">⌕</span><input id="sQ" type="search" placeholder="Busca NVIDIA, Fidelity, Cobas, IWDA…" autocomplete="off" enterkeyhint="search"><button class="x-close" data-sclose aria-label="Cerrar">✕</button></div>
     <div class="sbar" id="sBar"></div><div class="sfil" id="sFil" hidden></div><div class="scount" id="sCount"></div><div class="slistr" id="sList"></div></div>`;
-    $('#sQ').addEventListener('input',e=>{sq.q=e.target.value;renderSearch()});
+    $('#sQ').addEventListener('input',e=>{sq.q=e.target.value;if(sq.q.trim())sq.active=true;renderSearch()});
     d.querySelector('[data-sclose]').addEventListener('click',closeSearch);
     d.addEventListener('click',e=>{if(e.target===d)closeSearch()});
     const onChip=e=>{const b=e.target.closest('.sc-chip');if(!b)return;const g=b.dataset.g,v=b.dataset.v;
-      if(g==='fit')sq.fit=!sq.fit;else if(g==='open')sq.open=!sq.open;else if(g==='sec')sq.sec=sq.sec===v&&v!=='all'?'all':v;else sq[g]=v;renderSearch();if(g==='sec'&&b.classList.contains('stile'))$('#sList').scrollTop=0};
+      if(g!=='open')sq.active=true;if(g==='fit')sq.fit=!sq.fit;else if(g==='open')sq.open=!sq.open;else if(g==='sec')sq.sec=sq.sec===v&&v!=='all'?'all':v;else sq[g]=v;renderSearch();if(g==='sec'&&b.classList.contains('stile'))$('#sList').scrollTop=0};
     ['#sBar','#sFil','#sList'].forEach(s=>$(s).addEventListener('click',onChip));
-    $('#sList').addEventListener('click',e=>{const b=e.target.closest('.sr');if(!b)return;const nd=b.dataset.n;if(gl_ok){const ll=hubLL(nd);flyTo({lat:ll.lat,lon:ll.lon,dist:NODES[nd].sty==='generic'?30:42,heading:0},1400)}openDetail(b.dataset.k,b.dataset.t,nd)})}
+    $('#sList').addEventListener('click',e=>{const b=e.target.closest('.sr');if(!b)return;const nd=b.dataset.n;if(MAPMODE&&mapReady){const k=b.dataset.k,t=b.dataset.t;closeSearch();setTimeout(()=>{if(!focusEntOnMap(k,t))openDetail(k,t,nd)},80);return}if(gl_ok){const ll=hubLL(nd);flyTo({lat:ll.lat,lon:ll.lon,dist:NODES[nd].sty==='generic'?30:42,heading:0},1400)}openDetail(b.dataset.k,b.dataset.t,nd)})}
   if($('#sQ').value!==sq.q)$('#sQ').value=sq.q;
   const nAdv=(sq.sec!=='all')+(sq.sort!=='mean');
   $('#sBar').innerHTML=`<div class="sseg">${chip('type','all','Todo',sq.type==='all')}${chip('type','etf','ETFs',sq.type==='etf')}${chip('type','fnd','Fondos',sq.type==='fnd')}${chip('type','stk','Acciones',sq.type==='stk')}</div>
@@ -1773,10 +1915,11 @@ function renderSearch(){
     <div class="sgrp"><span class="slbl">Ordenar por</span><div class="srow2">${chip('sort','mean','Más rentable',sq.sort==='mean')}${chip('sort','risk','Menos riesgo',sq.sort==='risk')}${chip('sort','worst','Mejor peor año',sq.sort==='worst')}${chip('sort','az','A–Z',sq.sort==='az')}</div></div>`;
   const L=$('#sList');
   if(home){const best=entEnrich(ents.filter(ofType)).filter(x=>x.fit||x.inPlan).sort((a,b)=>(b.inPlan-a.inPlan)||((b.an?b.an.mean:-99)-(a.an?a.an.mean:-99))).slice(0,5);
-    $('#sCount').innerHTML='';
+    $('#sCount').innerHTML='';updateMapSoon();sheetBtn();
     L.innerHTML=`<h5 class="shd">Explora por sector</h5><div class="stiles">${secs.map(x=>`<button class="sc-chip stile" data-g="sec" data-v="${esc(x)}"><span class="sti">${SEC_ICON[x]||'◆'}</span><b>${esc(x)}</b><small>${secCount[x]}</small></button>`).join('')}</div>
       ${best.length?`<h5 class="shd">Lo mejor para tu perfil ${esc(P.label)} <span>media anual</span></h5>${best.map(x=>entRow(x)).join('')}`:''}`;return}
   $('#sCount').innerHTML=`<span>${res.length} resultado${res.length===1?'':'s'}${sq.sec!=='all'?` en ${esc(sq.sec)}`:''}</span><span>media anual</span>`;
+  updateMapSoon();sheetBtn();
   L.innerHTML=res.length?res.map(x=>entRow(x)).join(''):`<p class="sempty">Nada con esos filtros.<br>Prueba otra palabra o quita alguno.</p>`;
 }
 let cardAll={};
@@ -2225,7 +2368,7 @@ try{const q=new URLSearchParams(location.search),m=+q.get('monthly');
     document.body.appendChild(a)}
   if(q.has('monthly')||q.has('from'))history.replaceState(null,'',location.pathname)}catch(e){}
 renderProfileSeg();syncMode();
-if(window.THREE){initThree();buildLabels()}else{$('#stage').insertAdjacentHTML('beforeend','<div class="nolgl">No se pudo cargar Three.js desde el CDN. Los paneles siguen funcionando.</div>')}
+if(MAPMODE){initMap();$('#mapBar').addEventListener('click',mapBarClick)}else if(window.THREE){initThree();buildLabels()}else{$('#stage').insertAdjacentHTML('beforeend','<div class="nolgl">No se pudo cargar Three.js desde el CDN. Los paneles siguen funcionando.</div>')}
 initCharts();refreshAll();renderStocksTable();tickClocks();setInterval(tickClocks,1000);
 applyCam&&window.THREE&&applyCam();requestAnimationFrame(loop);
 setTimeout(()=>flyTo(HOME,reduced?1:3200),300);
