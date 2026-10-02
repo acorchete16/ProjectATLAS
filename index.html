@@ -1868,7 +1868,8 @@ function focusEntOnMap(k,t){const x=searchEntities().find(y=>y.k===k&&y.t===t);i
 /* ================= PRECIOS DIARIOS (EODHD) ================= */
 const EOD_LOCAL={SAN:'SAN.MC',FER:'FER.MC',AENA:'AENA.MC',ACS:'ACS.MC',IBE:'IBE.MC',ITX:'ITX.MC',MC:'MC.PA',RMS:'RMS.PA',OR:'OR.PA',DG:'DG.PA',RHM:'RHM.XETRA',ALV:'ALV.XETRA',LSEG:'LSEG.LSE',VWS:'VWS.CO','8035':'8035.TSE','6857':'6857.TSE','9983':'9983.TSE','8058':'8058.TSE','3690':'3690.HK',RELIANCE:'RELIANCE.NSE',TCS:'TCS.NSE',LT:'LT.NSE',BHARTIARTL:'BHARTIARTL.NSE'};
 const EOD_CUR={US:'$',MC:'€',PA:'€',XETRA:'€',LSE:'p',CO:' kr',TSE:'¥',HK:' HK$',NSE:'₹',EUFUND:'€'};
-function eodKey(){try{return localStorage.getItem('atlas_eod_key')||''}catch(_){return''}}
+const EOD_DEFAULT='6ac044dd2ffb75.42832912'; // clave gratuita de Ander (20 consultas/día)
+function eodKey(){try{return localStorage.getItem('atlas_eod_key')||EOD_DEFAULT}catch(_){return EOD_DEFAULT}}
 function eodSym(k,o){if(k==='f')return o.isin+'.EUFUND';if(k==='e')return o.t+'.US';return EOD_LOCAL[o.t]||o.t.replace('.','-')+'.US'}
 const today=()=>new Date().toISOString().slice(0,10);
 function eodUsed(){try{return +(localStorage.getItem('atlas_eod_n_'+today())||0)}catch(_){return 0}}
