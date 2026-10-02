@@ -1883,6 +1883,7 @@ function liveSpark(rows,color){const W=340,H=96,v=rows.map(r=>r[1]),mn=Math.min(
     <polygon points="4,${H-14} ${pts} ${W-4},${H-14}" fill="url(#lvg)"/><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round"/>
     <circle cx="${sx(rows.length-1)}" cy="${sy(v[v.length-1])}" r="3.5" fill="${color}"/>
     <text x="4" y="${H-2}" font-size="9" fill="#6b8096">${rows[0][0].slice(2,7).split('-').reverse().join('/')}</text><text x="${W-4}" y="${H-2}" font-size="9" fill="#6b8096" text-anchor="end">${rows[rows.length-1][0].split('-').reverse().slice(0,2).join('/')}</text></svg>`}
+function liveDedup(el){const b=el.closest('.dbody')?.querySelector('.dprice');if(b){const p=b.querySelector(':scope>b');if(p)p.remove();const t=b.querySelector('.dtag');if(t&&/12 meses/.test(t.textContent))t.remove()}}
 function liveHTML(rows,sym,color,cached){const cur=EOD_CUR[sym.split('.').pop()]||'',last=rows[rows.length-1],prev=rows[rows.length-2]||last,d1=(last[1]/prev[1]-1)*100;
   const y=rows.filter(r=>r[0]>=new Date(Date.now()-365*864e5).toISOString().slice(0,10)),y1=(last[1]/y[0][1]-1)*100;
 const fmt=v=>`${cur==='$'?'$':''}${v.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})}${cur!=='$'?cur.replace('€',' €'):''}`;
@@ -1891,10 +1892,10 @@ const fmt=v=>`${cur==='$'?'$':''}${v.toLocaleString('es-ES',{minimumFractionDigi
     ${liveSpark(y,color)}<p class="mp-note">Datos diarios de EODHD (${esc(sym)})${cached?' · guardado de hoy':''}. Te quedan ${Math.max(0,20-eodUsed())} consultas gratis hoy.</p>`}
 async function loadLive(el,k,o,color){if(!el)return;const key=eodKey(),sym=eodSym(k,o);
   if(!key){el.innerHTML=`<p class="lv-off">Conecta EODHD en ⚙ para ver el precio del último cierre y su gráfico del año.</p>`;return}
-  const ck='atlas_eod_'+sym;try{const c=JSON.parse(localStorage.getItem(ck)||'null');if(c&&c.d===today()&&c.rows&&c.rows.length>1){el.innerHTML=liveHTML(c.rows,sym,color,true);return}}catch(_){}
+  const ck='atlas_eod_'+sym;try{const c=JSON.parse(localStorage.getItem(ck)||'null');if(c&&c.d===today()&&c.rows&&c.rows.length>1){el.innerHTML=liveHTML(c.rows,sym,color,true);liveDedup(el);return}}catch(_){}
   if(eodUsed()>=20&&key!=='demo'){el.innerHTML=`<p class="lv-off">Has gastado las 20 consultas gratis de hoy. Mañana se renuevan.</p>`;return}
   el.innerHTML=`<p class="lv-off">Cargando precio…</p>`;
-  try{const rows=await eodFetch(sym,key);eodCount();try{localStorage.setItem(ck,JSON.stringify({d:today(),rows}))}catch(_){}if(el.isConnected)el.innerHTML=liveHTML(rows,sym,color,false)}
+  try{const rows=await eodFetch(sym,key);eodCount();try{localStorage.setItem(ck,JSON.stringify({d:today(),rows}))}catch(_){}if(el.isConnected){el.innerHTML=liveHTML(rows,sym,color,false);liveDedup(el)}}
   catch(e){const m=e.message;if(el.isConnected)el.innerHTML=`<p class="lv-off">${m==='auth'?'La clave de EODHD no es válida. Revísala en ⚙.':m==='limit'?'Has llegado al límite de consultas de EODHD por hoy.':m==='empty'?`EODHD no tiene datos de ${esc(sym)}.`:'No se pudo conectar con EODHD ahora mismo.'}</p>`}}
 
 const SEC_ICON={'Gestión activa':'🎯','Tecnología':'💻','Salud':'🧬','Energía':'⚡','Finanzas':'🏦','Consumo':'🛒','Defensa y espacio':'🚀','Infraestructuras':'🏗️','Mercado amplio':'🌍','Regiones y países':'🗺️','Bonos y oro':'🪙','Automoción':'🚗','Industria':'🏭','Lujo':'💎','Materias primas':'⛏️','Telecomunicaciones':'📡','Inmobiliario':'🏢','Otros':'◆'};
