@@ -1311,6 +1311,13 @@ $('#testBtn').addEventListener('click',async()=>{syncMode();if(!apiKey){$('#upMs
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCard();$('#settings').hidden=true}});
 let rsT;window.addEventListener('resize',()=>{clearTimeout(rsT);rsT=setTimeout(resize3d,80)});
 
+// Enlace desde Cimientos: ?monthly=300&from=cimientos → arranca con tu aportación real y muestra un botón para volver
+try{const q=new URLSearchParams(location.search),m=+q.get('monthly');
+  if(m>0){monthly=Math.round(m);$('#monthly').value=monthly}
+  if(q.get('from')==='cimientos'){const a=document.createElement('a');a.href='https://acorchete16.github.io/cimientos/';a.textContent='Volver a Cimientos';
+    a.style.cssText='position:fixed;right:10px;top:calc(10px + env(safe-area-inset-top,0px));z-index:9999;padding:6px 11px;border-radius:10px;background:rgba(255,122,26,.92);color:#2B1103;font:700 12px system-ui,sans-serif;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.4)';
+    document.body.appendChild(a)}
+  if(q.has('monthly')||q.has('from'))history.replaceState(null,'',location.pathname)}catch(e){}
 renderProfileSeg();syncMode();
 if(window.THREE){initThree();buildLabels()}else{$('#stage').insertAdjacentHTML('beforeend','<div class="nolgl">No se pudo cargar Three.js desde el CDN. Los paneles siguen funcionando.</div>')}
 initCharts();refreshAll();renderStocksTable();tickClocks();setInterval(tickClocks,1000);
