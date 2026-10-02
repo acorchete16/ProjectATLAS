@@ -281,7 +281,7 @@ details.tech>.tin{padding:0 12px 12px;display:flex;flex-direction:column;gap:12p
 #stageHint.off{opacity:0}
 @media (pointer:coarse){#stageHint{display:block}}
 @media (max-width:1100px){
-  body{padding-block:12px}
+  body{padding-block:calc(12px + env(safe-area-inset-top,0px)) calc(12px + env(safe-area-inset-bottom,0px))}
   #app{height:auto;min-height:0;overflow:visible;border:0;border-radius:0;display:flex;flex-direction:column;gap:12px;background:none}
   #stage{position:relative;height:58vh;min-height:360px;border-radius:14px;border:1px solid var(--edge);overflow:hidden;order:2;background:radial-gradient(120% 100% at 50% 40%,#061426 0%,#020710 55%,#01040a 100%)}
   .top,.left,.right,.dock{position:static;width:auto;height:auto}
@@ -374,6 +374,17 @@ details.tech>.tin{padding:0 12px 12px;display:flex;flex-direction:column;gap:12p
 .dbox{overflow:clip}.dhead{position:sticky;top:-32px;z-index:3;background-color:rgba(22,19,42,.98)}
 @media (max-width:700px){.dsheet{padding:0}.dbox{border-radius:0;min-height:100vh}.dhead{top:0}.x-close{width:44px;height:44px}}
 @media (max-width:700px){.sbar{flex-wrap:wrap}.sseg{flex:1 1 100%}.sseg .sc-chip{flex:1}.sbar .sfit{margin-left:0;flex:1}.sbar .sfbtn{flex:1}}
+
+/* hojas: respetar la barra de estado / notch y cierre abajo */
+.dsheet{padding-top:calc(32px + env(safe-area-inset-top,0px))}
+#sheetX{display:none}
+@media (max-width:1100px){
+  .dsheet{padding-top:env(safe-area-inset-top,0px);padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+  .sbox{min-height:calc(100dvh - env(safe-area-inset-top,0px));height:auto;max-height:none}
+  .shead,.dhead{padding-top:12px}
+  #sheetX:not([hidden]){display:flex;align-items:center;gap:6px;position:fixed;z-index:80;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));padding:14px 26px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(30,26,56,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font:600 15px Inter,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5);touch-action:manipulation}
+  #search:not([hidden])~#searchFab,#detail:not([hidden])~#searchFab{display:none}
+}
 </style>
 </head>
 <body>
@@ -476,6 +487,7 @@ details.tech>.tin{padding:0 12px 12px;display:flex;flex-direction:column;gap:12p
   <div id="card" class="glass" hidden></div>
   <div id="search" class="dsheet ssheet" hidden></div>
   <div id="detail" class="dsheet" hidden></div>
+  <button id="sheetX" hidden aria-label="Cerrar">✕ Cerrar</button>
   <button id="searchFab" aria-label="Buscar ETFs y acciones">⌕</button>
 </div>
 
@@ -1642,7 +1654,7 @@ async function loadNews(q,box){
     if(j.status==='ok'&&j.items&&j.items.length){render(j.items.map(it=>{const m=String(it.title).match(/^(.*) - ([^-]+)$/);return{title:m?m[1]:it.title,source:m?m[2]:(it.author||''),date:String(it.pubDate||'').slice(0,10).split('-').reverse().join('/'),url:it.link}}));return}}catch(e){}
   if(apiKey){try{const res=await gemini(`Hoy es ${new Date().toISOString().slice(0,10)}. Busca las 5 noticias más recientes e importantes sobre "${q}" (preferiblemente en español). Responde SOLO con JSON: {"news":[{"title":"...","source":"...","date":"DD/MM/AAAA","url":"https://..."}]}`);const j=parseJSON(res.text);if(j.news&&j.news.length){render(j.news);return}}catch(e){}}
   box.innerHTML=`<p class="mp-note">No he podido cargar titulares desde aquí. Ábrelos directamente:</p>`+links}
-function openDetail(kind,t,node){litNode=node;const d=$('#detail');let html='';
+function openDetail(kind,t,node){litNode=node;const d=$('#detail');let html='';if(d.hidden)sheetPush();
   if(kind==='f'){const f=FUNDS.find(x=>x.t===t);if(!f)return;d.innerHTML=`<div class="dbox">${fundDetail(f)}</div>`;d.hidden=false;loadNews(`${f.n} fondo`,$('#dNews'))}
   else if(kind==='s'){const l=STOCKS[node]||Object.values(STOCKS).flat(),s=(STOCKS[node]||[]).find(x=>x.t===t)||Object.values(STOCKS).flat().find(x=>x.t===t);if(!s)return;const info=stockInfo(s),an=annStats(s.t),color=NODES[node].color;
     html=`<div class="dhead" style="--c:${color}"><div class="dlogo">${esc(dispT(s).slice(0,4))}</div><div class="dtit"><h3>${esc(s.n)}</h3><p>${esc(dispT(s))} · ${esc(s.sec||'')} · Sede: ${esc(s.hq||NODES[node].city)}</p></div><button class="x-close" data-close aria-label="Cerrar">✕</button></div>
@@ -1670,7 +1682,13 @@ function openDetail(kind,t,node){litNode=node;const d=$('#detail');let html='';
   d.querySelector('[data-close]').addEventListener('click',closeDetail);d.scrollTop=0;
 }
 $('#detail').addEventListener('click',e=>{if(e.target.id==='detail')closeDetail()});
-function closeDetail(){litNode=null;const d=$('#detail');d.hidden=true;d.innerHTML=''}
+function closeDetail(fromPop){const d=$('#detail');if(d.hidden)return;if(fromPop!==true&&sheetPop())return;litNode=null;d.hidden=true;d.innerHTML='';sheetBtn()}
+// hojas a pantalla completa: botón «Cerrar» abajo (al alcance del pulgar) y gesto/botón «atrás» del móvil
+let _sheetN=0;
+function sheetPush(){try{history.pushState({atlasSheet:++_sheetN},'')}catch(_){}setTimeout(sheetBtn,0)}
+function sheetPop(){if(history.state&&history.state.atlasSheet){history.back();return true}return false}
+function sheetBtn(){const b=$('#sheetX');if(b)b.hidden=$('#detail').hidden&&$('#search').hidden}
+window.addEventListener('popstate',()=>{if(!$('#detail').hidden)closeDetail(true);else if(!$('#search').hidden)closeSearch(true)});
 function entityTiles(id){const o=buildPlan(profile),P=PROFILES[profile],color=NODES[id].color;
   const st=nodeStocks(id),et=o.all.filter(x=>x.e.node===id).sort((a,b)=>((b.e.ann?b.e.ann.mean:-99)-(a.e.ann?a.e.ann.mean:-99)));
   const mx=Math.max(10,...st.map(x=>{const a=annStats(x.s.t);return a?Math.abs(a.mean):0}),...et.map(x=>x.e.ann?Math.abs(x.e.ann.mean):0));
@@ -1722,8 +1740,8 @@ function fundDetail(f){const info=fundInfo(f),an=annStats(f.t),color=NODES[f.nod
    <div class="dsec"><h4>Noticias</h4><div id="dNews"></div></div>
    ${f.doubt?`<p class="mp-note" style="color:var(--warn)">Ojo con los datos: ${esc(f.doubt)}</p>`:''}
    <p class="mp-note">Rentabilidades en euros de las fichas de la gestora, Renta 4, Quefondos y Finect (${f.src.map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener" style="color:inherit">${i+1}</a>`).join(', ')}), consultadas el 2 oct. 2026. Rentabilidades pasadas no garantizan las futuras. No es asesoramiento financiero.</p></div>`}
-function openSearch(){const d=$('#search');d.hidden=false;renderSearch();setTimeout(()=>{const i=$('#sQ');if(i&&!mobile())i.focus()},50)}
-function closeSearch(){$('#search').hidden=true}
+function openSearch(){const d=$('#search');if(d.hidden)sheetPush();d.hidden=false;renderSearch();setTimeout(()=>{const i=$('#sQ');if(i&&!mobile())i.focus()},50)}
+function closeSearch(fromPop){if($('#search').hidden)return;if(fromPop!==true&&sheetPop())return;$('#search').hidden=true;sheetBtn()}
 function renderSearch(){
   const d=$('#search'),P=PROFILES[profile],ents=searchEntities();
   const ofType=x=>sq.type==='all'||x.k===({etf:'e',stk:'s',fnd:'f'}[sq.type]);
@@ -2192,7 +2210,7 @@ $('#settings').addEventListener('click',e=>{if(e.target.id==='settings')$('#sett
 $('#saveUp').addEventListener('click',()=>{syncMode();$('#settings').hidden=true;renderSources();stream('sys',apiKey?'Clave Gemini cargada: la próxima misión usará datos LIVE.':'Sin clave: misión en simulación.',apiKey?'lv':'')});
 $('#testBtn').addEventListener('click',async()=>{syncMode();if(!apiKey){$('#upMsg').textContent='Pega primero tu API key.';return}setUp('run','Probando');$('#upMsg').textContent='Probando conexión…';
   try{const r=await gemini('Responde solo con el JSON {"ok":true}');setUp('done','Online');$('#upMsg').textContent='Conexión correcta: '+r.text.slice(0,80)}catch(e){setUp('err',e.blocked?'Bloqueado':'Fallo');$('#upMsg').textContent=e.message}});
-$('#searchBtn').addEventListener('click',openSearch);
+$('#searchBtn').addEventListener('click',openSearch);$('#sheetX').addEventListener('click',()=>{if(!$('#detail').hidden)closeDetail();else closeSearch()});
 $('#setBtn').addEventListener('click',()=>{$('#settings').hidden=false});
 $('#expertBtn').addEventListener('click',()=>{const app=$('#app'),on=app.classList.toggle('simple');$('#expertBtn').setAttribute('aria-pressed',String(!on));$('#expertBtn').textContent=on?'Vista experta':'Vista simple';try{localStorage.setItem('atlas_view',on?'simple':'expert')}catch(_){}setTimeout(resize3d,60);refreshAll()});
 try{if(localStorage.getItem('atlas_view')==='expert'){$('#app').classList.remove('simple');$('#expertBtn').textContent='Vista simple';$('#expertBtn').setAttribute('aria-pressed','true')}}catch(_){}$('#searchFab').addEventListener('click',openSearch);
