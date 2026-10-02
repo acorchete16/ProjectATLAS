@@ -297,11 +297,50 @@ details.tech>.tin{padding:0 12px 12px;display:flex;flex-direction:column;gap:12p
   #stream .ln{grid-template-columns:84px 84px 1fr}#stream .ln span:nth-child(3),#stream .ln span:nth-child(5){display:none}
 }
 @media (prefers-reduced-motion:reduce){.blink{animation:none}#card{transition:none}}
+
+/* ===== vista simple ===== */
+#app .sp{display:none}#app.simple .sp{display:inline}#app.simple .xp{display:none!important}
+#app.simple .mission,#app.simple .sep,#app.simple #modeTag,#app.simple .clocks,#app.simple #runBtn,#app.simple .left,#app.simple .dock,#app.simple .hint,#app.simple #techToggle,#app.simple .bub,#app.simple #caoPill,#app.simple #card .ch .pill{display:none!important}
+#app.simple .right{bottom:16px}
+#app.simple .clab .t,#app.simple .clab .v{display:none}#app.simple .clab .chip{font-family:Inter,system-ui,sans-serif;font-size:11px;letter-spacing:.02em;padding:4px 9px;background:rgba(14,12,30,.7)}#app.simple .clab .chip b{font-weight:600}
+#app.simple .mapctl{bottom:24px}
+#app.simple .top{gap:12px}
+#app.simple .sbtn{margin-left:auto;min-width:260px;text-align:left;font-family:Inter,system-ui,sans-serif;font-size:13px;letter-spacing:0;text-transform:none;padding:10px 14px;border-radius:999px;color:var(--mid);background:rgba(255,255,255,.06)}
+#app.simple .sbtn::after{content:' una empresa o ETF…'}
+.hbtn{font:inherit;font-size:12px;padding:8px 12px;border-radius:999px;border:1px solid var(--edge2);background:rgba(255,255,255,.04);color:var(--mid);cursor:pointer;white-space:nowrap}
+.hbtn.ico{width:38px;height:38px;padding:0;font-size:16px;display:grid;place-items:center}
+.hbtn:hover{color:var(--fg);border-color:var(--cyan)}
+#app:not(.simple) .sbtn{margin-left:0}
+#app.simple .right .phead{padding:16px 18px 10px;border-bottom:0}
+#app.simple .right .phead h2{font-family:Inter,system-ui,sans-serif;font-size:20px;letter-spacing:0;text-transform:none;font-weight:700}
+#app.simple .right .pbody{padding:4px 18px 18px;gap:16px}
+#app.simple .right .lbl{font-family:Inter,system-ui,sans-serif;font-size:12.5px;letter-spacing:0;text-transform:none;color:var(--mid)}
+#app.simple .seg button{font-family:Inter,system-ui,sans-serif;font-size:12px;letter-spacing:0;text-transform:none;padding:8px 4px}
+#app.simple .seg button small{font-size:10.5px}
+#app.simple #flag .flag:not(.bad){display:none}
+#app.simple #flag .flag.bad{font-size:12px}
+.pl-hero{display:grid;grid-template-columns:1.1fr 1fr;gap:10px}
+.pl-big{padding:14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--edge);display:flex;flex-direction:column;gap:2px}
+.pl-big span,.pl-side span{font-size:12px;color:var(--mid)}.pl-big b{font-size:38px;line-height:1.05;font-weight:800}.pl-big small,.pl-side small{font-size:11px;color:var(--dim)}
+.pl-side{display:flex;flex-direction:column;gap:8px}.pl-side>div{flex:1;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--edge);display:flex;flex-direction:column;gap:2px}
+.pl-side b{font-size:18px}.pl-meter{display:flex;gap:3px;margin-top:3px}.pl-meter i{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.1)}
+.pl-list{display:flex;flex-direction:column;gap:4px}
+.pl-row{display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid transparent;background:rgba(255,255,255,.03);color:var(--fg);font:inherit;text-align:left;cursor:pointer}
+.pl-row:hover{border-color:var(--edge2);background:rgba(255,255,255,.06)}
+.pl-row>i{width:10px;height:10px;border-radius:50%}
+.pl-nm{min-width:0;display:flex;flex-direction:column}.pl-nm b{font-size:14px;font-family:var(--mono)}.pl-nm small{font-size:11.5px;color:var(--mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pl-w{display:flex;flex-direction:column;align-items:flex-end}.pl-w b{font-size:15px}.pl-w small{font-size:11px;color:var(--dim)}
+.pl-card{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--edge)}
+.pl-card h4{margin:0 0 8px;font-size:13px;font-weight:600}
+.pp-row{display:grid;grid-template-columns:62px 1fr auto;gap:8px;align-items:baseline;padding:6px 0;border-top:1px solid var(--edge)}.pp-row:first-of-type{border-top:0}
+.pp-row span{font-size:12px;color:var(--mid)}.pp-row b{font-size:14px}.pp-row small{font-size:11px;color:var(--dim)}
+.pl-warn{margin:0;font-size:12px;line-height:1.45;color:#ffd29a;padding:9px 12px;border-radius:12px;background:rgba(255,177,59,.08);border:1px solid rgba(255,177,59,.25)}
+@media (max-width:1100px){#app.simple .sbtn{min-width:0;flex:1}#app.simple .sbtn::after{content:''}#app.simple #expertBtn{display:none}#app.simple .top{flex-wrap:nowrap}#app.simple .brand small{display:none}}
 </style>
 </head>
 <body>
 
-<div id="app">
+<div id="app" class="simple">
   <div id="stage" aria-label="Globo 3D interactivo con skylines de San Francisco, Cabo Cañaveral, Boston, Copenhague y el cuartel general de Nueva York. Arrastra para girar, rueda para acercar.">
     <canvas id="gl"></canvas>
     <div class="vign"></div>
@@ -321,7 +360,9 @@ details.tech>.tin{padding:0 12px 12px;display:flex;flex-direction:column;gap:12p
     <span id="modeTag" class="pill sim">Simulación</span>
     <div class="clocks" id="clocks"></div>
     <button class="btn2 sbtn" id="searchBtn" aria-label="Buscar ETFs y acciones">⌕ Buscar</button>
-    <button class="btn2" id="uplinkBtn">⌁ Uplink Gemini</button>
+    <button class="btn2 xp" id="uplinkBtn">⌁ Uplink Gemini</button>
+    <button class="hbtn" id="expertBtn" aria-pressed="false" title="Mostrar nodos, terminal y misión">Vista experta</button>
+    <button class="hbtn ico" id="setBtn" aria-label="Ajustes">⚙</button>
     <button class="btn" id="runBtn">▶ Lanzar misión</button>
   </header>
 
@@ -331,26 +372,27 @@ details.tech>.tin{padding:0 12px 12px;display:flex;flex-direction:column;gap:12p
   </aside>
 
   <aside class="glass right" aria-label="Estrategia de Nueva York">
-    <div class="phead"><h2 style="color:var(--hq)">Polo Norte · Estrategia</h2><span id="caoPill" class="pill s-idle">En reposo</span></div>
+    <div class="phead"><h2 style="color:var(--hq)"><span class="xp">Polo Norte · Estrategia</span><span class="sp">Tu plan</span></h2><span id="caoPill" class="pill s-idle">En reposo</span></div>
     <div class="pbody">
-      <div><div class="lbl" style="margin-bottom:6px">Perfil de riesgo · objetivo anual</div>
+      <div><div class="lbl" style="margin-bottom:6px">Tu perfil de riesgo</div>
         <div class="seg" id="profileSeg" role="group" aria-label="Perfil de riesgo"></div></div>
-      <div><div class="lbl" style="margin-bottom:6px">Qué plan quieres ver</div>
+      <div class="mp-in"><label class="lbl" for="monthly">Cuánto aportas al mes</label>
+        <div class="mp-inrow"><input id="monthly" type="number" min="25" step="25" value="150" inputmode="numeric" aria-label="Aportación mensual en euros"><span>€</span>
+          <div class="mp-chips" id="mpChips"><button data-m="50">50</button><button data-m="100">100</button><button data-m="150">150</button><button data-m="300">300</button><button data-m="500">500</button></div></div></div>
+      <div>
         <div class="seg seg2" id="planSeg" role="group" aria-label="Tipo de plan">
-          <button data-v="etf" aria-pressed="true" style="--pc:#f5c542">Plan de ETFs<small>fondos · la base recomendada</small></button>
-          <button data-v="stk" aria-pressed="false" style="--pc:#f5c542">Plan de acciones<small>empresas sueltas · más riesgo</small></button>
+          <button data-v="etf" aria-pressed="true" style="--pc:#f5c542">Plan de ETFs</button>
+          <button data-v="stk" aria-pressed="false" style="--pc:#f5c542">Plan de acciones</button>
         </div></div>
+      <div id="myPlan" class="mp"></div>
+      <div id="flag"></div>
+      <details class="tech" id="techDet"><summary>Ajustes avanzados y datos técnicos</summary><div class="tin">
       <div><div class="lbl" style="margin-bottom:6px">Qué rentabilidad usar</div>
         <div class="seg seg2" id="basisSeg" role="group" aria-label="Base de rentabilidades">
           <button data-b="hist" aria-pressed="true" style="--pc:#7ff6ff">Histórico 10 años<small>lo que rindió la última década</small></button>
           <button data-b="prosp" aria-pressed="false" style="--pc:#7ff6ff">Prospectivo<small>más prudente</small></button>
         </div></div>
-      <div class="mp-in"><label class="lbl" for="monthly">Cuánto aportas al mes</label>
-        <div class="mp-inrow"><input id="monthly" type="number" min="25" step="25" value="150" inputmode="numeric" aria-label="Aportación mensual en euros"><span>€</span>
-          <div class="mp-chips" id="mpChips"><button data-m="50">50</button><button data-m="100">100</button><button data-m="150">150</button><button data-m="300">300</button><button data-m="500">500</button></div></div></div>
-      <div id="myPlan" class="mp"></div>
-      <div id="flag"></div>
-      <details class="tech" id="techDet"><summary>Datos técnicos y metodología</summary><div class="tin">
+
       <div class="chartbox">
         <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">Rentabilidad anual del plan</span><span class="mono" id="gBig" style="font-size:20px;font-weight:700">—</span></div>
         <div class="gauge" id="gauge"></div>
@@ -869,7 +911,7 @@ function initThree(){
   if(THREE.EffectComposer&&THREE.UnrealBloomPass){composer=new THREE.EffectComposer(renderer);composer.addPass(new THREE.RenderPass(scene,camera));bloom=new THREE.UnrealBloomPass(new THREE.Vector2(512,512),.7,.45,.6);composer.addPass(bloom)}
   resize3d();
 }
-function resize3d(){if(!gl_ok)return;const r=$('#stage').getBoundingClientRect();renderer.setSize(r.width,r.height,false);if(scene){const old=scene.background;scene.background=sunsetTex(r.width,r.height);if(old&&old.dispose)old.dispose()}camera.aspect=r.width/Math.max(1,r.height);if(!mobile())camera.setViewOffset(r.width,r.height,(416-324)/2,(212-94)/2,r.width,r.height);else camera.clearViewOffset();camera.updateProjectionMatrix();if(composer){composer.setSize(r.width,r.height);bloom.resolution.set(r.width,r.height)}}
+function resize3d(){if(!gl_ok)return;const r=$('#stage').getBoundingClientRect();renderer.setSize(r.width,r.height,false);if(scene){const old=scene.background;scene.background=sunsetTex(r.width,r.height);if(old&&old.dispose)old.dispose()}camera.aspect=r.width/Math.max(1,r.height);if(!mobile()){const simple=$('#app').classList.contains('simple');camera.setViewOffset(r.width,r.height,simple?200:(416-324)/2,simple?-30:(212-94)/2,r.width,r.height)}else camera.clearViewOffset();camera.updateProjectionMatrix();if(composer){composer.setSize(r.width,r.height);bloom.resolution.set(r.width,r.height)}}
 
 
 const glowCache={};
@@ -880,8 +922,8 @@ function sunsetTex(w,h){const c=document.createElement('canvas'),W=Math.max(256,
   g.addColorStop(0,'#141026');g.addColorStop(hz*.35,'#2a2148');g.addColorStop(hz*.62,'#5a3f72');g.addColorStop(hz*.82,'#a76b93');g.addColorStop(hz*.95,'#cf93a6');g.addColorStop(hz,'#e2acb0');
   g.addColorStop(Math.min(.995,hz+.02),'#6e4a6c');g.addColorStop(1,'#1a1428');x.fillStyle=g;x.fillRect(0,0,W,H);
   const sx=W*(mobile()?.7:.62),sy=H*hz;
-  let gr=x.createRadialGradient(sx,sy,0,sx,sy,Math.max(W,H)*.45);gr.addColorStop(0,'rgba(255,226,214,.32)');gr.addColorStop(.3,'rgba(250,190,200,.12)');gr.addColorStop(1,'rgba(250,180,200,0)');x.fillStyle=gr;x.fillRect(0,0,W,H);
-  gr=x.createRadialGradient(sx,sy,0,sx,sy,Math.min(W,H)*.06);gr.addColorStop(0,'rgba(255,240,232,.55)');gr.addColorStop(1,'rgba(255,220,215,0)');x.save();x.beginPath();x.rect(0,0,W,sy);x.clip();x.fillStyle=gr;x.fillRect(0,0,W,H);x.restore();
+  let gr=x.createRadialGradient(sx,sy,0,sx,sy,Math.max(W,H)*.45);gr.addColorStop(0,'rgba(255,226,214,.18)');gr.addColorStop(.3,'rgba(250,190,200,.07)');gr.addColorStop(1,'rgba(250,180,200,0)');x.fillStyle=gr;x.fillRect(0,0,W,H);
+  gr=x.createRadialGradient(sx,sy,0,sx,sy,Math.min(W,H)*.06);gr.addColorStop(0,'rgba(255,236,230,.28)');gr.addColorStop(1,'rgba(255,220,215,0)');x.save();x.beginPath();x.rect(0,0,W,sy);x.clip();x.fillStyle=gr;x.fillRect(0,0,W,H);x.restore();
   const R2=seededStr('sky');for(let i=0;i<3;i++){const cy=H*hz*(.78+i*.06),cw=W*(.5+R2()*.4),cx=W*R2();const cg=x.createLinearGradient(cx-cw/2,0,cx+cw/2,0);cg.addColorStop(0,'rgba(255,200,215,0)');cg.addColorStop(.5,'rgba(255,205,220,.10)');cg.addColorStop(1,'rgba(255,200,215,0)');x.fillStyle=cg;x.fillRect(cx-cw/2,cy,cw,H*.006)}
   for(let i=0;i<90;i++){const px=R2()*W,py=Math.pow(R2(),2)*H*hz*.5;x.fillStyle=`rgba(255,240,250,${(1-py/(H*hz*.5))*(.2+R2()*.45)})`;x.fillRect(px,py,1,1)}
   gr=x.createLinearGradient(0,sy,0,H);gr.addColorStop(0,'rgba(244,196,188,.18)');gr.addColorStop(1,'rgba(244,196,188,0)');x.fillStyle=gr;x.fillRect(sx-W*.12,sy,W*.24,H-sy);
@@ -1248,11 +1290,13 @@ function buildLabels(){const box=$('#labels');Object.entries(NODES).forEach(([id
     const b=document.createElement('div');b.className='bub';b.style.setProperty('--c',n.color);b.style.opacity=0;box.appendChild(b);bubbles[id]={el:b,until:0}})}
 function robotSay(id,text,ms=3600){const b=bubbles[id];if(!b)return;b.el.textContent=text.length>44?text.slice(0,43)+'…':text;b.until=performance.now()+ms}
 let _v=null,_w=null;
+const SIMPLE=()=>document.getElementById('app').classList.contains('simple');
 function projectOverlays(now){if(!_v){_v=new THREE.Vector3();_w=new THREE.Vector3()}
   const r=$('#stage').getBoundingClientRect(),camDir=camera.position.clone().normalize(),placed=[];
   Object.keys(NODES).forEach(id=>{const c=cityObjs[id];if(!c)return;const ll=hubLL(id);_w.copy(ll2v(ll.lat,ll.lon,1)).normalize();const facing=_w.dot(camDir);
     const top=c.group.localToWorld(_v.set(0,c.labelH||9,0));const p=top.clone().project(camera);
-    const x=(p.x*.5+.5)*r.width,y=(-p.y*.5+.5)*r.height,vis=facing>.12&&p.z<1&&x>-60&&x<r.width+60&&y>-40&&y<r.height+40;
+    const nE=(STOCKS[id]||[]).length+UNIV.filter(e=>e.node===id).length,minE=SIMPLE()?(cam.dist>300?5:cam.dist>200?3:cam.dist>120?2:0):0;
+    const x=(p.x*.5+.5)*r.width,y=(-p.y*.5+.5)*r.height,vis=facing>.12&&p.z<1&&x>-60&&x<r.width+60&&y>-40&&y<r.height+40&&(nE>=minE||id===cardOpen||id==='cao');
     const l=labels[id];l.style.transform=`translate(${x}px,${y}px) translate(-50%,-100%)`;placed.push({id,l,x,y,vis,facing});
     if(!robots[id]){bubbles[id].el.style.opacity=0;return}const rb=robots[id].obj,rp=rb.localToWorld(_v.set(0,1.9,0)).project(camera),bx=(rp.x*.5+.5)*r.width,by=(-rp.y*.5+.5)*r.height;const b=bubbles[id];
     const close=cam.dist<230,show=vis&&close&&now<b.until;b.el.style.transform=`translate(${bx}px,${by-6}px) translate(-50%,-100%)`;b.el.style.opacity=show?1:0});
@@ -1410,50 +1454,30 @@ const etfRisk=v=>v<12?1:v<20?2:v<30?3:v<45?4:5;
 const planRisk=v=>v<8?1:v<14?2:v<20?3:v<28?4:5;
 const fmtEur=x=>x>=1e6?(x/1e6).toFixed(2).replace('.',',')+' M€':x>=1e4?Math.round(x/1000).toLocaleString('es-ES')+' k€':Math.round(x).toLocaleString('es-ES')+' €';
 const fvMonthly=(m,gPct,yrs)=>{const r=Math.pow(1+gPct/100,1/12)-1,n=yrs*12;return r===0?m*n:m*((Math.pow(1+r,n)-1)/r)*(1+r)};
+function planHero(P,g,gLo,gHi,sig,dd,ddY){const lvl=planRisk(sig),lvC=['#4cd8a0','#9be15d','#ffd24a','#ff9a3c','#ff4d6d'][lvl-1];
+  return `<div class="pl-hero">
+    <div class="pl-big"><span>Rentabilidad estimada</span><b style="color:${P.color}">${p1(g,0)}</b><small>al año · entre ${p1(gLo,0)} y ${p1(gHi,0)}</small></div>
+    <div class="pl-side"><div><span>Riesgo</span><b style="color:${lvC}">${RISK_TXT[lvl-1]}</b><i class="pl-meter">${[1,2,3,4,5].map(k=>`<i style="${k<=lvl?'background:'+lvC:''}"></i>`).join('')}</i></div>
+      <div><span>Peor año real</span><b style="color:${dd<0?'var(--bad)':'var(--good)'}">${p1(dd,0)}</b>${ddY?`<small>${ddY}</small>`:''}</div></div></div>`}
+function planProj(gLo,gHi){if(!(monthly>0))return '';const rows=[10,20,30].map(y=>{const put=monthly*12*y,lo=fvMonthly(monthly,gLo,y),hi=fvMonthly(monthly,gHi,y);
+  return `<div class="pp-row"><span>${y} años</span><b>${fmtEur(lo)} – ${fmtEur(hi)}</b><small>pones ${fmtEur(put)}</small></div>`}).join('');
+  return `<div class="pl-card"><h4>Si aportas ${fmtEur(monthly)} al mes</h4>${rows}</div>`}
+function planBars(bt,color){if(!bt)return '';return `<div class="pl-card"><h4>Así le habría ido, año a año</h4>${yrBars([...bt.ys.map(q=>({lbl:String(q.y),v:q.r})),{lbl:'2026*',v:bt.ytd,ytd:true}],color,bt.mean,{h:120})}<p class="mp-note">${bt.neg?`${bt.neg} de ${bt.n} años en negativo`:'Ningún año en negativo'} · media ${p1(bt.mean,0)} · 2026* hasta hoy</p></div>`}
+function planRow(kind,t,node,tk,name,sub,w,color){return `<button class="pl-row" data-k="${kind}" data-t="${esc(t)}" data-n="${node}"><i style="background:${color}"></i><span class="pl-nm"><b>${esc(tk)}</b><small>${esc(name)}${sub?' · '+esc(sub):''}</small></span><span class="pl-w"><b>${Math.round(w*100)} %</b>${monthly>0?`<small>${Math.round(w*monthly)} €/mes</small>`:''}</span></button>`}
+function bindPlanRows(el){el.querySelectorAll('.pl-row').forEach(b=>b.addEventListener('click',()=>{const nd=b.dataset.n;if(gl_ok){const ll=hubLL(nd);flyTo({lat:ll.lat,lon:ll.lon,dist:NODES[nd].sty==='generic'?30:42,heading:0},1400)}openDetail(b.dataset.k,b.dataset.t,nd)}))}
 function renderMyPlan(o){
-  const el=$('#myPlan');if(!el)return;renderPlanSeg();if(planView==='stk'){renderStockPlanView(el);const ch=$('#mpChips');if(ch)ch.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.m===monthly));return}
-  const s=o.st,P=PROFILES[profile],col=o.items.map((x,i,a)=>itemColor(x,i,a));
-  const gLo=Math.min(s.g,o.other.g),gHi=Math.max(s.g,o.other.g);
-  const lvl=planRisk(s.sig),lvC=['#4cd8a0','#9be15d','#ffd24a','#ff9a3c','#ff4d6d'][lvl-1];
-  const oneIn=s.ploss>0.005?Math.max(2,Math.round(1/s.ploss)):null;
-  const alloc=o.items.map((x,i)=>`<i style="width:${(x.w*100).toFixed(1)}%;background:${col[i]}" title="${esc(x.e.u?x.e.u.t:x.e.t)} ${Math.round(x.w*100)}%"></i>`).join('');
-  const cards=o.items.map((x,i)=>{const tk=x.e.u?x.e.u.t:x.e.t,rl=etfRisk(x.e.vol),pct=Math.round(x.w*100);
-    const dots=[1,2,3,4,5].map(k=>`<span class="${k<=rl?'on':'off'}">●</span>`).join('');
-    return `<div class="mp-etf" style="--c:${col[i]}"><div class="mp-top"><div><b class="mp-tk">${esc(tk)}</b><span class="mp-th">${esc(THEME[x.e.t]||GRP_LBL[x.e.grp]||x.e.n)}</span></div>
-      <div class="mp-w"><b>${pct}%</b><span>${monthly>0?Math.round(x.w*monthly)+' €/mes':'del plan'}</span></div></div>
-      <div class="mp-bar"><i style="width:${pct}%"></i></div>
-      <div class="mp-meta"><span class="mp-pill${x.filled?' warn':''}">${x.filled?'De una banda más baja · ':'▲ '}${p1(x.v,0)} al año</span><span>Riesgo <span class="mp-dots">${dots}</span> ${RISK_TXT[rl-1]}</span></div>
-      ${x.e.ann?`<p class="mp-why" style="color:var(--mid)">Media anual ${x.e.ann.from}–${x.e.ann.to}: <b>${p1(x.e.ann.mean,0)}</b> · ${x.e.ann.worst<0?`peor año <b style="color:var(--bad)">${p1(x.e.ann.worst,0)}</b> (${x.e.ann.worstY})`:`año más flojo <b style="color:var(--good)">+${p1(x.e.ann.worst,0)}</b> (${x.e.ann.worstY})`} · ${x.e.ann.neg?x.e.ann.neg+' año'+(x.e.ann.neg===1?'':'s')+' en negativo':'ningún año en negativo'}</p>`:''}
-      <p class="mp-why">${esc(x.e.w||x.e.n)}</p></div>`}).join('');
-  const sp=o.stocks||[];
-  const stk=`<div class="mp-proj"><h4>Acciones que encajan con tu perfil <span style="font-weight:400;color:var(--dim)">· ${sp.length} de ${Object.values(STOCKS).flat().length}</span></h4>`+
-    (sp.length?`<div class="mp-stk">${sp.slice(0,10).map(x=>{const c=NODES[x.node].color;return `<button class="mp-sk" data-node="${x.node}" data-t="${esc(x.s.t)}" style="--c:${c}"><b>${esc(dispT(x.s))}</b><span>${esc(x.s.n)}</span><em>${p1(x.v,0)}</em></button>`}).join('')}</div>
-      <p class="mp-note" style="margin-top:8px">Opcionales y como complemento: máximo un 5 % de tu cartera en cada una. Toca una para ver su ficha.</p>`
-    :`<p class="mp-note">Ninguna acción individual encaja con este perfil sin demasiado riesgo: para él, mejor solo fondos.</p>`)+`</div>`;
-  let proj='';
-  if(monthly>0){
-    const hz=[10,20,30],hiMax=Math.max(...hz.map(y=>fvMonthly(monthly,gHi,y)));
-    proj=`<div class="mp-proj"><h4>Si aportas ${fmtEur(monthly)} al mes…</h4>`+hz.map(y=>{
-      const put=monthly*12*y,lo=fvMonthly(monthly,gLo,y),hi=fvMonthly(monthly,gHi,y),sc=100/hiMax;
-      return `<div class="mp-row"><span class="yr">${y} años</span><div class="mp-track"><i style="width:${(put*sc).toFixed(1)}%;background:rgba(160,185,210,.5)"></i><i style="width:${(Math.max(0,lo-put)*sc).toFixed(1)}%;background:${P.color}"></i><i style="width:${(Math.max(0,hi-lo)*sc).toFixed(1)}%;background:${alpha(P.color,.35)}"></i></div>
-        <div class="mp-val">Pones <b>${fmtEur(put)}</b> → podrías tener entre <b>${fmtEur(lo)}</b> y <b>${fmtEur(hi)}</b></div></div>`}).join('')+
-      `<div class="mp-legend"><span style="--lc:rgba(160,185,210,.5)">Lo que pones tú</span><span style="--lc:${P.color}">Ganancia estimada</span><span style="--lc:${alpha(P.color,.35)}">Si va mejor</span></div></div>`;
-  }else proj=`<div class="mp-proj"><h4>Indica cuánto aportas al mes para ver la proyección.</h4></div>`;
-  el.innerHTML=`<div><div class="mp-title"><h3 style="color:${P.color}">Tu plan ${esc(P.label)}</h3></div>
-    <p class="mp-sub">${monthly>0?`Repartes <b>${fmtEur(monthly)} al mes</b> entre `:'Se reparte entre '}<b>${o.items.length} ETFs</b>. Rentabilidad media estimada: <b>${p1(s.g)} al año</b>.</p></div>
-    <div class="mp-alloc" role="img" aria-label="Reparto del dinero entre los ETFs">${alloc}</div>
-    <div class="mp-tiles">
-      <div class="mp-tile"><span class="k">Rentabilidad</span><span class="v" style="color:${P.color}">${p1(s.g,0)}</span><span class="n">al año · entre ${p1(gLo,0)} y ${p1(gHi,0)} según la base</span></div>
-      <div class="mp-tile"><span class="k">Riesgo</span><span class="v" style="color:${lvC}">${RISK_TXT[lvl-1]}</span><div class="mp-meter">${[1,2,3,4,5].map(k=>`<i style="${k<=lvl?'background:'+lvC:''}"></i>`).join('')}</div></div>
-      <div class="mp-tile"><span class="k">${s.bt?'Peor año real':'Un año muy malo'}</span><span class="v" style="color:var(--bad)">${p1(s.dd,0)}</span><span class="n">${s.bt?'fue en '+s.bt.worstY+' con este mismo reparto':'pasa 1 de cada ~40 años'}</span></div>
-    </div>
-    <p class="mp-sub">${s.bt?`Con este reparto, <b>${s.bt.neg} de los últimos ${s.bt.n} años</b> habrían acabado en negativo. Media anual real: <b>${p1(s.bt.mean)}</b>.`:oneIn?`Por término medio, <b>1 de cada ${oneIn} años</b> acabaría en negativo.`:'Los años en negativo serían muy poco frecuentes.'}</p>
-    ${s.bt?`<div class="mp-proj"><h4>Así le habría ido a tu plan, año a año</h4>${yrBars([...s.bt.ys.map(x=>({lbl:String(x.y),v:x.r})),{lbl:'2026*',v:s.bt.ytd,ytd:true}],P.color,s.bt.mean,{h:140})}<p class="mp-note">Rentabilidad real de cada año con este mismo reparto (reequilibrando cada enero). 2026* = hasta hoy. El riesgo del plan se calcula con estos años.</p></div>`:''}
-    ${cards}${stk}${proj}
-    <p class="mp-note">Son estimaciones, no garantías: el pasado no asegura el futuro y puedes perder dinero. Esto no es asesoramiento financiero.</p>`;
-  el.querySelectorAll('.mp-sk').forEach(b=>b.addEventListener('click',()=>{const nd=b.dataset.node;focusCity(nd);openDetail('s',b.dataset.t,nd)}));
+  const el=$('#myPlan');if(!el)return;renderPlanSeg();
   const ch=$('#mpChips');if(ch)ch.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.m===monthly));
   const inp=$('#monthly');if(inp&&document.activeElement!==inp)inp.value=monthly;
+  if(planView==='stk'){renderStockPlanView(el);return}
+  const s=o.st,P=PROFILES[profile],col=o.items.map((x,i,a)=>itemColor(x,i,a)),gLo=Math.min(s.g,o.other.g),gHi=Math.max(s.g,o.other.g);
+  el.innerHTML=planHero(P,s.g,gLo,gHi,s.sig,s.dd,s.bt?s.bt.worstY:null)+
+    `<div class="mp-alloc" role="img" aria-label="Reparto del dinero">${o.items.map((x,i)=>`<i style="width:${(x.w*100).toFixed(1)}%;background:${col[i]}"></i>`).join('')}</div>
+    <div class="pl-list">${o.items.map((x,i)=>planRow('e',x.e.t,x.e.node,x.e.u?x.e.u.t:x.e.t,THEME[x.e.t]||GRP_LBL[x.e.grp]||x.e.n,x.filled?'banda inferior':'',x.w,col[i])).join('')}</div>
+    ${o.filled.length?`<p class="pl-warn">Con tu perfil no hay suficientes ETFs comprables: ${o.filled.join(', ')} ${o.filled.length>1?'vienen':'viene'} de un perfil más prudente.</p>`:''}
+    ${planBars(s.bt,P.color)}${planProj(gLo,gHi)}
+    <p class="mp-note">Estimaciones, no garantías. Toca un ETF para ver su ficha completa.</p>`;
+  bindPlanRows(el);
 }
 
 let planView='etf';
@@ -1465,31 +1489,15 @@ function projBlock(gLo,gHi,color){if(!(monthly>0))return `<div class="mp-proj"><
     `<div class="mp-legend"><span style="--lc:rgba(160,185,210,.5)">Lo que pones tú</span><span style="--lc:${color}">Ganancia estimada</span><span style="--lc:${alpha(color,.35)}">Si va mejor</span></div></div>`}
 function renderStockPlanView(el){
   const P=PROFILES[profile],sp=buildStockPlan(profile),other=buildStockPlan(profile,basis==='hist'?'prosp':'hist');
-  if(!sp.items.length){el.innerHTML=`<div><div class="mp-title"><h3 style="color:${P.color}">Tu plan de acciones ${esc(P.label)}</h3></div><p class="mp-sub">Ninguna acción con 5 años de historia encaja en este perfil. Para él, mejor solo fondos.</p></div>`;return}
+  if(!sp.items.length){el.innerHTML=`<p class="pl-warn">Ninguna acción con 5 años de historia encaja con el perfil ${esc(P.label)}. Para él, mejor solo fondos.</p>`;return}
   const s=sp.st,cols=sp.items.map((x,i,a)=>{const c=NODES[x.node].color,k=a.slice(0,i).filter(y=>y.node===x.node).length;return k?alpha(c,.55):c});
-  const cities=new Set(sp.items.map(x=>x.node)).size,og=other.st?other.st.g:s.g,gLo=Math.min(s.g,og),gHi=Math.max(s.g,og);
-  const lvl=planRisk(s.sig),lvC=['#4cd8a0','#9be15d','#ffd24a','#ff9a3c','#ff4d6d'][lvl-1];
-  const cards=sp.items.map((x,i)=>{const c=cols[i],rl=etfRisk(x.vol),pct=Math.round(x.w*100),info=NODE_INFO[x.node]||{};
-    const dots=[1,2,3,4,5].map(k=>`<span class="${k<=rl?'on':'off'}">●</span>`).join('');
-    return `<button class="mp-etf mp-btn" data-node="${x.node}" data-t="${esc(x.s.t)}" style="--c:${c}"><div class="mp-top"><div><b class="mp-tk">${esc(dispT(x.s))}</b><span class="mp-th">${esc(x.s.n)} · <span style="color:${NODES[x.node].color}">${esc(NODES[x.node].city)}</span> · ${esc(info.theme||'')}</span></div>
-      <div class="mp-w"><b>${pct}%</b><span>${monthly>0?Math.round(x.w*monthly)+' €/mes':'del plan'}</span></div></div>
-      <div class="mp-bar"><i style="width:${pct}%"></i></div>
-      <div class="mp-meta"><span class="mp-pill${x.filled?' warn':''}">${x.filled?'De una banda más baja · ':'▲ '}${p1(x.v,0)} al año</span><span>Riesgo <span class="mp-dots">${dots}</span> ${RISK_TXT[rl-1]}</span></div>
-      ${x.an?`<p class="mp-why" style="color:var(--mid)">Media anual ${x.an.from}–${x.an.to}: <b>${p1(x.an.mean,0)}</b> · ${x.an.worst<0?`peor año <b style="color:var(--bad)">${p1(x.an.worst,0)}</b> (${x.an.worstY})`:`año más flojo <b style="color:var(--good)">+${p1(x.an.worst,0)}</b>`}</p>`:''}
-      <p class="mp-why">${esc(x.s.thesis||'')}</p></button>`}).join('');
-  el.innerHTML=`<div><div class="mp-title"><h3 style="color:${P.color}">Tu plan de acciones ${esc(P.label)}</h3></div>
-    <p class="mp-sub">${monthly>0?`Repartes <b>${fmtEur(monthly)} al mes</b> entre `:'Se reparte entre '}<b>${sp.items.length} empresas</b> de <b>${cities} ciudades</b>, elegidas entre ${sp.nElig} que encajan con tu perfil (de ${sp.nAll} analizadas). Rentabilidad media estimada: <b>${p1(s.g)} al año</b>.</p></div>
-    <div class="mp-alloc" role="img" aria-label="Reparto entre acciones">${sp.items.map((x,i)=>`<i style="width:${(x.w*100).toFixed(1)}%;background:${cols[i]}" title="${esc(x.s.t)} ${Math.round(x.w*100)}%"></i>`).join('')}</div>
-    <div class="mp-tiles">
-      <div class="mp-tile"><span class="k">Rentabilidad</span><span class="v" style="color:${P.color}">${p1(s.g,0)}</span><span class="n">al año · entre ${p1(gLo,0)} y ${p1(gHi,0)} según la base</span></div>
-      <div class="mp-tile"><span class="k">Riesgo</span><span class="v" style="color:${lvC}">${RISK_TXT[lvl-1]}</span><div class="mp-meter">${[1,2,3,4,5].map(k=>`<i style="${k<=lvl?'background:'+lvC:''}"></i>`).join('')}</div></div>
-      <div class="mp-tile"><span class="k">${s.bt?'Peor año real':'Un año muy malo'}</span><span class="v" style="color:${s.dd<0?'var(--bad)':'var(--good)'}">${p1(s.dd,0)}</span><span class="n">${s.bt?'fue en '+s.bt.worstY+' con este reparto':'estimación'}</span></div>
-    </div>
-    ${s.bt?`<p class="mp-sub">Con este reparto, <b>${s.bt.neg} de los últimos ${s.bt.n} años</b> habrían acabado en negativo. Media anual real: <b>${p1(s.bt.mean)}</b>.</p>
-    <div class="mp-proj"><h4>Así le habría ido a este plan, año a año</h4>${yrBars([...s.bt.ys.map(q=>({lbl:String(q.y),v:q.r})),{lbl:'2026*',v:s.bt.ytd,ytd:true}],P.color,s.bt.mean,{h:140})}<p class="mp-note">Rentabilidad real de cada año con este reparto (reequilibrando cada enero). 2026* = hasta hoy.</p></div>`:''}
-    ${cards}${projBlock(gLo,gHi,P.color)}
-    <p class="mp-note"><b style="color:var(--warn)">Ojo:</b> estas empresas se eligen precisamente por lo bien que les ha ido, así que el gráfico de arriba es optimista: el pasado no se repite. Una sola empresa puede caer un 50 % o más. Úsalo como complemento de tu plan de ETFs (por ejemplo, un 10–20 % de lo que inviertes), no en su lugar. Pesos según el riesgo de cada acción, entre el 5 % y el 25 %; como mucho 2 empresas por ciudad. No es asesoramiento financiero.</p>`;
-  el.querySelectorAll('.mp-btn').forEach(b=>b.addEventListener('click',()=>{const nd=b.dataset.node;focusCity(nd);openDetail('s',b.dataset.t,nd)}));
+  const og=other.st?other.st.g:s.g,gLo=Math.min(s.g,og),gHi=Math.max(s.g,og);
+  el.innerHTML=planHero(P,s.g,gLo,gHi,s.sig,s.dd,s.bt?s.bt.worstY:null)+
+    `<div class="mp-alloc" role="img" aria-label="Reparto entre acciones">${sp.items.map((x,i)=>`<i style="width:${(x.w*100).toFixed(1)}%;background:${cols[i]}"></i>`).join('')}</div>
+    <div class="pl-list">${sp.items.map((x,i)=>planRow('s',x.s.t,x.node,dispT(x.s),x.s.n,NODES[x.node].city.split(' ·')[0],x.w,cols[i])).join('')}</div>
+    ${planBars(s.bt,P.color)}${planProj(gLo,gHi)}
+    <p class="pl-warn">Empresas elegidas por lo bien que les ha ido: el gráfico es optimista. Úsalo como complemento de tus ETFs (10–20 % de lo que inviertes).</p>`;
+  bindPlanRows(el);
 }
 function renderPlanSeg(){document.querySelectorAll('#planSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===planView)));const f=$('#flag');if(f)f.style.display=planView==='stk'?'none':''}
 /* ---------- ficha de ciudad: resumen visual ---------- */
@@ -2094,7 +2102,10 @@ $('#settings').addEventListener('click',e=>{if(e.target.id==='settings')$('#sett
 $('#saveUp').addEventListener('click',()=>{syncMode();$('#settings').hidden=true;renderSources();stream('sys',apiKey?'Clave Gemini cargada: la próxima misión usará datos LIVE.':'Sin clave: misión en simulación.',apiKey?'lv':'')});
 $('#testBtn').addEventListener('click',async()=>{syncMode();if(!apiKey){$('#upMsg').textContent='Pega primero tu API key.';return}setUp('run','Probando');$('#upMsg').textContent='Probando conexión…';
   try{const r=await gemini('Responde solo con el JSON {"ok":true}');setUp('done','Online');$('#upMsg').textContent='Conexión correcta: '+r.text.slice(0,80)}catch(e){setUp('err',e.blocked?'Bloqueado':'Fallo');$('#upMsg').textContent=e.message}});
-$('#searchBtn').addEventListener('click',openSearch);$('#searchFab').addEventListener('click',openSearch);
+$('#searchBtn').addEventListener('click',openSearch);
+$('#setBtn').addEventListener('click',()=>{$('#settings').hidden=false});
+$('#expertBtn').addEventListener('click',()=>{const app=$('#app'),on=app.classList.toggle('simple');$('#expertBtn').setAttribute('aria-pressed',String(!on));$('#expertBtn').textContent=on?'Vista experta':'Vista simple';try{localStorage.setItem('atlas_view',on?'simple':'expert')}catch(_){}setTimeout(resize3d,60);refreshAll()});
+try{if(localStorage.getItem('atlas_view')==='expert'){$('#app').classList.remove('simple');$('#expertBtn').textContent='Vista simple';$('#expertBtn').setAttribute('aria-pressed','true')}}catch(_){}$('#searchFab').addEventListener('click',openSearch);
 document.addEventListener('keydown',e=>{if((e.key==='/'||(e.key==='k'&&(e.ctrlKey||e.metaKey)))&&document.activeElement.tagName!=='INPUT'){e.preventDefault();openSearch();return}if(e.key==='Escape'){if(!$('#detail').hidden){closeDetail();return}if(!$('#search').hidden){closeSearch();return}closeCard();$('#settings').hidden=true}});
 let rsT;window.addEventListener('resize',()=>{clearTimeout(rsT);rsT=setTimeout(resize3d,80)});
 
