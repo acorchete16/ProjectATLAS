@@ -157,17 +157,82 @@ a{color:var(--cyan)}
 .modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(2,4,8,.6);padding:16px}
 .modal .box{width:min(460px,100%);padding:20px;display:flex;flex-direction:column;gap:12px;background:rgba(8,14,24,.92)}
 
+
+/* ---- vista "Tu plan" (visual, lenguaje llano) ---- */
+.mp-in{display:flex;flex-direction:column;gap:6px}
+.mp-inrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mp-inrow input{width:92px;font-size:16px}
+.mp-inrow>span{color:var(--mid)}
+.mp-chips{display:flex;gap:6px;flex-wrap:wrap}
+.mp-chips button{border:1px solid var(--edge2);background:rgba(255,255,255,.04);color:var(--mid);border-radius:999px;padding:6px 11px;font-size:12px;cursor:pointer;min-height:32px}
+.mp-chips button.on{border-color:var(--pc,#7ff6ff);color:var(--fg);background:rgba(127,246,255,.1)}
+.mp{display:flex;flex-direction:column;gap:12px}
+.mp-title{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.mp-title h3{margin:0;font-size:17px;font-weight:700;color:var(--fg)}
+.mp-sub{margin:2px 0 0;font-size:13px;line-height:1.5;color:var(--mid)}
+.mp-sub b{color:var(--fg)}
+.mp-alloc{display:flex;height:16px;border-radius:8px;overflow:hidden;gap:2px;background:rgba(255,255,255,.04)}
+.mp-alloc i{display:block;height:100%;min-width:3px}
+.mp-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mp-tile{padding:10px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid var(--edge);display:flex;flex-direction:column;gap:4px;min-width:0}
+.mp-tile .k{font-size:11px;color:var(--dim);line-height:1.2}
+.mp-tile .v{font-size:21px;font-weight:700;line-height:1.1}
+.mp-tile .n{font-size:11px;color:var(--mid);line-height:1.3}
+.mp-meter{display:flex;gap:3px;margin:3px 0}
+.mp-meter i{flex:1;height:8px;border-radius:3px;background:rgba(255,255,255,.1)}
+.mp-etf{position:relative;padding:12px 12px 11px 15px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--edge);overflow:hidden}
+.mp-etf::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c)}
+.mp-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.mp-tk{font-family:var(--mono);font-size:18px;color:var(--c);display:block}
+.mp-th{font-size:12.5px;color:var(--mid);line-height:1.3;display:block;margin-top:2px}
+.mp-w{text-align:right;flex:none}
+.mp-w b{font-size:22px;display:block;line-height:1.1}
+.mp-w span{font-size:12px;color:var(--mid)}
+.mp-bar{height:6px;border-radius:3px;background:rgba(255,255,255,.07);margin:9px 0 8px;overflow:hidden}
+.mp-bar i{display:block;height:100%;background:var(--c);border-radius:3px}
+.mp-meta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--mid)}
+.mp-pill{padding:3px 8px;border-radius:999px;background:rgba(80,220,140,.12);color:var(--good);font-weight:600}
+.mp-pill.warn{background:rgba(255,177,59,.14);color:var(--warn)}
+.mp-dots{letter-spacing:2px;font-size:11px}
+.mp-dots .on{color:var(--c)}.mp-dots .off{color:rgba(255,255,255,.18)}
+.mp-why{margin:8px 0 0;font-size:12.5px;line-height:1.45;color:var(--dim)}
+.mp-proj{padding:12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--edge)}
+.mp-proj h4{margin:0 0 10px;font-size:13px;font-weight:600;color:var(--fg)}
+.mp-row{display:grid;grid-template-columns:62px 1fr;gap:10px;align-items:center;margin-bottom:10px}
+.mp-row:last-of-type{margin-bottom:6px}
+.mp-row .yr{font-size:12px;color:var(--mid)}
+.mp-track{position:relative;height:14px;border-radius:7px;background:rgba(255,255,255,.05);overflow:hidden;display:flex}
+.mp-track i{display:block;height:100%}
+.mp-val{grid-column:2;font-size:12px;color:var(--mid);margin-top:-4px}
+.mp-val b{color:var(--fg)}
+.mp-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--dim);margin-top:4px}
+.mp-legend span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;background:var(--lc);vertical-align:-1px}
+.mp-note{font-size:11px;color:var(--dim);line-height:1.4;margin:0}
+details.tech{border:1px solid var(--edge);border-radius:12px;background:rgba(255,255,255,.02)}
+details.tech>summary{cursor:pointer;list-style:none;padding:12px 14px;font-size:13px;color:var(--mid);display:flex;justify-content:space-between;align-items:center;min-height:44px}
+details.tech>summary::-webkit-details-marker{display:none}
+details.tech>summary::after{content:"▾";transition:transform .2s}
+details.tech[open]>summary::after{transform:rotate(180deg)}
+details.tech>.tin{padding:0 12px 12px;display:flex;flex-direction:column;gap:12px}
+#techToggle{display:none}
+@media (max-width:700px){.clab .v{display:none}}
+#stageHint{display:none;position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:3;padding:7px 12px;border-radius:999px;background:rgba(6,14,26,.82);border:1px solid var(--edge2);color:var(--mid);font-size:12px;white-space:nowrap;pointer-events:none;transition:opacity .6s}
+#stageHint.off{opacity:0}
+@media (pointer:coarse){#stageHint{display:block}}
 @media (max-width:1100px){
   body{padding-block:12px}
   #app{height:auto;min-height:0;overflow:visible;border:0;border-radius:0;display:flex;flex-direction:column;gap:12px;background:none}
-  #stage{position:relative;height:62vh;min-height:380px;border-radius:14px;border:1px solid var(--edge);overflow:hidden;order:2;background:radial-gradient(120% 100% at 50% 40%,#061426 0%,#020710 55%,#01040a 100%)}
+  #stage{position:relative;height:58vh;min-height:360px;border-radius:14px;border:1px solid var(--edge);overflow:hidden;order:2;background:radial-gradient(120% 100% at 50% 40%,#061426 0%,#020710 55%,#01040a 100%)}
   .top,.left,.right,.dock{position:static;width:auto;height:auto}
   .top{order:1;flex-wrap:wrap;padding:12px 14px;gap:12px}.clocks{margin-left:0}.sep{display:none}
-  .left{order:4}.right{order:3}.dock{order:5;height:300px}
+  .right{order:3}#techToggle{display:block;order:4}.left{order:5}.dock{order:6;height:300px}
+  #app:not(.tech-open) .left,#app:not(.tech-open) .dock{display:none}
+  .clocks{display:none}
   .left .pbody,.right .pbody{overflow:visible}
   .mapctl{position:absolute;right:12px;bottom:12px}.hint{display:none}
   #card{position:fixed;left:12px;right:12px;top:auto;bottom:12px;width:auto;max-height:72vh}
   .mapctl{right:12px!important}
+  .mapctl button{width:46px;height:44px;font-size:19px}
   #stream .ln{grid-template-columns:84px 84px 1fr}#stream .ln span:nth-child(3),#stream .ln span:nth-child(5){display:none}
 }
 @media (prefers-reduced-motion:reduce){.blink{animation:none}#card{transition:none}}
@@ -180,8 +245,9 @@ a{color:var(--cyan)}
     <canvas id="gl"></canvas>
     <div class="vign"></div>
     <div id="labels"></div>
+    <div class="glass mapctl" id="mapctl"><button id="zIn" aria-label="Acercar">+</button><button id="zOut" aria-label="Alejar">−</button><button id="zHome" aria-label="Vista global">⌂</button></div>
+    <div id="stageHint" aria-hidden="true">Pellizca para acercar · arrastra para girar · toca una ciudad</div>
   </div>
-  <div class="glass mapctl" id="mapctl"><button id="zIn" aria-label="Acercar">+</button><button id="zOut" aria-label="Alejar">−</button><button id="zHome" aria-label="Vista global">⌂</button></div>
 
   <header class="glass top">
     <div class="brand">
@@ -207,15 +273,20 @@ a{color:var(--cyan)}
     <div class="pbody">
       <div><div class="lbl" style="margin-bottom:6px">Perfil de riesgo · objetivo anual</div>
         <div class="seg" id="profileSeg" role="group" aria-label="Perfil de riesgo"></div></div>
-      <div><div class="lbl" style="margin-bottom:6px">Base de rentabilidades</div>
+      <div><div class="lbl" style="margin-bottom:6px">Qué rentabilidad usar</div>
         <div class="seg seg2" id="basisSeg" role="group" aria-label="Base de rentabilidades">
-          <button data-b="hist" aria-pressed="true" style="--pc:#7ff6ff">Histórico 10 años<small>10 años reales · sep. 2026</small></button>
-          <button data-b="prosp" aria-pressed="false" style="--pc:#7ff6ff">Prospectivo<small>supuestos a 10 años vista</small></button>
+          <button data-b="hist" aria-pressed="true" style="--pc:#7ff6ff">Histórico 10 años<small>lo que rindió la última década</small></button>
+          <button data-b="prosp" aria-pressed="false" style="--pc:#7ff6ff">Prospectivo<small>más prudente</small></button>
         </div></div>
+      <div class="mp-in"><label class="lbl" for="monthly">Cuánto aportas al mes</label>
+        <div class="mp-inrow"><input id="monthly" type="number" min="25" step="25" value="150" inputmode="numeric" aria-label="Aportación mensual en euros"><span>€</span>
+          <div class="mp-chips" id="mpChips"><button data-m="50">50</button><button data-m="100">100</button><button data-m="150">150</button><button data-m="300">300</button><button data-m="500">500</button></div></div></div>
+      <div id="myPlan" class="mp"></div>
+      <div id="flag"></div>
+      <details class="tech" id="techDet"><summary>Datos técnicos y metodología</summary><div class="tin">
       <div class="chartbox">
         <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="lbl">Rentabilidad anual del plan</span><span class="mono" id="gBig" style="font-size:20px;font-weight:700">—</span></div>
         <div class="gauge" id="gauge"></div>
-        <div id="flag" style="margin-top:14px"></div>
       </div>
       <div class="kpis">
         <div class="kpi"><span class="lbl">Volatilidad</span><b id="kVol">—</b></div>
@@ -230,11 +301,13 @@ a{color:var(--cyan)}
         <div class="legend" id="legend"></div>
       </div>
       <div class="chartbox"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px"><span class="lbl">Peso vs contribución al riesgo · por ETF</span><span class="mono" style="font-size:10px;color:var(--dim)">%</span></div><div style="position:relative;height:230px"><canvas id="cRisk" aria-label="Peso frente a contribución al riesgo"></canvas></div></div>
-      <div style="display:flex;gap:10px;align-items:center"><label class="lbl" for="monthly">Aportación €/mes</label><input id="monthly" type="number" min="25" step="25" value="150" style="width:90px"></div>
       <div><div class="lbl" style="margin-bottom:8px">Tesis del comandante</div><ul class="th" id="thesis"></ul></div>
       <div id="macro"></div>
+      </div></details>
     </div>
   </aside>
+
+  <button class="btn2" id="techToggle" aria-expanded="false">Ver cómo se calculó (nodos y terminal) ▾</button>
 
   <section class="glass dock" aria-label="Terminal">
     <div class="tabs" role="tablist">
@@ -863,13 +936,25 @@ function flyTo(t,ms=1400){const s={...cam},t0=performance.now();if(reduced)ms=1;
   camTarget={tick(now){const u=Math.min(1,(now-t0)/ms),k=ease(u);cam.lat=s.lat+(t.lat-s.lat)*k;cam.lon=s.lon+dl*k;cam.dist=Math.exp(Math.log(s.dist)+(Math.log(t.dist)-Math.log(s.dist))*k);cam.heading=s.heading+((t.heading??s.heading)-s.heading)*k;return u>=1}}}
 const HOME={lat:47,lon:-46,dist:420,heading:0};
 function focusCity(id){const ll=hubLL(id);flyTo({lat:ll.lat,lon:ll.lon,dist:id==='cao'?62:48,heading:id==='clean'?-20:0},1600);openCard(id)}
-{const st=$('#stage');let drag=null;
-  st.addEventListener('pointerdown',e=>{if(e.target.closest('.clab'))return;drag={x:e.clientX,y:e.clientY,moved:false,btn:e.button,sh:e.shiftKey};st.setPointerCapture(e.pointerId);st.classList.add('drag');camTarget=null});
-  st.addEventListener('pointermove',e=>{if(!drag){hoverPick(e);return}const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>3)drag.moved=true;drag.x=e.clientX;drag.y=e.clientY;
+{const st=$('#stage');let drag=null,pinch=null;const ptrs=new Map();
+  const two=()=>{const a=[...ptrs.values()];return a.length>=2?{d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)}:null};
+  const hideHint=()=>{const h=$('#stageHint');if(h)h.classList.add('off')};
+  st.addEventListener('pointerdown',e=>{if(e.target.closest('.clab,.mapctl'))return;hideHint();ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});try{st.setPointerCapture(e.pointerId)}catch(_){}camTarget=null;
+    if(ptrs.size>=2){pinch=two();drag=null}else{drag={x:e.clientX,y:e.clientY,moved:false,btn:e.button,sh:e.shiftKey};st.classList.add('drag')}});
+  st.addEventListener('pointermove',e=>{const p=ptrs.get(e.pointerId);if(p){p.x=e.clientX;p.y=e.clientY}
+    if(ptrs.size>=2&&pinch){const t=two();if(t&&pinch.d>8&&t.d>8)cam.dist=Math.max(30,Math.min(700,cam.dist*pinch.d/t.d));if(t)pinch=t;return}
+    if(!drag){hoverPick(e);return}const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>3)drag.moved=true;drag.x=e.clientX;drag.y=e.clientY;
     if(drag.btn===2||drag.sh){cam.heading+=dx*.3}else{const k=cam.dist/900;cam.lon-=dx*k*1.1/Math.max(.35,Math.cos(cam.lat*D2R));cam.lat=Math.max(-70,Math.min(78,cam.lat+dy*k))}});
-  st.addEventListener('pointerup',e=>{if(drag&&!drag.moved){const id=pick(e);if(id)focusCity(id)}drag=null;st.classList.remove('drag')});
+  const end=e=>{ptrs.delete(e.pointerId);
+    if(ptrs.size>=2)return;
+    if(pinch&&ptrs.size===1){const r=[...ptrs.values()][0];drag={x:r.x,y:r.y,moved:true,btn:0,sh:false};pinch=null;return}
+    pinch=null;
+    if(drag&&!drag.moved&&e.type==='pointerup'){const id=pick(e);if(id)focusCity(id)}
+    drag=null;st.classList.remove('drag')};
+  st.addEventListener('pointerup',end);st.addEventListener('pointercancel',end);
+  st.addEventListener('gesturestart',e=>e.preventDefault());
   st.addEventListener('contextmenu',e=>e.preventDefault());
-  st.addEventListener('wheel',e=>{e.preventDefault();camTarget=null;cam.dist=Math.max(30,Math.min(700,cam.dist*Math.exp(e.deltaY*.0012)))},{passive:false});}
+  st.addEventListener('wheel',e=>{e.preventDefault();hideHint();camTarget=null;cam.dist=Math.max(30,Math.min(700,cam.dist*Math.exp(e.deltaY*.0012)))},{passive:false});}
 let ray=null,mouse=null;
 function pick(e){if(!gl_ok)return null;if(!ray){ray=new THREE.Raycaster();mouse=new THREE.Vector2()}const r=$('#stage').getBoundingClientRect();mouse.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(mouse,camera);const h=ray.intersectObjects(hitMeshes,false);return h.length?h[0].object.userData.id:null}
 let hoverId=null;function hoverPick(e){const id=pick(e);if(id!==hoverId){hoverId=id;$('#stage').style.cursor=id?'pointer':'grab'}}
@@ -1004,12 +1089,58 @@ function renderGauge(o){
   if(basis==='hist')f+=`<div class="flag" style="margin-top:8px">La década de SMH (+34,6 %/año) y del Nasdaq (+20,9 %/año) fue excepcional. Con supuestos prospectivos este mismo plan daría <b>${p1(o.other.g)}</b> al año.</div>`;
   $('#flag').innerHTML=f;
 }
+
+/* ---------- "Tu plan": vista visual en lenguaje llano ---------- */
+const GRP_LBL={semis:'Chips y semiconductores',usbig:'Grandes empresas de EE. UU.',sw:'Software en la nube',robo:'Robótica e inteligencia artificial',def:'Defensa y aeroespacial',biotech:'Biotecnología',health:'Salud',medtech:'Tecnología médica',renov:'Energías renovables',nucl:'Energía nuclear',uran:'Uranio',grid:'Redes eléctricas',infra:'Infraestructuras',pave:'Infraestructuras de EE. UU.',util:'Luz, agua y gas',fintech:'Tecnología financiera',finus:'Bancos y finanzas de EE. UU.',fineu:'Bancos y finanzas de Europa',core:'Todo el mundo en un solo fondo',div:'Empresas que reparten dividendos',eu:'Europa',em:'Países emergentes',small:'Empresas pequeñas',spnew:'Las 500 grandes de EE. UU.',cdisc:'Consumo y ocio',staples:'Consumo básico',bond:'Bonos',tbill:'Deuda a corto plazo',tips:'Bonos ligados a la inflación',gold:'Oro'};
+const THEME={SMH:'Chips y semiconductores (IA)',SOXX:'Chips y semiconductores (IA)',XLK:'Tecnología de EE. UU. (Apple, Microsoft, NVIDIA)',IGV:'Software en la nube',BOTZ:'Robótica e inteligencia artificial',SOXL:'Chips x3 · muy arriesgado',ITA:'Defensa y aeroespacial',XAR:'Defensa y aeroespacial',PPA:'Defensa y aeroespacial',UFO:'Espacio y satélites',ARKX:'Espacio y defensa innovadora',XLV:'Salud (farmacéuticas y hospitales)',IBB:'Biotecnología',XBI:'Biotecnología',ARKG:'Edición genética',IHI:'Equipos y dispositivos médicos',ICLN:'Energías limpias',QCLN:'Energías limpias',TAN:'Energía solar',URA:'Uranio',URNM:'Uranio',NLR:'Nuclear y uranio',XLF:'Bancos y finanzas de EE. UU.',EUFN:'Bancos y finanzas de Europa',KBE:'Bancos de EE. UU.',IAI:'Bolsa y brókers de EE. UU.',FINX:'Fintech y pagos',XLY:'Consumo y ocio (Amazon, Tesla)',VCR:'Consumo y ocio',XLP:'Consumo básico (comida, higiene)',IGF:'Infraestructuras del mundo',GRID:'Redes eléctricas',PAVE:'Obra pública de EE. UU.',XLU:'Luz, agua y gas',VT:'Todo el mundo, toda la bolsa',URTH:'Países desarrollados (tipo MSCI World)',SPY:'Las 500 mayores empresas de EE. UU.',QQQ:'Las 100 mayores tecnológicas (Nasdaq)',VIG:'Empresas que suben el dividendo',VGK:'Europa',EEM:'Países emergentes',IWM:'Empresas pequeñas de EE. UU.',AGG:'Bonos',SHY:'Deuda pública a corto plazo',TIP:'Bonos ligados a la inflación',GLD:'Oro',SSO:'S&P 500 ×2 · arriesgado',QLD:'Nasdaq ×2 · arriesgado',TQQQ:'Nasdaq ×3 · muy arriesgado'};
+const RISK_TXT=['Muy bajo','Bajo','Medio','Alto','Muy alto'];
+const etfRisk=v=>v<12?1:v<20?2:v<30?3:v<45?4:5;
+const planRisk=v=>v<8?1:v<14?2:v<20?3:v<28?4:5;
+const fmtEur=x=>x>=1e6?(x/1e6).toFixed(2).replace('.',',')+' M€':x>=1e4?Math.round(x/1000).toLocaleString('es-ES')+' k€':Math.round(x).toLocaleString('es-ES')+' €';
+const fvMonthly=(m,gPct,yrs)=>{const r=Math.pow(1+gPct/100,1/12)-1,n=yrs*12;return r===0?m*n:m*((Math.pow(1+r,n)-1)/r)*(1+r)};
+function renderMyPlan(o){
+  const el=$('#myPlan');if(!el)return;
+  const s=o.st,P=PROFILES[profile],col=o.items.map((x,i,a)=>itemColor(x,i,a));
+  const gLo=Math.min(s.g,o.other.g),gHi=Math.max(s.g,o.other.g);
+  const lvl=planRisk(s.sig),lvC=['#4cd8a0','#9be15d','#ffd24a','#ff9a3c','#ff4d6d'][lvl-1];
+  const oneIn=s.ploss>0.005?Math.max(2,Math.round(1/s.ploss)):null;
+  const alloc=o.items.map((x,i)=>`<i style="width:${(x.w*100).toFixed(1)}%;background:${col[i]}" title="${esc(x.e.u?x.e.u.t:x.e.t)} ${Math.round(x.w*100)}%"></i>`).join('');
+  const cards=o.items.map((x,i)=>{const tk=x.e.u?x.e.u.t:x.e.t,rl=etfRisk(x.e.vol),pct=Math.round(x.w*100);
+    const dots=[1,2,3,4,5].map(k=>`<span class="${k<=rl?'on':'off'}">●</span>`).join('');
+    return `<div class="mp-etf" style="--c:${col[i]}"><div class="mp-top"><div><b class="mp-tk">${esc(tk)}</b><span class="mp-th">${esc(THEME[x.e.t]||GRP_LBL[x.e.grp]||x.e.n)}</span></div>
+      <div class="mp-w"><b>${pct}%</b><span>${monthly>0?Math.round(x.w*monthly)+' €/mes':'del plan'}</span></div></div>
+      <div class="mp-bar"><i style="width:${pct}%"></i></div>
+      <div class="mp-meta"><span class="mp-pill${x.filled?' warn':''}">${x.filled?'De una banda más baja · ':'▲ '}${p1(x.v,0)} al año</span><span>Riesgo <span class="mp-dots">${dots}</span> ${RISK_TXT[rl-1]}</span></div>
+      <p class="mp-why">${esc(x.e.w||x.e.n)}</p></div>`}).join('');
+  let proj='';
+  if(monthly>0){
+    const hz=[10,20,30],hiMax=Math.max(...hz.map(y=>fvMonthly(monthly,gHi,y)));
+    proj=`<div class="mp-proj"><h4>Si aportas ${fmtEur(monthly)} al mes…</h4>`+hz.map(y=>{
+      const put=monthly*12*y,lo=fvMonthly(monthly,gLo,y),hi=fvMonthly(monthly,gHi,y),sc=100/hiMax;
+      return `<div class="mp-row"><span class="yr">${y} años</span><div class="mp-track"><i style="width:${(put*sc).toFixed(1)}%;background:rgba(160,185,210,.5)"></i><i style="width:${(Math.max(0,lo-put)*sc).toFixed(1)}%;background:${P.color}"></i><i style="width:${(Math.max(0,hi-lo)*sc).toFixed(1)}%;background:${alpha(P.color,.35)}"></i></div>
+        <div class="mp-val">Pones <b>${fmtEur(put)}</b> → podrías tener entre <b>${fmtEur(lo)}</b> y <b>${fmtEur(hi)}</b></div></div>`}).join('')+
+      `<div class="mp-legend"><span style="--lc:rgba(160,185,210,.5)">Lo que pones tú</span><span style="--lc:${P.color}">Ganancia estimada</span><span style="--lc:${alpha(P.color,.35)}">Si va mejor</span></div></div>`;
+  }else proj=`<div class="mp-proj"><h4>Indica cuánto aportas al mes para ver la proyección.</h4></div>`;
+  el.innerHTML=`<div><div class="mp-title"><h3 style="color:${P.color}">Tu plan ${esc(P.label)}</h3></div>
+    <p class="mp-sub">${monthly>0?`Repartes <b>${fmtEur(monthly)} al mes</b> entre `:'Se reparte entre '}<b>${o.items.length} ETFs</b>. Rentabilidad media estimada: <b>${p1(s.g)} al año</b>.</p></div>
+    <div class="mp-alloc" role="img" aria-label="Reparto del dinero entre los ETFs">${alloc}</div>
+    <div class="mp-tiles">
+      <div class="mp-tile"><span class="k">Rentabilidad</span><span class="v" style="color:${P.color}">${p1(s.g,0)}</span><span class="n">al año · entre ${p1(gLo,0)} y ${p1(gHi,0)} según la base</span></div>
+      <div class="mp-tile"><span class="k">Riesgo</span><span class="v" style="color:${lvC}">${RISK_TXT[lvl-1]}</span><div class="mp-meter">${[1,2,3,4,5].map(k=>`<i style="${k<=lvl?'background:'+lvC:''}"></i>`).join('')}</div></div>
+      <div class="mp-tile"><span class="k">Un año muy malo</span><span class="v" style="color:var(--bad)">${p1(s.dd,0)}</span><span class="n">pasa 1 de cada ~40 años</span></div>
+    </div>
+    <p class="mp-sub">${oneIn?`Por término medio, <b>1 de cada ${oneIn} años</b> acabaría en negativo.`:'Los años en negativo serían muy poco frecuentes.'}</p>
+    ${cards}${proj}
+    <p class="mp-note">Son estimaciones, no garantías: el pasado no asegura el futuro y puedes perder dinero. Esto no es asesoramiento financiero.</p>`;
+  const ch=$('#mpChips');if(ch)ch.querySelectorAll('button').forEach(b=>b.classList.toggle('on',+b.dataset.m===monthly));
+  const inp=$('#monthly');if(inp&&document.activeElement!==inp)inp.value=monthly;
+}
 function renderStrategy(){
   const o=buildPlan(profile),s=o.st,P=PROFILES[profile];
   $('#gBig').textContent=p1(s.g);$('#gBig').style.color=P.color;
   $('#kVol').textContent=p1(s.sig);$('#kSh').textContent=s.sharpe.toFixed(2).replace('.',',');$('#kLev').textContent=s.L.toFixed(2).replace('.',',')+'x';
   $('#kVar').textContent=p1(s.var95,0);$('#kDD').textContent=p1(s.dd,0);$('#kPl').textContent=p1(s.ploss*100,0);
-  renderGauge(o);
+  renderGauge(o);renderMyPlan(o);
   const lbl=o.items.map(x=>x.e.u?x.e.u.t:x.e.t),col=o.items.map((x,i,a)=>itemColor(x,i,a));
   if(donut){donut.data.labels=lbl;donut.data.datasets[0].data=o.items.map(x=>+(x.w*100).toFixed(1));donut.data.datasets[0].backgroundColor=col;donut.update()}
   if(riskChart){riskChart.data.labels=lbl;const d=riskChart.data.datasets;d[0].data=o.items.map(x=>+(x.w*100).toFixed(1));d[0].backgroundColor=col.map(c=>c.startsWith('#')?alpha(c,.25):c.replace(/[\d.]+\)$/,'.15)'));d[0].borderColor=col;
@@ -1299,6 +1430,11 @@ $('#runBtn').addEventListener('click',run);
 $('#profileSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setProfile(b.dataset.p)});
 $('#basisSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setBasis(b.dataset.b)});
 $('#monthly').addEventListener('change',e=>{monthly=Math.max(0,+e.target.value||0);renderStrategy()});
+$('#monthly').addEventListener('input',e=>{const v=+e.target.value;if(v>=0&&e.target.value!==''){monthly=v;renderStrategy()}});
+$('#mpChips').addEventListener('click',e=>{const b=e.target.closest('button[data-m]');if(!b)return;monthly=+b.dataset.m;$('#monthly').value=monthly;renderStrategy()});
+$('#techToggle').addEventListener('click',()=>{const app=$('#app'),on=app.classList.toggle('tech-open');$('#techToggle').setAttribute('aria-expanded',on);$('#techToggle').textContent=on?'Ocultar detalles técnicos ▴':'Ver cómo se calculó (nodos y terminal) ▾'});
+$('#techDet').addEventListener('toggle',()=>{setTimeout(()=>{try{donut&&donut.resize();riskChart&&riskChart.resize()}catch(_){}},60)});
+setTimeout(()=>{const h=$('#stageHint');if(h)h.classList.add('off')},7000);
 document.querySelectorAll('.tabs [data-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tabs [data-tab]').forEach(x=>x.setAttribute('aria-selected',String(x===b)));['stream','matrix','stocks','model','src'].forEach(t=>$('#p-'+t).hidden=t!==b.dataset.tab)}));
 $('#clearLog').addEventListener('click',()=>{$('#stream').innerHTML=''});
 $('#zIn').addEventListener('click',()=>flyTo({...cam,dist:Math.max(30,cam.dist/1.7)},500));$('#zOut').addEventListener('click',()=>flyTo({...cam,dist:Math.min(700,cam.dist*1.7)},500));
