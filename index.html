@@ -11,8 +11,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Atlas ETF">
-<link rel="icon" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -254,7 +254,7 @@ details.tech>.tin{padding:0 12px 12px;display:flex;flex-direction:column;gap:12p
 
   <header class="glass top">
     <div class="brand">
-      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="15" r="12" fill="none" stroke="#f5c542" stroke-width="1.4"/><ellipse cx="15" cy="15" rx="5.5" ry="12" fill="none" stroke="#f5c542" stroke-width="1"/><path d="M3 15h24M5 9h20M5 21h20" stroke="#f5c542" stroke-width=".8" opacity=".7"/><circle cx="21" cy="11" r="2" fill="#f5c542"/></svg>
+      <svg width="32" height="32" viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFB13B"/><stop offset=".5" stop-color="#FF5A36"/><stop offset="1" stop-color="#E5126B"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#lg)"/><g transform="translate(0 -6)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"><circle cx="246" cy="276" r="146" stroke-width="34"/><path d="M146 336 L222 262 L274 304 L384 186" stroke-width="40"/><path d="M318 178 L392 178 L392 252" stroke-width="40"/></g></svg>
       <div><h1>Atlas 3D</h1><small>Global ETF Intelligence</small></div>
     </div>
     <div class="sep"></div>
@@ -368,6 +368,20 @@ const LR={eq:7,bond:3.8,tbill:3,tips:3.5,gold:4}; // long-run nominal returns us
 // US reference ETFs. r10 = annualized return (per = window), vol = 1-year volatility (PortfoliosLab, 29 Sep–1 Oct 2026).
 // u = UCITS equivalent buyable in Trade Republic (null = none exists; verify = ISIN to be checked on justETF).
 const U=(t,n,isin,verify)=>({t,n,isin,verify:!!verify});
+const YR0=2016,WIN=[2021,2022,2023,2024,2025];
+// rentabilidad total por año natural 2016–2025 y 2026 YTD (PortfoliosLab y TotalRealReturns, con dividendos; null = sin dato fiable o no cotizaba)
+const YRS={"SMH":[35.54,38.48,-9.05,64.45,55.53,42.13,-33.53,73.38,39.1,49.17,71.55],"SOXX":[null,null,null,null,null,44.09,-35.09,67.12,12.92,40.74,89.15],"XLK":[15.01,34.26,-1.68,49.86,43.62,34.74,-27.73,56.02,21.63,24.61,37.89],"IGV":[5.79,42.16,12.44,34.32,52.86,12.3,-35.65,58.56,23.41,5.56,2.42],"BOTZ":[null,null,null,null,null,8.65,-42.69,38.97,12.26,14.17,-2.16],"SOXL":[123.48,141.7,-39.07,231.83,70.04,118.84,-85.66,226.98,-12.31,54.91,265.91],"ITA":[20.25,35.24,-7.22,30.51,-13.57,9.39,9.96,14.33,15.81,48.64,-2.85],"XAR":[null,null,null,null,null,2.31,-5.02,23.79,23.32,46.15,-3.88],"PPA":[19.26,30.1,-7.51,39.63,0.45,7.09,9.52,18.41,25.28,37.15,-0.27],"UFO":[null,null,null,null,null,7.17,-25.85,-2.34,27.22,67.36,9.63],"ARKX":[null,null,null,null,null,null,-34.27,24.37,26.67,48.46,10.32],"XLV":[null,null,null,null,null,26.04,-2.08,2.07,2.47,14.5,8.7],"IBB":[-21.42,null,null,null,26.01,0.95,-13.69,3.76,-2.41,27.98,24.86],"IHI":[null,null,null,32.75,24.17,21.03,-19.8,3.24,8.62,6.88,-18.19],"XBI":[-15.45,43.77,-15.28,32.56,48.33,-20.45,-25.87,7.6,1.01,35.89,26.84],"ARKG":[-19.26,46.61,-0.12,44.0,180.4,-33.92,-53.9,16.22,-28.24,23.04,87.16],"ICLN":[-16.9,null,null,null,null,-24.18,-5.43,-20.41,-25.72,47.05,2.77],"TAN":[null,null,null,null,null,-25.1,-5.24,-26.79,-37.61,48.31,-10.48],"QCLN":[null,null,null,null,null,-3.21,-30.37,-10.02,-18.86,31.81,8.98],"URA":[-1.25,19.36,-22.11,-3.54,41.33,57.57,-11.32,46.25,-0.58,67.18,-7.35],"URNM":[null,null,null,null,null,78.32,-11.86,57.8,-14.13,40.78,-13.54],"NLR":[9.21,8.25,4.94,0.41,3.49,13.63,2.29,36.67,14.26,56.5,-16.7],"XLF":[22.42,22.0,-13.05,31.87,-1.74,34.8,-10.59,12.03,30.56,14.9,-1.2],"EUFN":[null,null,null,null,null,19.13,-8.78,26.15,17.2,65.73,7.4],"KBE":[null,null,null,29.78,-8.66,33.46,-14.83,5.3,23.78,12.36,9.52],"IAI":[null,null,null,null,null,40.48,-10.87,15.27,34.37,25.8,0.4],"FINX":[null,null,null,null,null,-9.65,-51.8,33.15,23.02,-5.2,-17.42],"XLY":[5.97,22.82,1.58,28.39,29.63,27.93,-36.27,39.64,26.51,7.37,-8.29],"VCR":[null,null,null,null,null,24.86,-35.15,40.38,24.27,5.77,-6.73],"XLP":[null,null,null,null,null,17.2,-0.81,-0.82,12.2,1.52,5.4],"IGF":[null,null,null,null,null,11.57,-1.26,6.14,14.81,21.31,2.23],"GRID":[null,null,null,42.8,48.82,27.65,-13.89,21.57,15.18,29.65,17.62],"PAVE":[null,null,null,null,null,36.42,-7.17,31.01,17.92,19.36,11.18],"XLU":[16.08,12.05,3.93,25.93,0.51,17.7,1.44,-7.18,23.31,16.03,-5.11],"VT":[8.5,24.5,-9.76,26.81,16.59,18.27,-18.0,22.02,16.49,22.43,12.82],"URTH":[null,null,null,null,null,22.27,-17.97,23.95,18.66,21.36,11.76],"SPY":[12.0,21.71,-4.57,31.22,18.33,28.73,-18.18,26.18,24.89,17.72,12.91],"QQQ":[7.1,32.66,-0.12,38.96,48.62,27.42,-32.58,54.86,25.58,20.77,21.2],"VIG":[null,null,null,null,null,23.76,-9.8,14.51,16.99,14.17,7.55],"VGK":[-0.42,26.99,-14.88,24.85,5.43,16.89,-15.98,20.19,1.88,35.83,4.39],"EEM":[10.87,37.26,-15.31,18.22,17.02,-3.63,-20.56,8.95,6.49,33.98,22.75],"IWM":[null,null,null,null,null,14.54,-20.48,16.83,11.38,12.66,14.12],"AGG":[2.41,3.55,0.1,8.46,7.48,-1.77,-13.02,5.65,1.31,7.19,-2.78],"SHY":[0.82,0.26,1.47,3.38,3.03,-0.71,-3.88,4.16,3.92,4.95,0.56],"TIP":[4.68,2.92,-1.42,8.35,10.84,5.68,-12.26,3.8,1.65,6.77,-1.85],"GLD":[8.03,12.81,-1.94,17.86,24.81,-4.15,-0.77,12.69,26.66,63.68,-3.42],"SSO":[21.54,44.35,-14.6,63.44,21.54,60.57,-38.98,46.65,43.48,26.19,20.85],"QLD":[12.14,70.34,-8.31,81.69,88.9,54.67,-60.52,117.72,42.81,30.36,36.0],"TQQQ":[11.38,118.06,-19.79,133.84,110.05,82.98,-79.09,198.05,58.27,34.35,48.88],"AVGO":[23.64,48.19,2.18,29.05,44.88,56.48,-13.28,104.18,110.49,50.63,1.8],"TXN":[36.71,46.75,-7.17,39.56,31.7,17.53,-9.86,6.41,13.14,-4.47,62.98],"PLTR":[null,null,null,null,null,-22.68,-64.74,167.45,340.48,135.03,5.23],"IONQ":[null,null,null,null,null,null,-79.34,259.13,237.13,7.42,-1.96],"NVDA":[226.97,81.98,-30.81,76.94,122.29,125.48,-50.26,239.02,171.25,38.92,24.08],"AMD":[295.12,-9.35,79.57,148.43,99.98,56.91,-54.99,127.59,-18.06,77.3,187.51],"TSM":[30.18,41.46,-3.59,64.92,92.71,12.08,-36.75,42.33,92.18,55.64,52.14],"CME":[null,null,null,null,null,29.47,-22.89,31.32,15.41,19.83,0.38],"SCHW":[21.01,31.15,-18.43,16.38,13.57,60.23,0.11,-15.97,9.17,36.65,-0.57],"AXP":[null,null,null,null,null,36.88,-8.52,28.67,60.32,25.99,-16.78],"AAPL":[12.48,48.46,-5.39,88.96,82.31,34.65,-26.4,49.01,30.71,9.05,21.83],"MSFT":[15.08,40.73,20.8,57.56,42.53,52.48,-28.02,58.19,12.93,15.58,6.71],"GOOGL":[1.86,32.93,-0.8,28.18,30.85,65.3,-39.09,58.32,36.01,65.99,8.27],"META":[null,null,null,null,null,23.13,-64.22,194.13,66.05,13.09,10.26],"TSLA":[-10.97,45.7,6.89,25.7,743.44,49.76,-65.03,101.72,62.52,11.36,-21.26],"BRK.B":[23.43,21.62,3.01,10.93,2.37,28.95,3.31,15.46,27.09,10.89,-0.43],"WMT":[null,null,null,null,null,1.97,-0.46,12.88,73.99,24.49,-5.82],"XOM":[19.88,-3.81,-15.09,7.23,-36.21,57.58,87.41,-6.26,11.26,15.98,38.86],"JNJ":[15.33,24.43,-5.13,16.22,10.82,11.44,5.97,-8.58,-4.81,47.48,27.0],"PG":[null,null,null,null,null,20.52,-5.05,-0.86,17.25,-12.26,2.68],"ASML":[27.9,56.46,-9.68,93.23,66.28,64.13,-30.49,39.91,-7.7,56.51,70.15],"MU":[54.8,87.59,-22.84,69.49,39.79,24.21,-45.93,71.93,-0.96,240.24,284.72],"CRWD":[null,null,null,null,324.74,-3.34,-48.58,142.49,34.01,37.0,127.06],"RTX":[17.35,19.32,-14.53,44.04,-16.72,23.27,20.01,-14.44,40.76,61.44,2.32],"SPCX":[null,null,null,null,null,null,null,null,null,null,null],"RKLB":[null,null,null,null,null,null,-69.3,46.68,360.58,173.89,-0.11],"LMT":[18.37,31.78,-16.35,52.55,-6.49,3.15,40.48,-4.31,10.02,2.47,7.2],"RHM":[null,null,null,null,null,-1.77,128.13,56.82,116.51,155.27,-38.12],"ASTS":[null,null,null,null,null,-31.73,-39.29,25.1,249.92,244.22,-18.96],"GE":[null,null,null,null,null,9.69,-10.92,95.71,64.83,85.73,1.66],"NOC":[25.19,32.59,null,null,-9.88,29.29,43.02,-12.79,1.93,23.61,-14.44],"GD":[null,null,null,null,null,43.77,21.69,7.13,3.52,30.39,0.13],"KTOS":[null,null,null,null,null,-29.27,-46.8,96.61,30.01,187.76,-43.59],"LLY":[-10.37,17.83,40.45,16.14,31.03,66.08,34.26,60.91,33.3,40.25,7.51],"AMGN":[-7.57,22.27,15.23,27.6,-1.99,0.87,20.43,13.46,-6.77,29.67,32.08],"ALNY":[null,null,null,null,null,30.48,40.14,-19.46,22.94,68.99,-41.86],"BEAM":[null,null,null,null,null,-2.39,-50.92,-30.4,-8.89,11.77,-12.45],"VRTX":[-41.45,103.42,10.58,32.13,7.94,-7.08,31.5,40.9,-1.03,12.58,11.77],"REGN":[null,null,null,null,null,30.72,14.25,21.73,-18.9,8.96,2.08],"MRNA":[null,null,null,28.09,434.1,143.11,-29.28,-44.63,-58.19,-29.08,540.69],"CRSP":[null,null,null,null,null,-50.51,-46.36,54.0,-37.12,33.23,5.49],"ISRG":[16.11,72.64,31.23,23.43,38.39,31.76,-26.15,27.14,54.72,8.51,-29.15],"NVO":[-36.56,54.23,-12.12,28.7,23.33,63.52,22.66,54.84,-15.93,-39.22,-22.95],"VST":[null,null,24.95,null,null,19.57,5.08,70.73,261.52,17.66,-13.87],"NEE":[null,null,null,null,null,23.39,-8.54,-25.3,21.46,15.47,-3.6],"OKLO":[null,null,null,null,null,null,null,null,null,238.01,-49.64],"CCJ":[null,null,null,null,null,63.19,4.35,90.49,19.47,78.38,-5.27],"FSLR":[null,null,null,null,null,-11.89,71.86,15.01,2.3,48.22,-32.95],"VWS":[null,null,null,null,null,-30.06,1.22,6.04,-54.23,77.9,15.36],"IBE":[null,null,null,null,null,-7.68,9.68,12.99,16.57,44.56,13.88],"CEG":[null,null,null,null,null,null,null,37.24,92.71,58.8,-27.78],"GEV":[null,null,null,null,null,null,null,null,null,99.02,45.7],"ENPH":[-71.23,138.61,96.27,452.43,571.53,4.26,44.83,-50.13,-48.02,-53.33,2.4],"ALV":[null,null,null,null,null,8.15,1.9,26.98,28.79,37.66,10.36],"SAN":[null,null,null,null,null,18.17,-1.58,39.57,22.56,132.63,25.73],"V":[1.37,47.18,16.49,43.33,17.12,-0.31,-3.4,26.31,22.32,11.76,3.22],"NU":[null,null,null,null,null,null,-56.61,104.67,24.37,61.58,-24.37],"COIN":[null,null,null,null,null,null,-85.98,391.44,42.77,-8.92,-16.3],"HSBC":[null,null,null,null,null,20.76,7.79,39.45,34.48,67.91,33.31],"MA":[6.91,47.69,25.31,59.16,20.19,1.16,-2.66,23.4,24.17,9.04,-2.93],"ING":[null,null,null,null,null,55.41,-4.22,31.88,12.25,91.12,35.56],"LSEG":[null,null,null,null,null,-22.3,4.28,31.78,23.26,-19.64,-6.78],"BCS":[null,null,null,null,null,31.71,-21.9,6.01,76.26,96.49,-1.52],"KO":[-0.36,14.38,6.77,20.6,2.47,11.37,10.61,-4.43,8.88,15.6,25.55],"MC":[null,null,null,null,null,43.83,-4.76,9.6,-11.73,3.93,-40.2],"RMS":[null,null,null,null,null,75.41,-5.28,33.69,22.38,-7.65,-36.38],"AMZN":[null,null,null,null,null,2.38,-49.62,80.88,44.39,5.21,7.54],"RIVN":[null,null,null,null,null,null,-82.23,27.29,-43.31,48.2,-22.43],"RACE":[null,null,null,null,null,13.32,-16.68,59.12,26.34,-11.65,7.23],"OR":[null,null,null,null,null,35.74,-18.84,36.99,-22.98,9.18,7.08],"ITX":[null,null,null,null,null,null,null,null,29.15,17.5,-2.65],"COST":[0.28,22.37,10.6,45.7,32.67,51.82,-19.05,49.0,39.62,-5.39,6.57],"MCD":[6.21,45.05,5.78,13.97,11.3,27.79,0.51,15.06,0.14,7.89,-22.96],"DG":[null,null,null,null,null,17.59,3.96,26.5,-8.64,25.31,-9.42],"FER":[null,null,null,null,null,24.29,-8.58,38.38,25.67,38.64,-13.85],"PWR":[null,null,null,null,null,59.5,24.63,51.7,46.6,33.7,52.32],"JOBY":[null,null,null,null,null,null,-54.11,98.51,22.26,62.36,-54.85],"CAT":[42.11,75.03,-17.56,19.51,26.97,15.95,18.6,25.95,24.66,60.3,45.13],"VMC":[null,null,null,null,null,41.09,-14.87,30.75,14.12,11.7,-13.97],"ETN":[null,null,null,null,null,46.7,-7.18,56.22,39.51,-2.79,38.44],"AENA":[null,null,null,null,null,-2.39,-15.49,44.38,25.62,26.32,12.37],"ACS":[null,null,null,null,null,-6.93,23.87,60.12,26.92,81.61,12.49],"EME":[48.24,15.96,null,null,null,39.93,16.81,46.03,111.27,35.05,24.76],"JPM":[34.57,27.47,-6.65,47.27,-5.52,27.75,-12.64,30.63,44.29,37.27,4.87],"GS":[null,null,null,null,null,47.61,-7.87,15.91,52.03,56.64,3.93],"MS":[null,null,null,null,null,46.65,-10.34,13.93,39.73,45.16,10.87],"BLK":[14.64,38.2,-21.59,31.87,47.21,29.39,-20.4,17.86,29.29,6.55,0.5],"BX":[null,null,null,null,null,107.11,-40.01,82.75,35.07,-7.84,-24.9],"SPGI":[null,null,null,null,null,44.68,-28.38,32.79,13.94,5.71,-19.85],"ICE":[null,null,null,null,null,19.94,-23.91,27.12,17.46,9.92,-5.06]};
+const _ann={};
+function annStats(t){if(t in _ann)return _ann[t];const a=YRS[t];let r=null;
+  if(a){const w=WIN.map(y=>({y,r:a[y-YR0]})).filter(x=>x.r!=null);
+    if(w.length>=3){const v=w.map(x=>x.r),n=v.length,mean=v.reduce((p,x)=>p+x,0)/n,sd=Math.sqrt(v.reduce((p,x)=>p+(x-mean)**2,0)/(n-1)),cagr=(Math.pow(v.reduce((p,x)=>p*(1+x/100),1),1/n)-1)*100,wi=w.reduce((m,x)=>x.r<m.r?x:m);
+      r={n,mean,sd,cagr,worst:wi.r,worstY:wi.y,best:Math.max(...v),neg:v.filter(x=>x<0).length,ytd:a[10],from:w[0].y,to:w[w.length-1].y}}}
+  return _ann[t]=r}
+// riesgo = desviación de las rentabilidades anuales 2021–25 (sustituye a la volatilidad diaria de 1 año cuando hay ≥3 años) + límite de peor año por perfil
+const WORST={etf:{cons:-15,mod:-25,ag:-40,alpha:-101},stk:{cons:-20,mod:-30,ag:-50,alpha:-101}};
+function backtest(items){const out=[];for(const y of WIN){let r=0,ok=true;for(const x of items){const a=YRS[x.e.t],v=a?a[y-YR0]:null;if(v==null){ok=false;break}r+=x.w*v}if(ok)out.push({y,r})}
+  let ytd=0,okY=true;for(const x of items){const a=YRS[x.e.t],v=a?a[10]:null;if(v==null){okY=false;break}ytd+=x.w*v}
+  return{ys:out,ytd:okY?ytd:null}}
 const UNIV=[
   {t:'SMH',node:'tech',n:'VanEck Semiconductor ETF',ter:.35,r10:34.59,vol:39.95,grp:'semis',u:U('SMH','VanEck Semiconductor UCITS','IE00BMC38736'),w:'La cadena de chips de la IA: NVIDIA y TSMC pesan ~30 % entre los dos.'},
   {t:'SOXX',node:'tech',n:'iShares Semiconductor ETF',ter:.35,r10:32.43,vol:46.37,grp:'semis',u:U('SEMI','iShares MSCI Global Semiconductors UCITS','IE000I8KRLL9',1),w:'Semiconductores algo menos concentrados que SMH, pero más volátiles este año.'},
@@ -420,6 +434,7 @@ const UNIV=[
   {t:'TQQQ',node:'fund',n:'ProShares UltraPro QQQ (3x)',ter:.82,r10:41.01,vol:59.30,grp:'usbig',L:3,base:'QQQ',u:U('QQQ3','WisdomTree Nasdaq-100 3x Daily Leveraged','IE00BLRPRL42',1),w:'Nasdaq-100 x3 diario: −79 % en 2022. Solo como posición pequeña.'},
 ];
 const UBY=Object.fromEntries(UNIV.map(e=>[e.t,e]));
+UNIV.forEach(e=>{e.vol1y=e.vol;const an=annStats(e.t);if(an){e.ann=an;e.vol=+an.sd.toFixed(2)}});
 UNIV.forEach(e=>{e.cls=e.cls||'eq';e.risk=e.vol<8?1:e.vol<16?2:e.vol<25?3:e.vol<40?4:5;e.lev=(e.L||1)>1});
 // stock history: annualized return (per window) and 1-year volatility (PortfoliosLab, 29 Sep–1 Oct 2026)
 const SRET={NVDA:[63.61,37.78],AMD:[57.02,72.98],TSM:[34.05,40.29],ASML:[33.27,46.42],TXN:[18.03,42.57],PLTR:[50.73,60.67,'5a'],IONQ:[33.35,94.09,'5a'],AVGO:[40.86,46.49],
@@ -451,18 +466,19 @@ function stockProsp(s){
 const bandOf=v=>v==null?null:v<8?'cons':v<13?'mod':v<18?'ag':'alpha';
 function etfVal(e,b=basis){return b==='hist'?e.r10:etfProsp(e)}
 function stockVal(s,b=basis){const h=SRET[s.t]||[null,null,'ipo'];return b==='hist'?h[0]:stockProsp(s).v}
-function stockVol(s){const h=SRET[s.t];return h&&h[1]!=null?h[1]:Math.max(40,(s.beta||1.5)*30)}
-function classify(v,vol,isStock,e){
+function stockVol(s){const an=annStats(s.t);if(an)return an.sd;const h=SRET[s.t];return h&&h[1]!=null?h[1]:Math.max(40,(s.beta||1.5)*30)}
+function classify(v,vol,isStock,e,an){
   if(v==null)return{band:null,ok:false,why:'Sin historial suficiente'};
   if(v<=0)return{band:bandOf(v),ok:false,why:'Rentabilidad negativa'};
   if(isStock&&v<=RF)return{band:bandOf(v),ok:false,why:`Rinde menos que un depósito (${p1(RF,1)}): no compensa el riesgo de una sola empresa`};
   const band=bandOf(v),cap=PROFILES[band][isStock?'stkVol':'etfVol'];
   if(vol>cap)return{band,ok:false,why:`σ ${p1(vol,0)} > ${cap} % que admite la banda: riesgo no compensado`};
+  if(an&&an.worst<WORST[isStock?'stk':'etf'][band])return{band,ok:false,why:`Peor año ${p1(an.worst,0)} (${an.worstY}): más caída de la que admite el perfil (${WORST[isStock?'stk':'etf'][band]} %)`};
   if(e&&!e.u)return{band,ok:false,buy:false,why:'Sin versión UCITS: no se puede comprar en Trade Republic'};
   return{band,ok:true,why:''};
 }
-function etfInfo(e,b=basis){const v=etfVal(e,b);return{e,v,...classify(v,e.vol,false,e)}}
-function stockInfo(s,b=basis){const v=stockVal(s,b),vol=stockVol(s);return{s,v,vol,...classify(v,vol,true)}}
+function etfInfo(e,b=basis){const v=etfVal(e,b);return{e,v,...classify(v,e.vol,false,e,e.ann)}}
+function stockInfo(s,b=basis){const v=stockVal(s,b),vol=stockVol(s);return{s,v,vol,...classify(v,vol,true,undefined,annStats(s.t))}}
 /* ---- portfolio maths ---- */
 function corrE(a,b){if(a===b)return 1;
   if(a.cls!=='eq'||b.cls!=='eq'){if(a.cls==='gold'||b.cls==='gold')return .1;if(a.cls!=='eq'&&b.cls!=='eq')return .7;return .1}
@@ -472,10 +488,15 @@ function stats(items,b=basis){
   const v=items.map(x=>etfVal(x.e,b)/100),s=items.map(x=>x.e.vol/100),w=items.map(x=>x.w);
   const mu=w.reduce((a,x,i)=>a+x*(v[i]+s[i]*s[i]/2),0);let va=0;
   for(let i=0;i<w.length;i++)for(let j=0;j<w.length;j++)va+=w[i]*w[j]*s[i]*s[j]*corrE(items[i].e,items[j].e);
-  const sig=Math.sqrt(va),g=mu-va/2,rf=RF/100;
   const rc=w.map((x,i)=>x*w.reduce((a,y,j)=>a+y*s[i]*s[j]*corrE(items[i].e,items[j].e),0)/va);
-  return{g:g*100,mu:mu*100,sig:sig*100,sharpe:(mu-rf)/sig,var95:(mu-1.645*sig)*100,dd:(mu-2*sig)*100,ploss:normCdf(-mu/sig),rc,L:w.reduce((a,x,i)=>a+x*(items[i].e.L||1),0)};
+  const bt=backtest(items);let btS=null;
+  if(bt.ys.length>=3){const r=bt.ys.map(x=>x.r),n=r.length,m=r.reduce((a,x)=>a+x,0)/n,sd=Math.sqrt(r.reduce((a,x)=>a+(x-m)**2,0)/(n-1)),wi=bt.ys.reduce((q,x)=>x.r<q.r?x:q);
+    btS={ys:bt.ys,ytd:bt.ytd,n,mean:m,sd,cagr:(Math.pow(r.reduce((p,x)=>p*(1+x/100),1),1/n)-1)*100,worst:wi.r,worstY:wi.y,best:Math.max(...r),neg:r.filter(x=>x<0).length};
+    va=(sd/100)**2}
+  const sig=Math.sqrt(va),g=mu-va/2,rf=RF/100;
+  return{g:g*100,mu:mu*100,sig:sig*100,sharpe:(mu-rf)/sig,var95:(mu-1.645*sig)*100,dd:btS?btS.worst:(mu-2*sig)*100,ploss:btS?btS.neg/btS.n:normCdf(-mu/sig),rc,bt:btS,L:w.reduce((a,x,i)=>a+x*(items[i].e.L||1),0)};
 }
+
 function normCdf(x){const t=1/(1+.2316419*Math.abs(x)),d=.3989423*Math.exp(-x*x/2),p=d*t*(.3193815+t*(-.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return x>0?1-p:p}
 function rng(seed){let s=seed%2147483647||1;return()=>(s=(s*16807)%2147483647)/2147483647}
 const rankE=x=>(x.v-RF)/x.e.vol;
@@ -1094,6 +1115,28 @@ function renderGauge(o){
   $('#flag').innerHTML=f;
 }
 
+/* ---------- gráfico de rentabilidad año a año ---------- */
+function yrBars(rows,color,meanV,{h=150}={}){ // rows: [{lbl,v,dim,ytd}]
+  rows=rows.filter(r=>r.v!=null);if(!rows.length)return '<p class="mp-note">Sin datos anuales.</p>';
+  const W=340,H=h,top=16,bot=20,mx=Math.max(10,...rows.map(r=>r.v)),mn=Math.min(0,...rows.map(r=>r.v)),rng=mx-mn||1,sy=v=>top+(mx-v)/rng*(H-top-bot),bw=(W-8)/rows.length;
+  const bars=rows.map((r,i)=>{const x=4+i*bw+bw*.14,w=bw*.72,y0=sy(0),y1=sy(r.v),neg=r.v<0,c=neg?'#ff5d6c':color;
+    return `<g opacity="${r.dim?.45:1}"><rect x="${x.toFixed(1)}" y="${Math.min(y0,y1).toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(1,Math.abs(y1-y0)).toFixed(1)}" rx="2" fill="${c}" ${r.ytd?`fill-opacity=".45" stroke="${c}" stroke-dasharray="3 2"`:''}><title>${r.lbl}: ${p1(r.v)}</title></rect>
+      <text x="${(x+w/2).toFixed(1)}" y="${(neg?(y1-y0>14?y0+11:y1+10):y1-3).toFixed(1)}" text-anchor="middle" font-size="${rows.length>8?7.5:9}" fill="${neg?(y1-y0>14?'#fff':'#ff8a95'):'#cfdbe7'}" font-family="JetBrains Mono, monospace">${Math.round(r.v)}</text>
+      <text x="${(x+w/2).toFixed(1)}" y="${H-6}" text-anchor="middle" font-size="${rows.length>8?7.5:9}" fill="#6b8096" font-family="JetBrains Mono, monospace">${r.lbl}</text></g>`}).join('');
+  const ml=meanV!=null?`<line x1="4" x2="${W-4}" y1="${sy(meanV).toFixed(1)}" y2="${sy(meanV).toFixed(1)}" stroke="#ffd24a" stroke-width="1.2" stroke-dasharray="5 4"/><text x="${W-6}" y="${(sy(meanV)-4).toFixed(1)}" text-anchor="end" font-size="9" fill="#ffd24a" font-family="JetBrains Mono, monospace">media ${p1(meanV,1)}</text>`:'';
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Rentabilidad año a año"><line x1="4" x2="${W-4}" y1="${sy(0).toFixed(1)}" y2="${sy(0).toFixed(1)}" stroke="rgba(255,255,255,.18)"/>${bars}${ml}</svg>`}
+function yrChart(t,color){const a=YRS[t],an=annStats(t);if(!a)return '<p class="mp-note">Sin datos anuales.</p>';
+  const rows=a.slice(0,10).map((v,i)=>({lbl:"'"+String(YR0+i).slice(2),v,dim:!WIN.includes(YR0+i)}));rows.push({lbl:'26*',v:a[10],ytd:true});
+  return yrBars(rows,color,an?an.mean:null)}
+function annBlock(t,color){const an=annStats(t);if(!an)return `<div><span class="lbl">Rentabilidad año a año</span>${yrChart(t,color)}<p class="mp-note">Menos de 3 años completos: el riesgo se mide con la volatilidad diaria.</p></div>`;
+  return `<div><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span class="lbl">Rentabilidad año a año</span><span class="lbl">media y riesgo: ${an.from}–${an.to}</span></div>${yrChart(t,color)}
+   <div class="mini" style="grid-template-columns:repeat(4,1fr);margin-top:6px">
+    <div><span class="lbl">Media anual</span><b style="color:${an.mean>=0?'var(--good)':'var(--bad)'}">${p1(an.mean)}</b></div>
+    <div><span class="lbl">Compuesta</span><b>${p1(an.cagr)}</b></div>
+    <div><span class="lbl">Peor año</span><b style="color:${an.worst<0?'var(--bad)':'var(--good)'}">${p1(an.worst,0)} <small style="color:var(--dim)">${an.worstY}</small></b></div>
+    <div><span class="lbl">Años negativos</span><b>${an.neg} de ${an.n}</b></div></div>
+   <p class="mp-note" style="margin-top:4px">Barras tenues: años fuera del periodo de cálculo. 26* = 2026 hasta hoy.</p></div>`}
+
 /* ---------- "Tu plan": vista visual en lenguaje llano ---------- */
 const GRP_LBL={semis:'Chips y semiconductores',usbig:'Grandes empresas de EE. UU.',sw:'Software en la nube',robo:'Robótica e inteligencia artificial',def:'Defensa y aeroespacial',biotech:'Biotecnología',health:'Salud',medtech:'Tecnología médica',renov:'Energías renovables',nucl:'Energía nuclear',uran:'Uranio',grid:'Redes eléctricas',infra:'Infraestructuras',pave:'Infraestructuras de EE. UU.',util:'Luz, agua y gas',fintech:'Tecnología financiera',finus:'Bancos y finanzas de EE. UU.',fineu:'Bancos y finanzas de Europa',core:'Todo el mundo en un solo fondo',div:'Empresas que reparten dividendos',eu:'Europa',em:'Países emergentes',small:'Empresas pequeñas',spnew:'Las 500 grandes de EE. UU.',cdisc:'Consumo y ocio',staples:'Consumo básico',bond:'Bonos',tbill:'Deuda a corto plazo',tips:'Bonos ligados a la inflación',gold:'Oro'};
 const THEME={SMH:'Chips y semiconductores (IA)',SOXX:'Chips y semiconductores (IA)',XLK:'Tecnología de EE. UU. (Apple, Microsoft, NVIDIA)',IGV:'Software en la nube',BOTZ:'Robótica e inteligencia artificial',SOXL:'Chips x3 · muy arriesgado',ITA:'Defensa y aeroespacial',XAR:'Defensa y aeroespacial',PPA:'Defensa y aeroespacial',UFO:'Espacio y satélites',ARKX:'Espacio y defensa innovadora',XLV:'Salud (farmacéuticas y hospitales)',IBB:'Biotecnología',XBI:'Biotecnología',ARKG:'Edición genética',IHI:'Equipos y dispositivos médicos',ICLN:'Energías limpias',QCLN:'Energías limpias',TAN:'Energía solar',URA:'Uranio',URNM:'Uranio',NLR:'Nuclear y uranio',XLF:'Bancos y finanzas de EE. UU.',EUFN:'Bancos y finanzas de Europa',KBE:'Bancos de EE. UU.',IAI:'Bolsa y brókers de EE. UU.',FINX:'Fintech y pagos',XLY:'Consumo y ocio (Amazon, Tesla)',VCR:'Consumo y ocio',XLP:'Consumo básico (comida, higiene)',IGF:'Infraestructuras del mundo',GRID:'Redes eléctricas',PAVE:'Obra pública de EE. UU.',XLU:'Luz, agua y gas',VT:'Todo el mundo, toda la bolsa',URTH:'Países desarrollados (tipo MSCI World)',SPY:'Las 500 mayores empresas de EE. UU.',QQQ:'Las 100 mayores tecnológicas (Nasdaq)',VIG:'Empresas que suben el dividendo',VGK:'Europa',EEM:'Países emergentes',IWM:'Empresas pequeñas de EE. UU.',AGG:'Bonos',SHY:'Deuda pública a corto plazo',TIP:'Bonos ligados a la inflación',GLD:'Oro',SSO:'S&P 500 ×2 · arriesgado',QLD:'Nasdaq ×2 · arriesgado',TQQQ:'Nasdaq ×3 · muy arriesgado'};
@@ -1115,6 +1158,7 @@ function renderMyPlan(o){
       <div class="mp-w"><b>${pct}%</b><span>${monthly>0?Math.round(x.w*monthly)+' €/mes':'del plan'}</span></div></div>
       <div class="mp-bar"><i style="width:${pct}%"></i></div>
       <div class="mp-meta"><span class="mp-pill${x.filled?' warn':''}">${x.filled?'De una banda más baja · ':'▲ '}${p1(x.v,0)} al año</span><span>Riesgo <span class="mp-dots">${dots}</span> ${RISK_TXT[rl-1]}</span></div>
+      ${x.e.ann?`<p class="mp-why" style="color:var(--mid)">Media anual ${x.e.ann.from}–${x.e.ann.to}: <b>${p1(x.e.ann.mean,0)}</b> · ${x.e.ann.worst<0?`peor año <b style="color:var(--bad)">${p1(x.e.ann.worst,0)}</b> (${x.e.ann.worstY})`:`año más flojo <b style="color:var(--good)">+${p1(x.e.ann.worst,0)}</b> (${x.e.ann.worstY})`} · ${x.e.ann.neg?x.e.ann.neg+' año'+(x.e.ann.neg===1?'':'s')+' en negativo':'ningún año en negativo'}</p>`:''}
       <p class="mp-why">${esc(x.e.w||x.e.n)}</p></div>`}).join('');
   const sp=o.stocks||[];
   const stk=`<div class="mp-proj"><h4>Acciones que encajan con tu perfil <span style="font-weight:400;color:var(--dim)">· ${sp.length} de ${Object.values(STOCKS).flat().length}</span></h4>`+
@@ -1136,9 +1180,10 @@ function renderMyPlan(o){
     <div class="mp-tiles">
       <div class="mp-tile"><span class="k">Rentabilidad</span><span class="v" style="color:${P.color}">${p1(s.g,0)}</span><span class="n">al año · entre ${p1(gLo,0)} y ${p1(gHi,0)} según la base</span></div>
       <div class="mp-tile"><span class="k">Riesgo</span><span class="v" style="color:${lvC}">${RISK_TXT[lvl-1]}</span><div class="mp-meter">${[1,2,3,4,5].map(k=>`<i style="${k<=lvl?'background:'+lvC:''}"></i>`).join('')}</div></div>
-      <div class="mp-tile"><span class="k">Un año muy malo</span><span class="v" style="color:var(--bad)">${p1(s.dd,0)}</span><span class="n">pasa 1 de cada ~40 años</span></div>
+      <div class="mp-tile"><span class="k">${s.bt?'Peor año real':'Un año muy malo'}</span><span class="v" style="color:var(--bad)">${p1(s.dd,0)}</span><span class="n">${s.bt?'fue en '+s.bt.worstY+' con este mismo reparto':'pasa 1 de cada ~40 años'}</span></div>
     </div>
-    <p class="mp-sub">${oneIn?`Por término medio, <b>1 de cada ${oneIn} años</b> acabaría en negativo.`:'Los años en negativo serían muy poco frecuentes.'}</p>
+    <p class="mp-sub">${s.bt?`Con este reparto, <b>${s.bt.neg} de los últimos ${s.bt.n} años</b> habrían acabado en negativo. Media anual real: <b>${p1(s.bt.mean)}</b>.`:oneIn?`Por término medio, <b>1 de cada ${oneIn} años</b> acabaría en negativo.`:'Los años en negativo serían muy poco frecuentes.'}</p>
+    ${s.bt?`<div class="mp-proj"><h4>Así le habría ido a tu plan, año a año</h4>${yrBars([...s.bt.ys.map(x=>({lbl:String(x.y),v:x.r})),{lbl:'2026*',v:s.bt.ytd,ytd:true}],P.color,s.bt.mean,{h:140})}<p class="mp-note">Rentabilidad real de cada año con este mismo reparto (reequilibrando cada enero). 2026* = hasta hoy. El riesgo del plan se calcula con estos años.</p></div>`:''}
     ${cards}${stk}${proj}
     <p class="mp-note">Son estimaciones, no garantías: el pasado no asegura el futuro y puedes perder dinero. Esto no es asesoramiento financiero.</p>`;
   el.querySelectorAll('.mp-sk').forEach(b=>b.addEventListener('click',()=>{const nd=b.dataset.node;stockSel[nd+profile]=b.dataset.t;cardTab='stk';focusCity(nd)}));
@@ -1173,7 +1218,7 @@ function renderStrategy(){
 }
 function renderMatrix(){
   const o=buildPlan(profile),SR={buy:0,alt:1,out:2,other:3},order=x=>(x.band===profile?0:1)*1e5+SR[statusOf(x,o)]*1e4+BANDS.indexOf(x.band)*1e3-x.v;
-  let h=`<thead><tr><th>Nodo</th><th>ETF</th><th>Nombre</th><th class="num">TER</th><th class="num">Rent. ${basis==='hist'?'hist.':'prosp.'}</th><th class="num">σ 1a</th><th>Banda</th><th>Estado</th><th>Motivo</th><th class="num">YTD</th><th class="num">6M</th><th>UCITS (TR)</th></tr></thead><tbody>`;
+  let h=`<thead><tr><th>Nodo</th><th>ETF</th><th>Nombre</th><th class="num">TER</th><th class="num">Rent. ${basis==='hist'?'hist.':'prosp.'}</th><th class="num">σ anual</th><th>Banda</th><th>Estado</th><th>Motivo</th><th class="num">YTD</th><th class="num">6M</th><th>UCITS (TR)</th></tr></thead><tbody>`;
   const rows=[...o.all].sort((a,b)=>order(a)-order(b));let sep=false;
   rows.forEach(x=>{const e=x.e,a=AGENTS.find(q=>q.id===e.node),st=S[e.node],r=st.rows&&st.rows.find(q=>q.t===e.t),done=st.status==='done',mine=x.band===profile,c=v=>v==null?'var(--dim)':v>=0?'var(--good)':'var(--bad)',stt=statusOf(x,o);
     if(!mine&&!sep){sep=true;h+=`<tr><td colspan="12" class="mono" style="font-size:10.5px;color:var(--dim);letter-spacing:.1em;padding-top:14px">OTRAS BANDAS</td></tr>`}
@@ -1372,7 +1417,7 @@ function revCagr(s){const fy=s.hist.filter(h=>h[0]!=='TTM'),a=fy[0],b=fy[fy.leng
 function nodeStocks(id){return(STOCKS[id]||[]).map(s=>stockInfo(s)).sort((x,y)=>(y.band===profile&&y.ok)-(x.band===profile&&x.ok)||(y.band===profile)-(x.band===profile)||(y.v??-99)-(x.v??-99))}
 function bandHead(kind){const P=PROFILES[profile];return `<div style="padding:9px 11px;border-radius:9px;background:color-mix(in srgb,${P.color} 10%,transparent);border:1px solid color-mix(in srgb,${P.color} 40%,transparent)">
   <div class="lbl" style="color:${P.color}">Banda ${P.label} · ${P.range} al año</div>
-  <div style="font-size:12.5px;line-height:1.45;margin-top:3px">Solo ${kind} cuya rentabilidad ${basisName()} cae en ${P.range} con σ ≤ ${kind==='acciones'?P.stkVol:P.etfVol} %. El resto aparece atenuado con su banda real.</div></div>`}
+  <div style="font-size:12.5px;line-height:1.45;margin-top:3px">Solo ${kind} cuya rentabilidad ${basisName()} cae en ${P.range}, con un riesgo (desviación de sus rentabilidades anuales 2021–25) ≤ ${kind==='acciones'?P.stkVol:P.etfVol} %${WORST[kind==='acciones'?'stk':'etf'][profile]>-100?` y cuyo peor año no bajó de ${WORST[kind==='acciones'?'stk':'etf'][profile]} %`:''}. El resto aparece atenuado con su banda real.</div></div>`}
 function stockBody(id){
   const color=NODES[id].color,list=nodeStocks(id),P=PROFILES[profile];
   if(!list.length)return bandHead('acciones')+'<p style="margin:0;font-size:12.5px;color:var(--mid)">Este nodo no analiza acciones individuales.</p>';
@@ -1388,8 +1433,9 @@ function stockBody(id){
     <div class="mini" style="grid-template-columns:repeat(3,1fr)">
       <div><span class="lbl">Histórica · ${PER_LBL[h[2]||'10a']}</span><b style="color:${hv==null?'var(--dim)':PROFILES[bandOf(hv)].color}">${hv==null?'n/d':p1(hv)}</b></div>
       <div><span class="lbl">Prospectiva</span><b style="color:${PROFILES[bandOf(pr.v)].color}">${p1(pr.v)}</b></div>
-      <div><span class="lbl">Volatilidad 1a</span><b style="color:${cur.vol>P.stkVol?'var(--bad)':'var(--fg)'}">${h[1]==null?'≈'+p1(cur.vol,0):p1(cur.vol,0)}</b></div>
+      <div><span class="lbl">Riesgo anual</span><b style="color:${cur.vol>P.stkVol?'var(--bad)':'var(--fg)'}">${h[1]==null?'≈'+p1(cur.vol,0):p1(cur.vol,0)}</b></div>
     </div>
+    ${annBlock(s.t,color)}
     <div><div style="display:flex;justify-content:space-between;margin-bottom:2px"><span class="lbl">Trayectoria · ingresos vs beneficio</span><span class="lbl">${s.histCur}</span></div>${revChart(s,color)}
       <div class="mono" style="display:flex;gap:12px;font-size:10px;color:var(--dim);flex-wrap:wrap"><span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${color};margin-right:4px"></i>ingresos</span><span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#3ddc84;margin-right:4px"></i>beneficio</span><span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#ff5d6c;margin-right:4px"></i>pérdida</span><span style="margin-left:auto">CAGR ingresos ${cg==null?'n/d':fmtPct(cg*100,0)}</span></div></div>
     <div class="mini" style="grid-template-columns:repeat(3,1fr)">
@@ -1409,7 +1455,7 @@ function stockBody(id){
 function renderStocksTable(){
   const P=PROFILES[profile],all=[];Object.entries(STOCKS).forEach(([id,l])=>l.forEach(s=>all.push({...stockInfo(s),node:id})));
   const mine=all.filter(x=>x.band===profile&&x.ok).sort((a,b)=>b.v-a.v),rest=all.filter(x=>!(x.band===profile&&x.ok)).sort((a,b)=>BANDS.indexOf(b.band)-BANDS.indexOf(a.band)||(b.v??-99)-(a.v??-99));
-  let h=`<thead><tr><th>Nodo</th><th>Acción</th><th>Empresa</th><th class="num">Rent. ${basis==='hist'?'hist.':'prosp.'}</th><th class="num">${basis==='hist'?'Prosp.':'Hist.'}</th><th class="num">σ 1a</th><th>Banda</th><th>Motivo</th><th class="num">CAGR ingr.</th><th class="num">Margen op.</th><th class="num">Caja/deuda neta</th><th class="num">Caja libre</th><th class="num">Dilución</th><th class="num">PER fut.</th></tr></thead><tbody>`;
+  let h=`<thead><tr><th>Nodo</th><th>Acción</th><th>Empresa</th><th class="num">Rent. ${basis==='hist'?'hist.':'prosp.'}</th><th class="num">${basis==='hist'?'Prosp.':'Hist.'}</th><th class="num">σ anual</th><th>Banda</th><th>Motivo</th><th class="num">CAGR ingr.</th><th class="num">Margen op.</th><th class="num">Caja/deuda neta</th><th class="num">Caja libre</th><th class="num">Dilución</th><th class="num">PER fut.</th></tr></thead><tbody>`;
   const row=(x,on)=>{const s=x.s,c=NODES[x.node].color,cg=revCagr(s),h2=SRET[s.t]||[],ov=basis==='hist'?stockProsp(s).v:h2[0];
     return `<tr style="${on?'':'opacity:.5'}"><td class="mono" style="color:${c};font-size:11px">${NODES[x.node].city.split(' ')[0].toUpperCase()}</td><td class="mono" style="color:${c};font-weight:600">${s.t}</td><td>${esc(s.n)}</td>
     <td class="num" style="color:${x.band?PROFILES[x.band].color:'var(--dim)'}">${x.v==null?'n/d':p1(x.v)}${basis==='hist'?perTag(h2[2]):''}</td><td class="num" style="color:var(--dim)">${ov==null?'n/d':p1(ov)}</td><td class="num">${p1(x.vol,0)}</td><td>${bandChip(x.band)}</td><td style="font-size:11px;color:var(--dim);white-space:normal;max-width:240px">${on?'<span style="color:var(--good)">Encaja</span>':esc(x.why||(x.band&&x.band!==profile?'Banda '+BAND_LBL[x.band]:''))}</td>
@@ -1443,11 +1489,12 @@ function etfBody(id){
      <div class="mini" style="grid-template-columns:repeat(3,1fr)">
        <div><span class="lbl">Hist. ${PER_LBL[e.per||'10a']}</span><b style="color:${PROFILES[bandOf(e.r10)].color}">${p1(e.r10)}</b></div>
        <div><span class="lbl">Prospectiva</span><b style="color:${PROFILES[bandOf(etfProsp(e))].color}">${p1(etfProsp(e))}</b></div>
-       <div><span class="lbl">Volatilidad</span><b style="color:${e.vol>(PROFILES[cur.band]?.etfVol??99)?'var(--bad)':'var(--fg)'}">${p1(e.vol)}</b></div>
+       <div><span class="lbl">Riesgo anual</span><b style="color:${e.vol>(PROFILES[cur.band]?.etfVol??99)?'var(--bad)':'var(--fg)'}">${p1(e.vol)}</b></div>
        <div><span class="lbl">TER</span><b>${e.ter.toFixed(2).replace('.',',')}%</b></div>
        <div><span class="lbl">Rent./riesgo</span><b>${rankE(cur).toFixed(2).replace('.',',')}</b></div>
        <div><span class="lbl">${e.lev?'Apalanc.':'YTD'}</span><b style="color:${e.lev?'var(--warn)':(live?.ytd??0)>=0?'var(--good)':'var(--bad)'}">${e.lev?e.L+'x diario':live&&st.status==='done'?fmtPct(live.ytd):'—'}</b></div>
      </div>
+     ${annBlock(e.t,color)}
      <p style="margin:0;font-size:12.5px;line-height:1.5;color:var(--mid)">${esc(e.w)}${st.signal?` <span style="color:${color}">${esc(st.signal)}</span>`:''}</p>
      <div><span class="lbl">Rentabilidad vs volatilidad · bandas de perfil</span>${chart}</div>
      ${st.flags&&st.flags.length?`<p style="margin:0;font-size:12px;color:var(--warn)">⚠ ${st.flags.map(esc).join(' · ')}</p>`:''}
