@@ -1,11 +1,30 @@
 crumb ok
-OK acciones 173/174 · ETFs 41/42 · fondos 32/39 · sin sede 0 · 468 s
+OK acciones 173/174 · ETFs 41/42 · fondos 13/39 · sin sede 0 · 118 s
   - s ROG.SW: HTTP Error 404: Not Found
   - e ESPO.DE: HTTP Error 404: Not Found
+  - f IE00BYX5M476 FEP2.MU: menos de 2 años de historia
+  - f IE00BYX5MS15 (Fidelity MSCI Europe Index P-ACC-EUR): Yahoo no lo identifica con seguridad
+  - f IE00BYX5P602 (Fidelity MSCI Japan Index P-ACC-EUR): Yahoo no lo identifica con seguridad
+  - f IE00BYX5MD61 (Fidelity MSCI Pacific ex-Japan Index P-ACC-EUR): Yahoo no lo identifica con seguridad
+  - f IE0007286036 (Vanguard Japan Stock Index EUR Acc): Yahoo no lo identifica con seguridad
+  - f IE0007987708 (Vanguard European Stock Index EUR Acc): Yahoo no lo identifica con seguridad
+  - f IE00B04GQT48 (Vanguard Euro Investment Grade Bond Index EUR Acc): Yahoo no lo identifica con seguridad
+  - f IE0007472115 (Vanguard Euro Government Bond Index EUR Acc): Yahoo no lo identifica con seguridad
   - f IE00B5456Q47: no encontrado en Yahoo
+  - f IE00BD0NCL49 (iShares Europe Index Fund (IE) D Acc EUR): Yahoo no lo identifica con seguridad
   - f IE00BDRK7S48: no encontrado en Yahoo
+  - f IE00BD0NCN62 (iShares North America Index Fund (IE) D Acc EUR): Yahoo no lo identifica con seguridad
+  - f ES0119184002 (Cobas Selección FI): Yahoo no lo identifica con seguridad
+  - f ES0173323009 (Renta 4 Nexus FI): Yahoo no lo identifica con seguridad
+  - f ES0138534039 (Santalucía Espabolsa A FI): Yahoo no lo identifica con seguridad
+  - f LU0599946893 HVJ9.F: menos de 2 años de historia
+  - f FR0010135103 Y9U6.F: menos de 2 años de historia
   - f LU0323578657: no encontrado en Yahoo
+  - f IE00B6X8T619 WYZZ.MU: menos de 2 años de historia
+  - f LU0099574567 FJ2P.F: menos de 2 años de historia
   - f LU0552385295: no encontrado en Yahoo
+  - f LU1279334210 LU1279334210.SG: menos de 2 años de historia
   - f LU0171310443: no encontrado en Yahoo
   - f LU0348926287: no encontrado en Yahoo
+  - f LU0210536198 (JPMorgan US Select Equity Plus A EUR): Yahoo no lo identifica con seguridad
   - f LU0119620416: no encontrado en Yahoo
