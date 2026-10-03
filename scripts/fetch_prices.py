@@ -7,7 +7,9 @@ import json, time, urllib.request, urllib.parse, datetime, sys, os, csv, io
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SYM = os.path.join(ROOT, 'data', 'symbols.json')
-OUT = os.path.join(ROOT, 'data', 'prices.json')
+OUT = os.path.join(ROOT, 'data', 'prices.json')   # antiguo (se elimina)
+PDIR = os.path.join(ROOT, 'data', 'p')            # un archivo pequeño por valor: la ficha solo descarga el suyo
+safe = lambda k: __import__('re').sub(r'[^A-Za-z0-9_.-]', '_', k)
 LOG = os.path.join(ROOT, 'data', 'prices_log.txt')
 EOD_KEY = os.environ.get('EODHD_KEY') or '6ac044dd2ffb75.42832912'
 UA = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36',
@@ -99,9 +101,13 @@ def eodhd(v):
 def main():
     global yahoo_ok, yahoo_fail_streak
     syms = json.load(open(SYM))
-    try: old = json.load(open(OUT))
-    except Exception: old = {'data': {}}
-    data, fails, src_n = {}, [], {}
+    old = {'data': {}}
+    os.makedirs(PDIR, exist_ok=True)
+    for f in os.listdir(PDIR):
+        if f.endswith('.json') and not f.startswith('_'):
+            try: old['data'][json.load(open(os.path.join(PDIR, f)))['k']] = json.load(open(os.path.join(PDIR, f)))
+            except Exception: pass
+    data, fails, src_n, fresh = {}, [], {}, set()
     order = sorted(syms.items(), key=lambda kv: 0 if kv[0].startswith('f:') else 1)  # fondos primero (necesitan EODHD si Yahoo falla)
     t0 = time.time()
     for key, v in order:
@@ -126,13 +132,17 @@ def main():
             try: got = eodhd(v)
             except Exception as e: errs.append('eodhd ' + str(e)[:60])
         if got:
-            data[key] = got; s = got['y'].split(':')[0] if ':' in got['y'] else 'yahoo'; src_n[s] = src_n.get(s, 0) + 1
+            data[key] = got; fresh.add(key); s = got['y'].split(':')[0] if ':' in got['y'] else 'yahoo'; src_n[s] = src_n.get(s, 0) + 1
         else:
             fails.append(key + ' | ' + ' ; '.join(errs))
             if key in old.get('data', {}): data[key] = old['data'][key]
         time.sleep(0.25)
-    out = {'updated': datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%MZ'), 'data': data}
-    json.dump(out, open(OUT, 'w'), separators=(',', ':'))
+    upd = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%MZ')
+    for k, v in data.items():
+        v = dict(v, k=k, u=v.get('u') if k not in fresh else upd)
+        json.dump(v, open(os.path.join(PDIR, safe(k) + '.json'), 'w'), separators=(',', ':'))
+    json.dump({'updated': upd, 'n': len(data)}, open(os.path.join(PDIR, '_meta.json'), 'w'))
+    if os.path.exists(OUT): os.remove(OUT)
     L(f'OK {len(data)}/{len(syms)} · fuentes {src_n} · fallos {len(fails)} · {int(time.time()-t0)} s')
     for f in fails: L('  -', f)
     open(LOG, 'w').write('\n'.join(log) + '\n')

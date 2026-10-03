@@ -15,16 +15,10 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
-<script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+<link rel="preconnect" href="https://api.mapbox.com" crossorigin>
+<link rel="preload" as="script" href="https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.js" crossorigin>
+<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.css">
 <style>
 /* Layout: full-bleed WebGL globe; glass command bar (top), node roster (left), NY HQ strategy (right), log terminal (bottom). Below 1100px the panels stack under a 62vh globe. Single dark look by design. */
 :root{
@@ -427,7 +421,7 @@ body.mapmode #searchFab{display:none!important}
 .lv-ch{display:flex;flex-direction:column;align-items:flex-end;font-family:var(--mono);font-size:12.5px;gap:2px}.lv-svg{width:100%;height:auto;margin-top:8px}.lv-off{margin:0;font-size:12.5px;color:var(--mid)}
 .mb-leg{display:flex;gap:12px;align-self:flex-start;font-size:11.5px;color:var(--mid);padding:5px 12px;border-radius:999px;background:rgba(16,14,36,.8)}
 .mb-leg span{display:flex;align-items:center;gap:5px}.lg{display:inline-block;width:11px;height:11px;border:2px solid;background:#0d0b22}
-.lg.e{border-color:#7ff6ff;clip-path:polygon(25% 3%,75% 3%,100% 50%,75% 97%,25% 97%,0 50%);background:#7ff6ff}.lg.f{border-color:#ff9be0;border-radius:3px}.lg.s{border-color:#ffd24a;border-radius:50%}
+.lg.e{border-color:#35e0ff;clip-path:polygon(25% 3%,75% 3%,100% 50%,75% 97%,25% 97%,0 50%);background:#35e0ff}.lg.f{border-color:#c084fc;border-radius:3px}.lg.s{border-color:#ffb020;border-radius:50%}
 .atlas-tip .maplibregl-popup-content{background:rgba(16,14,36,.95);color:var(--fg);border:1px solid var(--edge2);border-radius:10px;padding:8px 11px;font:12.5px Inter,system-ui,sans-serif;display:flex;flex-direction:column;gap:2px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
 .atlas-tip .maplibregl-popup-content span{color:var(--mid);font-size:11.5px}.atlas-tip .maplibregl-popup-tip{display:none}
 .hq-pin i{height:140px!important;width:3px!important;left:11.5px!important;background:linear-gradient(to top,#ffffff,#b9f6ff 30%,rgba(185,246,255,0))!important;box-shadow:0 0 18px #b9f6ff,0 0 40px rgba(185,246,255,.6)!important}
@@ -436,6 +430,26 @@ body.mapmode #searchFab{display:none!important}
 .tv summary{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;list-style:none;font-weight:600;font-size:14px}.tv summary::-webkit-details-marker{display:none}
 .tv summary small{font-weight:400;color:var(--dim);font-size:11.5px}.tv summary::after{content:'▾';color:var(--mid);margin-left:6px}.tv[open] summary::after{content:'▴'}
 .tvbox{height:420px;margin-top:10px;border-radius:10px;overflow:hidden;background:#100e22}@media (max-width:700px){.tvbox{height:360px}}
+
+/* generador del Polo Norte */
+.pole-gen{position:relative;width:120px;height:150px;cursor:pointer;--blip:#9ff8ff}
+.pg-beam{position:absolute;left:58px;bottom:18px;width:4px;height:120px;background:linear-gradient(to top,rgba(185,246,255,.9),rgba(185,246,255,0));filter:blur(.5px);box-shadow:0 0 16px rgba(185,246,255,.7);animation:pgbeam 3.2s ease-in-out infinite}
+.pg-core{position:absolute;left:44px;bottom:6px;width:32px;height:32px;border-radius:50%;background:radial-gradient(circle,#ffffff 0%,#b9f6ff 35%,rgba(120,90,255,.35) 70%,transparent 72%);box-shadow:0 0 22px #b9f6ff,0 0 50px rgba(160,120,255,.5)}
+.pg-core i{position:absolute;inset:9px;border-radius:3px;background:#0c0a24;transform:rotate(45deg);box-shadow:inset 0 0 6px #b9f6ff}
+.pg-ring{position:absolute;left:50%;bottom:22px;border:1.5px solid rgba(185,246,255,.55);border-radius:50%;transform:translate(-50%,50%) rotateX(70deg);animation:pgspin 9s linear infinite}
+.pg-ring.r1{width:56px;height:56px}.pg-ring.r2{width:80px;height:80px;border-color:rgba(192,132,252,.45);animation-duration:14s;animation-direction:reverse}.pg-ring.r3{width:110px;height:110px;border-color:rgba(255,176,32,.3);animation-duration:22s}
+.pg-lbl{position:absolute;left:50%;bottom:-36px;transform:translateX(-50%);white-space:nowrap;text-align:center;font:600 10px/1.3 Inter,system-ui,sans-serif;letter-spacing:.08em;color:#e9fbff;text-shadow:0 0 8px rgba(0,0,0,.9)}
+.pg-lbl span{display:block;font-weight:400;letter-spacing:0;color:var(--mid);font-size:10px}
+.pole-gen.blip .pg-core{animation:pgblip .9s ease-out}
+@keyframes pgspin{to{transform:translate(-50%,50%) rotateX(70deg) rotateZ(360deg)}}
+@keyframes pgbeam{50%{opacity:.55}}
+@keyframes pgblip{0%{box-shadow:0 0 22px #b9f6ff,0 0 0 0 var(--blip)}100%{box-shadow:0 0 22px #b9f6ff,0 0 0 26px transparent}}
+.pg-card{padding:12px 16px 16px}.pg-n{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}.pg-n div{background:rgba(255,255,255,.04);border:1px solid var(--edge);border-radius:12px;padding:10px;text-align:center}
+.pg-n b{display:block;font-size:22px;font-family:var(--mono)}.pg-n span{font-size:11.5px;color:var(--mid)}.pg-card p{font-size:12.5px;line-height:1.5;margin:6px 0}
+.pg-act{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+/* fichas: aparición suave */
+.dsheet:not([hidden]) .dbox{animation:dboxin .22s ease-out}@keyframes dboxin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.pg-ring,.pg-beam{animation:none}}
 </style>
 </head>
 <body>
@@ -1715,7 +1729,7 @@ async function loadNews(q,box){
   box.innerHTML=`<p class="mp-note">No he podido cargar titulares desde aquí. Ábrelos directamente:</p>`+links}
 function openDetail(kind,t,node){litNode=node;const d=$('#detail');let html='';if(d.hidden)sheetPush();
   if(kind==='f'){const f=FUNDS.find(x=>x.t===t);if(!f)return;d.innerHTML=`<div class="dbox">${fundDetail(f)}</div>`;d.hidden=false;loadNews(`${f.n} fondo`,$('#dNews'))}
-  else if(kind==='s'){const l=STOCKS[node]||Object.values(STOCKS).flat(),s=(STOCKS[node]||[]).find(x=>x.t===t)||Object.values(STOCKS).flat().find(x=>x.t===t);if(!s)return;const info=stockInfo(s),an=annStats(s.t),color=NODES[node].color;
+  else if(kind==='s'){const l=STOCKS[node]||Object.values(STOCKS).flat(),s=(STOCKS[node]||[]).find(x=>x.t===t)||Object.values(STOCKS).flat().find(x=>x.t===t);if(!s)return;const info=stockInfo(s),an=annStats(s.t),color=KIND_C.s;
     html=`<div class="dhead" style="--c:${color}"><div class="dlogo">${esc(dispT(s).slice(0,4))}</div><div class="dtit"><h3>${esc(s.n)}</h3><p>${esc(dispT(s))} · ${esc(s.sec||'')} · Sede: ${esc(s.hq||NODES[node].city)}</p></div><button class="x-close" data-close aria-label="Cerrar">✕</button></div>
      <div class="dbody"><div class="dprice"><b>${s.cur==='USD'?'$':''}${s.px.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})}${s.cur!=='USD'?' '+(s.cur==='EUR'?'€':s.cur):''}</b>${s.ch52!=null?`<span class="dtag" style="--b:${s.ch52>=0?'var(--good)':'var(--bad)'}">${fmtPct(s.ch52,0)} en 12 meses</span>`:''}${fitPill(info,true)}</div>
      ${s.since?`<p class="mp-note">${esc(s.since)}</p>`:''}
@@ -1727,7 +1741,7 @@ function openDetail(kind,t,node){litNode=node;const d=$('#detail');let html='';i
      <div class="dsec"><h4>Noticias</h4><div id="dNews"></div></div>
      <p class="mp-note">Datos: StockAnalysis y PortfoliosLab, 29 sep.–2 oct. 2026. No es asesoramiento financiero.</p></div>`;
     d.innerHTML=`<div class="dbox">${html}</div>`;d.hidden=false;loadNews(`${s.n} acciones`,$('#dNews'))}
-  else{const e=UNIV.find(x=>x.t===t);if(!e)return;const info=etfInfo(e),an=e.ann,color=NODES[e.node].color,tk=e.u?e.u.t:e.t;
+  else{const e=UNIV.find(x=>x.t===t);if(!e)return;const info=etfInfo(e),an=e.ann,color=KIND_C.e,tk=e.u?e.u.t:e.t;
     html=`<div class="dhead" style="--c:${color}"><div class="dlogo">${esc(tk.slice(0,4))}</div><div class="dtit"><h3>${esc(e.u?e.u.n:e.n)}</h3><p>ETF · ${esc(THEME[e.t]||e.n)} · Gestora: ${esc(e.iss||'')} (${esc(e.issHq||'')})</p></div><button class="x-close" data-close aria-label="Cerrar">✕</button></div>
      <div class="dbody"><div class="dprice">${fitPill(info,false)}${e.lev?`<span class="dtag" style="--b:var(--warn)">Apalancado ×${e.L}</span>`:''}</div>
      <div class="dkpi"><div><span>Rentab. 10 años</span><b>${p1(e.r10)}</b></div><div><span>Media anual${an?' '+an.from+'–'+String(an.to).slice(2):''}</span><b style="color:${an&&an.mean<0?'var(--bad)':'var(--good)'}">${an?p1(an.mean,0):'n/d'}</b></div><div><span>Peor año</span><b style="color:var(--bad)">${an?p1(an.worst,0):'n/d'}</b></div><div><span>Gastos (TER)</span><b>${e.ter.toFixed(2).replace('.',',')} %</b></div></div>
@@ -1739,7 +1753,7 @@ function openDetail(kind,t,node){litNode=node;const d=$('#detail');let html='';i
      <p class="mp-note">Rentabilidad y volatilidad: PortfoliosLab, 29 sep.–2 oct. 2026. No es asesoramiento financiero.</p></div>`;
     d.innerHTML=`<div class="dbox">${html}</div>`;d.hidden=false;loadNews(`${e.u?e.u.n:e.n} ETF`,$('#dNews'))}
   {const db=d.querySelector('.dbody'),o=kind==='f'?FUNDS.find(x=>x.t===t):kind==='s'?((STOCKS[node]||[]).find(x=>x.t===t)||Object.values(STOCKS).flat().find(x=>x.t===t)):UNIV.find(x=>x.t===t);
-   if(db&&o){db.insertAdjacentHTML('afterbegin','<div class="dsec lv" id="dLive"></div>'+tvBlock(kind,o));const tvd=db.querySelector('details.tv');if(tvd)tvd.addEventListener('toggle',()=>{if(tvd.open)tvMount(tvd)});loadLive($('#dLive'),kind,o,(NODES[node]||NODES[o.node]||{color:'#9ff8ff'}).color)}}
+   if(db&&o){db.insertAdjacentHTML('afterbegin','<div class="dsec lv" id="dLive"></div>'+tvBlock(kind,o));const tvd=db.querySelector('details.tv');if(tvd)tvd.addEventListener('toggle',()=>{if(tvd.open)tvMount(tvd)});loadLive($('#dLive'),kind,o,KIND_C[kind]||'#9ff8ff')}}
   d.querySelector('[data-close]').addEventListener('click',closeDetail);d.scrollTop=0;
 }
 $('#detail').addEventListener('click',e=>{if(e.target.id==='detail')closeDetail()});
@@ -1781,9 +1795,12 @@ const ISS_GEO={"VanEck": "VanEck", "iShares (BlackRock)": "iShares / BlackRock",
 const FUND_GEO={"FIDW": "Fidelity International (FIL)", "FIDS": "Fidelity International (FIL)", "AMWD": "Amundi", "AMEM": "Amundi", "ISDW": "iShares / BlackRock", "ISEM": "iShares / BlackRock", "MYEW": "MyInvestor (Andbank España)", "MYNQ": "MyInvestor (Andbank España)", "COBA": "Cobas Asset Management", "AZVA": "azValor Asset Management", "MAGA": "Magallanes Value Investors", "BEST": "Bestinver", "TRUV": "True Value Investments", "BAEL": "Baelo Patrimonio", "FSMT": "Fundsmith LLP", "SEIL": "Seilern Investment Management", "HAMC": "Hamco Asset Management", "CART": "Cartesio Inversiones", "VGLB": "Vanguard", "VUS5": "Vanguard", "VEM": "Vanguard", "VSML": "Vanguard", "VEUZ": "Vanguard", "VBND": "Vanguard"};
 
 /* ================= MAPA GEORREFERENCIADO (MapLibre + OpenFreeMap) ================= */
-const MAPMODE=!/[?&]globe=3d/.test(location.search)&&!!window.maplibregl;
+const MAPMODE=!/[?&]globe=3d/.test(location.search);
+function loadScript(src){return new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=rej;document.head.appendChild(sc)})}
+function loadCss(href){const l=document.createElement('link');l.rel='stylesheet';l.href=href;document.head.appendChild(l)}
+async function loadMapLibre(){if(window.maplibregl)return;loadCss('https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css');await loadScript('https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js')}
 const MAP_STYLE='https://tiles.openfreemap.org/styles/dark';
-const KIND_C={e:'#7ff6ff',f:'#ff9be0',s:'#ffd24a'},KIND_L={e:'ETF',f:'Fondo',s:'Acción'};
+const KIND_C={e:'#35e0ff',f:'#c084fc',s:'#ffb020'},KIND_L={e:'ETF',f:'Fondo',s:'Acción'};
 let map=null,mapReady=false,hqMarker=null,mapFocus=null;
 const PREC_TXT={edificio:'Ubicación exacta del edificio',direccion:'Dirección verificada · punto aproximado (±200 m)',ciudad:'Solo a nivel de ciudad'};
 function entGeo(x){ // [lat,lon,addr,prec,key,who]
@@ -1824,13 +1841,9 @@ function fxSetup(){
   map.addImage('win-lit',winPattern(true),{pixelRatio:2});map.addImage('win-dim',winPattern(false),{pixelRatio:2});
   if(map.getLayer('b3d')){map.setPaintProperty('b3d','fill-extrusion-pattern','win-dim')}
   map.addSource('flows',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-  map.addLayer({id:'flows',type:'line',source:'flows',maxzoom:9,layout:{'line-cap':'round'},paint:{'line-color':['get','c'],'line-width':1.4,'line-opacity':['interpolate',['linear'],['zoom'],1,.5,8,0],'line-dasharray':[0,4,3]}},'cl-glow');
+  map.addLayer({id:'flows',type:'line',source:'flows',maxzoom:9,layout:{'line-cap':'round'},paint:{'line-color':['get','c'],'line-width':1,'line-opacity':['interpolate',['linear'],['zoom'],1,.16,6,.08,8,0],'line-dasharray':[0,4,3]}},'cl-glow');
   map.addSource('packets',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-  map.addLayer({id:'packets',type:'circle',source:'packets',maxzoom:9,paint:{'circle-color':['get','c'],'circle-radius':2.6,'circle-blur':.3,'circle-opacity':['interpolate',['linear'],['zoom'],1,.95,8,0]}},'cl-glow');
-  map.addSource('heat',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
-  map.addLayer({id:'heat',type:'heatmap',source:'heat',maxzoom:8,paint:{'heatmap-radius':['interpolate',['linear'],['zoom'],0,14,7,40],'heatmap-intensity':.9,
-    'heatmap-color':['interpolate',['linear'],['heatmap-density'],0,'rgba(0,0,0,0)',.2,'rgba(80,60,180,.35)',.5,'rgba(255,150,220,.55)',.8,'rgba(255,214,140,.75)',1,'rgba(255,250,235,.9)'],
-    'heatmap-opacity':['interpolate',['linear'],['zoom'],0,.85,8,0]}},'flows');
+  map.addLayer({id:'packets',type:'circle',source:'packets',maxzoom:9,paint:{'circle-color':['get','c'],'circle-radius':1.8,'circle-blur':.4,'circle-opacity':['interpolate',['linear'],['zoom'],1,.55,8,0]}},'cl-glow');
   map.addLayer({id:'hq-ring',type:'circle',source:'hq',paint:{'circle-color':'rgba(0,0,0,0)','circle-stroke-color':'#b9f6ff','circle-stroke-width':2,'circle-radius':10,'circle-stroke-opacity':0,'circle-pitch-alignment':'map'}});
   // tooltip al pasar el ratón
   const tip=new GL.Popup({closeButton:false,closeOnClick:false,offset:14,className:'atlas-tip'});
@@ -1838,20 +1851,41 @@ function fxSetup(){
     tip.setLngLat(e.lngLat).setHTML(`<b>${esc(x.name)}</b><span>${KIND_L[x.k]} · ${an?p1(an.mean,0)+' media anual':'sin historial'}</span>`).addTo(map)});
   map.on('mouseleave','pt',()=>tip.remove());
   ['mousedown','touchstart','wheel','dragstart'].forEach(ev=>map.on(ev,()=>{fxOrbit=false}));
+  try{poleSetup()}catch(e){console.warn('polo',e)}
   cancelAnimationFrame(fxRaf);fxRaf=requestAnimationFrame(fxTick)}
+/* ---- Generador de datos del Polo Norte: aquí llegan los datos de todas las sedes ---- */
+let poleMk=null;
+function poleSetup(){const el=document.createElement('div');el.className='pole-gen';el.setAttribute('role','button');el.setAttribute('aria-label','Base de datos ATLAS en el Polo Norte');
+  el.innerHTML='<div class="pg-beam"></div><div class="pg-ring r1"></div><div class="pg-ring r2"></div><div class="pg-ring r3"></div><div class="pg-core"><i></i></div><div class="pg-lbl"><b>ATLAS · BASE DE DATOS</b><span id="pgStat">sincronizando…</span></div>';
+  el.addEventListener('click',e=>{e.stopPropagation();showPole()});
+  poleMk=new GL.Marker({element:el,anchor:'bottom'}).setLngLat(POLE).addTo(map);poleStat()}
+async function poleStat(){const n=searchEntities().length;let up='';try{const r=await fetch('data/p/_meta.json',{cache:'no-cache'});if(r.ok){const m=await r.json();up=m.updated}}catch(_){}
+  window._poleUp=up;const e=$('#pgStat');if(e)e.textContent=`${n} valores${up?' · act. '+up.slice(8,10)+'/'+up.slice(5,7)+' '+up.slice(11,16)+' UTC':''}`}
+function poleBlip(c){const el=poleMk&&poleMk.getElement();if(!el)return;el.style.setProperty('--blip',c||'#9ff8ff');el.classList.remove('blip');void el.offsetWidth;el.classList.add('blip')}
+function showPole(){const p=$('#mcard'),ents=searchEntities(),n={s:0,e:0,f:0};ents.forEach(x=>n[x.k]++);const up=window._poleUp||'';
+  p.innerHTML=`<div class="mc-h"><div><h3>ATLAS · Base de datos</h3><p>El generador del Polo Norte: aquí llegan los datos de todas las sedes.</p></div><button class="x-close" data-mclose aria-label="Cerrar">✕</button></div>
+   <div class="pg-card"><div class="pg-n"><div><b style="color:${KIND_C.s}">${n.s}</b><span>acciones</span></div><div><b style="color:${KIND_C.e}">${n.e}</b><span>ETFs</span></div><div><b style="color:${KIND_C.f}">${n.f}</b><span>fondos</span></div></div>
+   <p>Última actualización de precios: <b>${up?up.slice(8,10)+'/'+up.slice(5,7)+' a las '+up.slice(11,16)+' UTC':'—'}</b>. Se actualiza solo cada día laborable a las 19:35 y 23:25 (hora de Madrid).</p>
+   <p class="mp-note">Fuentes: Yahoo Finance (precios, cifras y rentabilidades), OpenStreetMap (sedes), EODHD (respaldo de fondos), fichas de las gestoras (fondos), Mapbox (mapa) y TradingView (gráfico interactivo).</p>
+   <div class="pg-act"><button class="btn" data-pg="all">Encender todo el mapa</button><button class="btn2" data-pg="plan">Ver mi plan</button></div></div>`;
+  p.hidden=false;requestAnimationFrame(()=>p.classList.add('on'));mapFocus='pole';
+  p.querySelector('[data-mclose]').addEventListener('click',closePlace);
+  p.querySelector('[data-pg=all]').addEventListener('click',()=>{sq.active=true;sq.type='all';sq.sec='all';sq.fit=false;sq.q='';closePlace();updateMap()});
+  p.querySelector('[data-pg=plan]').addEventListener('click',()=>{closePlace();const r=$('.right');if(r)r.scrollIntoView({behavior:'smooth'})});
+  map.flyTo({center:[POLE[0],78],zoom:2.6,pitch:35,bearing:0,duration:1600,padding:mapPad()})}
 function fxData(gj){ // flujos desde cada sede encendida hacia la base de datos del Polo Norte
   const seen=new Map();gj.features.forEach(f=>{const k=f.properties.gk;if(!seen.has(k))seen.set(k,f)});
-  fxFlows=[...seen.values()].slice(0,90).map((f,i)=>({c:f.properties.c,line:slerpLine(f.geometry.coordinates,POLE,60),ph:Math.random()}));
+  fxFlows=[...seen.values()].slice(0,60).map((f,i)=>({c:f.properties.c,line:slerpLine(f.geometry.coordinates,POLE,60),ph:Math.random()}));
   map.getSource('flows').setData({type:'FeatureCollection',features:fxFlows.map(f=>({type:'Feature',geometry:{type:'LineString',coordinates:f.line},properties:{c:f.c}}))});
-  map.getSource('heat').setData({type:'FeatureCollection',features:gj.features.map(f=>({type:'Feature',geometry:f.geometry,properties:{}}))});
-  fxPackets=fxFlows.map(f=>({f,t:f.ph,v:.05+Math.random()*.05}))}
+  fxPackets=fxFlows.filter((_,i)=>i%3===0).slice(0,16).map(f=>({f,t:f.ph,v:.012+Math.random()*.01}))}
 const DASH=[[0,4,3],[.5,4,2.5],[1,4,2],[1.5,4,1.5],[2,4,1],[2.5,4,.5],[3,4,0],[0,.5,3,3.5],[0,1,3,3],[0,1.5,3,2.5],[0,2,3,2],[0,2.5,3,1.5],[0,3,3,1],[0,3.5,3,.5]];
 let _dashI=-1,_lastNow=performance.now();
-function fxTick(now){fxRaf=requestAnimationFrame(fxTick);if(!mapReady||document.hidden)return;const dt=Math.min(.05,(now-_lastNow)/1000);_lastNow=now;
-  if(fxFlows.length&&map.getZoom()<9){const di=Math.floor(now/90)%DASH.length;if(di!==_dashI){_dashI=di;map.setPaintProperty('flows','line-dasharray',DASH[di])}
-    fxPackets.forEach(p=>{p.t=(p.t+p.v*dt)%1});
+let _pktT=0,_ringT=0;
+function fxTick(now){fxRaf=requestAnimationFrame(fxTick);if(!mapReady||document.hidden||!$('#detail').hidden||!$('#search').hidden)return;const dt=Math.min(.05,(now-_lastNow)/1000);_lastNow=now;
+  if(fxFlows.length&&map.getZoom()<9&&now-_pktT>140){const sdt=(now-_pktT)/1000;_pktT=now;const di=Math.floor(now/260)%DASH.length;if(di!==_dashI){_dashI=di;map.setPaintProperty('flows','line-dasharray',DASH[di])}
+    fxPackets.forEach(p=>{p.t+=p.v*Math.min(.5,sdt);if(p.t>=1){p.t-=1;poleBlip(p.f.c)}});
     map.getSource('packets').setData({type:'FeatureCollection',features:fxPackets.map(p=>{const L=p.f.line,i=Math.min(L.length-1,Math.floor(p.t*(L.length-1)));return{type:'Feature',geometry:{type:'Point',coordinates:L[i]},properties:{c:p.f.c}}})})}
-  if(mapFocus){const k=((now-fxT0)/1600)%1;map.setPaintProperty('hq-ring','circle-radius',10+k*140);map.setPaintProperty('hq-ring','circle-stroke-opacity',(1-k)*.8)}
+  if(mapFocus&&now-_ringT>33){_ringT=now;const k=((now-fxT0)/1800)%1;map.setPaintProperty('hq-ring','circle-radius',10+k*140);map.setPaintProperty('hq-ring','circle-stroke-opacity',(1-k)*.8)}
   if(fxOrbit&&!map.isMoving())map.setBearing(map.getBearing()+dt*4)}
 function roadsLit(on){const st=map.getStyle();if(!st)return;if(!_roadOrig){_roadOrig={};st.layers.forEach(l=>{if(l.type==='line'&&/transportation|road|highway|street/i.test((l['source-layer']||'')+l.id)){_roadOrig[l.id]=map.getPaintProperty(l.id,'line-color')}})}
   Object.keys(_roadOrig).forEach(id=>{try{map.setPaintProperty(id,'line-color',on?['interpolate',['linear'],['zoom'],12,'#7a4a2a',16,'#ffb35a']:_roadOrig[id])}catch(_){}})}
@@ -1863,17 +1897,17 @@ function mbxToken(){try{return localStorage.getItem('atlas_mbx')||MAPBOX_TOKEN}c
 const FONT=()=>MBX?['DIN Pro Bold','Arial Unicode MS Bold']:['Noto Sans Bold'];
 const promisify=(fn)=>new Promise((res,rej)=>{let done=false;const r=fn((e,v)=>{if(done)return;done=true;e?rej(e):res(v)});if(r&&r.then)r.then(v=>{if(!done){done=true;res(v)}},e=>{if(!done){done=true;rej(e)}})});
 function loadMapbox(){return new Promise((res,rej)=>{if(window.mapboxgl)return res(window.mapboxgl);const V='v3.8.0';
-  const l=document.createElement('link');l.rel='stylesheet';l.href=`https://api.mapbox.com/mapbox-gl-js/${V}/mapbox-gl.css`;document.head.appendChild(l);
-  const sc=document.createElement('script');sc.src=`https://api.mapbox.com/mapbox-gl-js/${V}/mapbox-gl.js`;sc.onload=()=>window.mapboxgl?res(window.mapboxgl):rej(new Error('mapbox'));sc.onerror=()=>rej(new Error('mapbox'));document.head.appendChild(sc);
+    const sc=document.createElement('script');sc.src=`https://api.mapbox.com/mapbox-gl-js/${V}/mapbox-gl.js`;sc.onload=()=>window.mapboxgl?res(window.mapboxgl):rej(new Error('mapbox'));sc.onerror=()=>rej(new Error('mapbox'));document.head.appendChild(sc);
   setTimeout(()=>rej(new Error('timeout')),12000)})}
 async function initMap(){const st=$('#stage');st.classList.add('maponly');document.body.classList.add('mapmode');
   const tk=mbxToken();
   if(tk){try{const mb=await loadMapbox();mb.accessToken=tk;GL=mb;MBX=true;buildMap(true);return}catch(e){console.warn('Mapbox no disponible, uso MapLibre',e)}}
-  GL=window.maplibregl;MBX=false;buildMap(false)}
+  fallbackMapLibre()}
+async function fallbackMapLibre(){try{await loadMapLibre()}catch(e){$('#mapMsg').textContent='No se pudo cargar el mapa. Comprueba la conexión.';return}GL=window.maplibregl;MBX=false;buildMap(false)}
 function buildMap(useMbx){
   let styled=false;
   map=new GL.Map({container:'map',style:useMbx?'mapbox://styles/mapbox/standard':MAP_STYLE,projection:useMbx?'globe':undefined,center:[-25,32],zoom:mobile()?0.9:1.7,maxPitch:75,attributionControl:useMbx?true:{compact:true},fadeDuration:150});
-  if(useMbx){map.on('error',e=>{const st=e&&e.error&&(e.error.status||0);if(!styled&&(st===401||st===403||/token|unauthor/i.test(String(e.error&&e.error.message)))){console.warn('Token de Mapbox rechazado: vuelvo a MapLibre');try{map.remove()}catch(_){}GL=window.maplibregl;MBX=false;buildMap(false)}})}
+  if(useMbx){map.on('error',e=>{const st=e&&e.error&&(e.error.status||0);if(!styled&&(st===401||st===403||/token|unauthor/i.test(String(e.error&&e.error.message)))){console.warn('Token de Mapbox rechazado: vuelvo a MapLibre');try{map.remove()}catch(_){}fallbackMapLibre()}})}
   map.on('style.load',()=>{styled=true;
     if(MBX){try{map.setConfigProperty('basemap','lightPreset','night');map.setConfigProperty('basemap','showPointOfInterestLabels',false);map.setConfigProperty('basemap','showTransitLabels',false)}catch(_){}
       try{map.setFog({color:'#140f2c','high-color':'#3a2050','space-color':'#06051a','star-intensity':.45,'horizon-blend':.06})}catch(_){}}
@@ -1890,8 +1924,8 @@ function buildMap(useMbx){
     map.addSource('ents',{type:'geojson',data:mapGeoJSON(mapEntities()),cluster:true,clusterRadius:42,clusterMaxZoom:13,
       clusterProperties:{ne:['+',['case',['==',['get','k'],'e'],1,0]],nf:['+',['case',['==',['get','k'],'f'],1,0]],ns:['+',['case',['==',['get','k'],'s'],1,0]]}});
     const fade={duration:700,delay:0};
-    map.addLayer({id:'cl-glow',type:'circle',source:'ents',filter:['has','point_count'],paint:{'circle-color':['case',['all',['>=',['get','ne'],['get','nf']],['>=',['get','ne'],['get','ns']]],'#7ff6ff',['>=',['get','nf'],['get','ns']],'#ff9be0','#ffd24a'],'circle-radius':['step',['get','point_count'],20,5,26,20,34],'circle-blur':1,'circle-opacity':.0,'circle-opacity-transition':fade}});
-    map.addLayer({id:'cl',type:'circle',source:'ents',filter:['has','point_count'],paint:{'circle-color':'#171338','circle-radius':['step',['get','point_count'],11,5,14,20,18],'circle-stroke-color':['case',['all',['>=',['get','ne'],['get','nf']],['>=',['get','ne'],['get','ns']]],'#7ff6ff',['>=',['get','nf'],['get','ns']],'#ff9be0','#ffd24a'],'circle-stroke-width':2.5,'circle-opacity':0,'circle-stroke-opacity':0,'circle-opacity-transition':fade,'circle-stroke-opacity-transition':fade}});
+    map.addLayer({id:'cl-glow',type:'circle',source:'ents',filter:['has','point_count'],paint:{'circle-color':['case',['all',['>=',['get','ne'],['get','nf']],['>=',['get','ne'],['get','ns']]],'#35e0ff',['>=',['get','nf'],['get','ns']],'#c084fc','#ffb020'],'circle-radius':['step',['get','point_count'],20,5,26,20,34],'circle-blur':1,'circle-opacity':.0,'circle-opacity-transition':fade}});
+    map.addLayer({id:'cl',type:'circle',source:'ents',filter:['has','point_count'],paint:{'circle-color':'#171338','circle-radius':['step',['get','point_count'],11,5,14,20,18],'circle-stroke-color':['case',['all',['>=',['get','ne'],['get','nf']],['>=',['get','ne'],['get','ns']]],'#35e0ff',['>=',['get','nf'],['get','ns']],'#c084fc','#ffb020'],'circle-stroke-width':2.5,'circle-opacity':0,'circle-stroke-opacity':0,'circle-opacity-transition':fade,'circle-stroke-opacity-transition':fade}});
     map.addLayer({id:'cl-n',type:'symbol',source:'ents',filter:['has','point_count'],layout:{'text-field':['get','point_count_abbreviated'],'text-font':FONT(),'text-size':12,'text-allow-overlap':true},paint:{'text-color':'#ffffff'}});
     map.addLayer({id:'pt-glow',type:'circle',source:'ents',filter:['!',['has','point_count']],paint:{'circle-color':['get','c'],'circle-radius':16,'circle-blur':1,'circle-opacity':0,'circle-opacity-transition':fade}});
     map.addLayer({id:'pt',type:'symbol',source:'ents',filter:['!',['has','point_count']],layout:{'icon-image':['concat','ic-',['get','k']],'icon-size':['interpolate',['linear'],['zoom'],1,.55,10,.85,16,1.1],'icon-allow-overlap':true,'icon-ignore-placement':true},paint:{'icon-opacity':0,'icon-opacity-transition':fade}});
@@ -1937,17 +1971,17 @@ function showPlace(coord,items,exact){const p=$('#mcard');if(!items.length)retur
   const sameSpot=new Set(rows.map(x=>{const q=entGeo(x);return q&&q[4]})).size===1;
   p.innerHTML=`<div class="mc-h"><div><h3>${sameSpot?esc(who):`${rows.length} resultados en esta zona`}</h3>${sameSpot&&addr?`<p>📍 ${esc(addr)}</p><p class="mc-prec ${prec}">${PREC_TXT[prec]||''}</p>`:''}</div><button class="x-close" data-mclose aria-label="Cerrar">✕</button></div>
     <div class="mc-list">${rows.map(x=>entRow(x)).join('')}</div>`;
-  p.hidden=false;requestAnimationFrame(()=>p.classList.add('on'));
+  p.hidden=false;requestAnimationFrame(()=>p.classList.add('on'));prefetchPrices(rows);
   p.querySelector('[data-mclose]').addEventListener('click',closePlace);
   p.querySelectorAll('.sr').forEach(r=>r.addEventListener('click',()=>openDetail(r.dataset.k,r.dataset.t,r.dataset.n)));
-  if(sameSpot&&g){const c=ck?[ck[1],ck[0]]:[g[1],g[0]];flyHQ(c);if(!ck&&prec!=='edificio')refineGeo(g,coord)}
+  if(sameSpot&&g){const c=ck?[ck[1],ck[0]]:[g[1],g[0]];requestAnimationFrame(()=>{flyHQ(c);if(!ck&&prec!=='edificio')setTimeout(()=>refineGeo(g,coord),1800)})}
   else map.easeTo({center:coord,zoom:Math.max(map.getZoom(),11),duration:900,padding:mapPad()})}
 function litCity(c){if(!mapReady)return;const src=map.getSource('hq');if(src)src.setData({type:'FeatureCollection',features:c?[{type:'Feature',geometry:{type:'Point',coordinates:c},properties:{}}]:[]});
   if(map.getLayer('hq-glow'))map.setPaintProperty('hq-glow','circle-opacity',c?.32:0);if(map.getLayer('b3d')){map.setPaintProperty('b3d','fill-extrusion-color',c?B3D_LIT:B3D_DIM);if(map.hasImage('win-lit'))map.setPaintProperty('b3d','fill-extrusion-pattern',c?'win-lit':'win-dim');map.setPaintProperty('b3d','fill-extrusion-opacity',c?.97:.9)}
   try{roadsLit(!!c)}catch(_){}if(!c){fxOrbit=false;try{map.setPaintProperty('hq-ring','circle-stroke-opacity',0)}catch(_){}}}
 function flyHQ(c){if(hqMarker)hqMarker.remove();litCity(c);const el=document.createElement('div');el.className='hq-pin';el.innerHTML='<i></i><b></b>';
   hqMarker=new GL.Marker({element:el,anchor:'bottom'}).setLngLat(c).addTo(map);
-  fxOrbit=false;map.flyTo({center:c,zoom:16.4,pitch:62,bearing:-28,duration:2200,essential:true,padding:{...mapPad(),bottom:mobile()?Math.round(innerHeight*.18):20}});map.once('moveend',()=>{if(mapFocus)fxOrbit=!reduced})}
+  fxOrbit=false;map.flyTo({center:c,zoom:16.2,pitch:60,bearing:-28,duration:1600,curve:1.3,essential:true,padding:{...mapPad(),bottom:mobile()?Math.round(innerHeight*.18):20}});map.once('moveend',()=>{if(mapFocus)fxOrbit=!reduced})}
 async function refineGeo(g,coord){ // geocodifica la dirección en el móvil (OpenStreetMap) para afinar al edificio
   if(!g[2])return;try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(g[2].replace(/\(.*?\)/g,'')),{headers:{'Accept-Language':'es'}});
     const j=await r.json();if(!j||!j[0])return;const lat=+j[0].lat,lon=+j[0].lon;const d=Math.hypot((lat-g[0])*111,(lon-g[1])*111*Math.cos(g[0]*Math.PI/180));
@@ -1986,15 +2020,16 @@ function liveHTML(rows,cur,label,color,note){const last=rows[rows.length-1],prev
     <div class="lv-ch"><span style="color:${d1<0?'var(--bad)':'var(--good)'}">${d1>=0?'+':''}${p1(d1,2)} día</span><span style="color:${y1<0?'var(--bad)':'var(--good)'}">${y1>=0?'+':''}${p1(y1,1)} 12 meses</span></div></div>
     ${liveSpark(y,color)}<p class="mp-note">${note}</p>`}
 const CUR_SYM={USD:'$',EUR:'€',GBp:'p',GBP:' £',DKK:' kr',JPY:'¥',HKD:' HK$',INR:'₹',CHF:' CHF'};
-let _prices=null;
-function loadPrices(){if(_prices)return _prices;
+const _pcache={};const priceKey=(k,o)=>o.x?`${k}:x:${o.y}`:k+':'+o.t;
+function loadPrice(pk){if(pk in _pcache)return _pcache[pk];const f=pk.replace(/[^A-Za-z0-9_.-]/g,'_')+'.json';
   const tryUrl=u=>fetch(u,{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()});
-  return _prices=tryUrl('data/prices.json?d='+today()).catch(()=>tryUrl('https://raw.githubusercontent.com/acorchete16/ProjectATLAS/main/data/prices.json')).catch(()=>null)}
+  return _pcache[pk]=tryUrl('data/p/'+f).catch(()=>tryUrl('https://raw.githubusercontent.com/acorchete16/ProjectATLAS/main/data/p/'+f)).catch(()=>null)}
+function prefetchPrices(list){list.slice(0,12).forEach(x=>{try{loadPrice(priceKey(x.k,x.obj))}catch(_){}})}
 function priceRows(p){const d0=new Date(p.d0+'T00:00:00Z').getTime();return p.o.map((o,i)=>[new Date(d0+o*864e5).toISOString().slice(0,10),p.c[i]])}
 async function loadLive(el,k,o,color){if(!el)return;el.innerHTML=`<p class="lv-off">Cargando precio…</p>`;
-  const P=await loadPrices(),pk=o.x?`${k}:x:${o.y}`:k+':'+o.t,p=P&&P.data&&P.data[pk];
+  const p=await loadPrice(priceKey(k,o));
   if(p&&p.o&&p.o.length>1){const rows=priceRows(p);if(!el.isConnected)return;
-    el.innerHTML=liveHTML(rows,CUR_SYM[p.cur]||(p.cur?' '+p.cur:''),k==='f'?'Valor liquidativo':'Precio',color,`Cierres diarios de Yahoo Finance (${esc(p.y)}), actualizados ${P.updated?'el '+P.updated.slice(8,10)+'/'+P.updated.slice(5,7)+' a las '+P.updated.slice(11,16)+' UTC':'a diario'}.`);liveDedup(el);return}
+    el.innerHTML=liveHTML(rows,CUR_SYM[p.cur]||(p.cur?' '+p.cur:''),k==='f'?'Valor liquidativo':'Precio',color,`Cierres diarios de Yahoo Finance (${esc(p.y)}), actualizados ${p.u?'el '+p.u.slice(8,10)+'/'+p.u.slice(5,7)+' a las '+p.u.slice(11,16)+' UTC':'a diario'}.`);liveDedup(el);return}
   // respaldo: EODHD directo desde el móvil
   const key=eodKey(),sym=eodSym(k,o);
   if(!key){el.innerHTML=`<p class="lv-off">Sin precio diario para este valor todavía.</p>`;return}
@@ -2039,9 +2074,11 @@ function tvMount(det){const box=det.querySelector('.tvbox');if(!box||box.dataset
   box.firstChild.appendChild(sc)}
 
 const SEC_ICON={'Gestión activa':'🎯','Tecnología':'💻','Salud':'🧬','Energía':'⚡','Finanzas':'🏦','Consumo':'🛒','Defensa y espacio':'🚀','Infraestructuras':'🏗️','Mercado amplio':'🌍','Regiones y países':'🗺️','Bonos y oro':'🪙','Automoción':'🚗','Industria':'🏭','Lujo':'💎','Materias primas':'⛏️','Telecomunicaciones':'📡','Inmobiliario':'🏢','Otros':'◆'};
-function entEnrich(list){const o=buildPlan(profile),sp=buildStockPlan(profile),pw={};o.items.forEach(x=>pw['e'+x.e.t]=x.w);sp.items.forEach(x=>pw['s'+x.s.t]=x.w);
-  return list.map(x=>{const info=x.k==='s'?stockInfo(x.obj):x.k==='f'?fundInfo(x.obj):etfInfo(x.obj),an=annStats(x.t);return{...x,info,an,fit:info.band===profile&&info.ok,inPlan:pw[x.k+x.t]||0}})}
-function entRow(x,showCity=true){const c=NODES[x.node].color,m=x.an?x.an.mean:null;
+let _enrK='',_enrC=new Map(),_enrPW={};
+function entEnrich(list){const key=[profile,basis,RF,UNIX_N.s,UNIX_N.e,UNIX_N.f].join('|');
+  if(key!==_enrK){_enrK=key;_enrC=new Map();_enrPW={};const o=buildPlan(profile),sp=buildStockPlan(profile);o.items.forEach(x=>_enrPW['e'+x.e.t]=x.w);sp.items.forEach(x=>_enrPW['s'+x.s.t]=x.w)}
+  return list.map(x=>{const ck=x.k+x.t;let r=_enrC.get(ck);if(!r){const info=x.k==='s'?stockInfo(x.obj):x.k==='f'?fundInfo(x.obj):etfInfo(x.obj),an=annStats(x.t);r={info,an,fit:info.band===profile&&info.ok,inPlan:_enrPW[x.k+x.t]||0};_enrC.set(ck,r)}return{...x,...r}})}
+function entRow(x,showCity=true){const c=KIND_C[x.k],m=x.an?x.an.mean:null;
   const nm=x.k==='s'?x.name:x.name,sub=x.k==='e'?`ETF · ${x.obj.iss||x.sec}`:x.k==='f'?`${x.obj.kind==='act'?'Fondo activo':'Fondo indexado'} · ${x.obj.iss}`:x.sec;
   return `<button class="sr" data-k="${x.k}" data-t="${esc(x.t)}" data-n="${x.node}"><span class="sr-logo" style="--c:${c}">${esc(String(x.tk).slice(0,4))}</span>
     <span class="sr-mid"><b>${esc(nm)}</b><small>${esc(sub)}${showCity?` · ${esc(NODES[x.node].city.split(' ·')[0])}`:''}</small></span>
@@ -2049,7 +2086,7 @@ function entRow(x,showCity=true){const c=NODES[x.node].color,m=x.an?x.an.mean:nu
 function fundInfo(f){const an=annStats(f.t),a=YRS[f.t].slice(0,10).filter(v=>v!=null);
   const v=a.length>=3?(Math.pow(a.reduce((p,x)=>p*(1+x/100),1),1/a.length)-1)*100:null,vol=an?an.sd:(f.vol3??20);
   return{f,v,vol,...classify(v,vol,false,undefined,an)}}
-function fundDetail(f){const info=fundInfo(f),an=annStats(f.t),color=NODES[f.node].color,act=f.kind==='act';
+function fundDetail(f){const info=fundInfo(f),an=annStats(f.t),color=KIND_C.f,act=f.kind==='act';
   const yrsN=YRS[f.t].slice(0,10).filter(v=>v!=null).length;
   const drag=(ter)=>Math.round((1-Math.pow((1-ter/100)/(1-0.12/100),20))*100);
   const where=f.isin.startsWith('ES0165')?'Solo en <b>MyInvestor</b> (es su propia gestora).':'En <b>MyInvestor</b>, <b>Renta 4</b>, <b>Openbank</b>, <b>Selfbank</b> o el banco de la gestora. <b>Trade Republic no vende fondos</b>, solo ETFs y acciones.';
@@ -2370,7 +2407,7 @@ try{const q=new URLSearchParams(location.search),m=+q.get('monthly');
     document.body.appendChild(a)}
   if(q.has('monthly')||q.has('from'))history.replaceState(null,'',location.pathname)}catch(e){}
 renderProfileSeg();syncMode();
-loadUniverseX();if(MAPMODE){initMap();$('#mapBar').addEventListener('click',mapBarClick)}else if(window.THREE){initThree();buildLabels()}else{$('#stage').insertAdjacentHTML('beforeend','<div class="nolgl">No se pudo cargar Three.js desde el CDN. Los paneles siguen funcionando.</div>')}
+loadUniverseX();if(MAPMODE){initMap();$('#mapBar').addEventListener('click',mapBarClick)}else{const B='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/';loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js').then(()=>Promise.all(['shaders/CopyShader.js','shaders/LuminosityHighPassShader.js'].map(f=>loadScript(B+f)))).then(()=>loadScript(B+'postprocessing/EffectComposer.js')).then(()=>Promise.all(['postprocessing/RenderPass.js','postprocessing/ShaderPass.js','postprocessing/UnrealBloomPass.js'].map(f=>loadScript(B+f)))).then(()=>{initThree();buildLabels();applyCam()}).catch(()=>{$('#stage').insertAdjacentHTML('beforeend','<div class="nolgl">No se pudo cargar Three.js desde el CDN. Los paneles siguen funcionando.</div>')})}
 initCharts();refreshAll();renderStocksTable();tickClocks();setInterval(tickClocks,1000);
 applyCam&&window.THREE&&applyCam();requestAnimationFrame(loop);
 setTimeout(()=>flyTo(HOME,reduced?1:3200),300);
