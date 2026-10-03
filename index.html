@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 <link rel="preconnect" href="https://api.mapbox.com" crossorigin>
-<link rel="preload" as="script" href="https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.js" crossorigin>
+<link rel="preload" as="script" href="https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.js">
 <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.css">
 <style>
 /* Layout: full-bleed WebGL globe; glass command bar (top), node roster (left), NY HQ strategy (right), log terminal (bottom). Below 1100px the panels stack under a 62vh globe. Single dark look by design. */
@@ -486,6 +486,21 @@ body.mapmode #app.simple .right{top:18px}
 .pf-form .seg button[aria-pressed="true"]{background:rgba(192,132,252,.18);color:#e9d5ff;border-color:rgba(192,132,252,.5)}.pf-ok{color:var(--good);margin:0}
 @media (max-width:700px){.pf-hero b{font-size:15px;white-space:nowrap}}
 .pole-gen.near .pg-lbl{display:none}
+
+/* visor 3D de Atlántida */
+#atlv{position:fixed;inset:0;z-index:200;background:#050816}#atlv[hidden]{display:none}#atlvC{width:100%;height:100%;display:block;touch-action:none}
+body.av-open{overflow:hidden}
+.av-top{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;pointer-events:none}
+.av-top>div:first-child{display:flex;flex-direction:column;text-shadow:0 2px 12px #000}.av-top b{font-size:20px;letter-spacing:.06em;color:#ffe2b0}.av-top span{font-size:12px;color:#b9c6e8}
+.av-btns{display:flex;gap:5px;pointer-events:auto;flex-wrap:nowrap;justify-content:flex-end}@media(max-width:560px){.av-top>div:first-child span{display:none}.av-btns button{padding:8px 9px!important;font-size:12px!important}.av-btns [data-av=x]{width:36px}.av-btns button{white-space:nowrap}}
+.av-btns button{font:600 13px Inter,system-ui,sans-serif;padding:10px 13px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(10,12,30,.7);color:#e9f0ff;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer}
+.av-btns button.on{background:#ffe2b0;color:#1a1020;border-color:#ffe2b0}.av-btns [data-av=x]{width:44px}
+.av-hint{position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font-size:12px;color:#c9d4f2;background:rgba(10,12,30,.6);padding:7px 12px;border-radius:999px;white-space:nowrap;pointer-events:none}
+.av-cap{position:absolute;left:50%;bottom:calc(64px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font:500 17px Inter,system-ui,sans-serif;color:#fff;text-shadow:0 2px 14px #000;text-align:center;width:90%;pointer-events:none;transition:opacity .4s}
+.av-load{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:14px;color:#cfe;font-size:14px}.av-load i{width:46px;height:46px;border-radius:50%;border:3px solid rgba(127,246,255,.25);border-top-color:#7ff6ff;animation:avspin 1s linear infinite}
+@keyframes avspin{to{transform:rotate(360deg)}}
+.av-go{width:100%;margin-top:10px;font:700 15px Inter,system-ui,sans-serif;padding:14px;border-radius:14px;border:0;cursor:pointer;color:#1a1020;background:linear-gradient(90deg,#ffe2b0,#ffb35a,#7ff6ff);box-shadow:0 8px 30px rgba(255,179,90,.35)}
+@media (max-width:700px){.av-btns button{padding:9px 10px;font-size:12px}.av-top b{font-size:17px}}
 </style>
 </head>
 <body>
@@ -1904,6 +1919,98 @@ function fxSetup(){
   try{map.addSource('hqA',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:ATL},properties:{}}});atlantisSetup()}catch(e){console.warn('atlantis',e)}
   try{poleSetup()}catch(e){console.warn('polo',e)}
   cancelAnimationFrame(fxRaf);fxRaf=requestAnimationFrame(fxTick)}
+
+/* ================= ATLÁNTIDA EN 3D: visor propio para recorrer la ciudad ================= */
+const ATLV={on:false};
+async function loadAtlLibs(){if(window.THREE&&THREE.GLTFLoader&&THREE.OrbitControls&&THREE.DRACOLoader)return;
+  const B='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/';
+  if(!window.THREE)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
+  await Promise.all(['loaders/GLTFLoader.js','loaders/DRACOLoader.js','controls/OrbitControls.js','shaders/CopyShader.js','shaders/LuminosityHighPassShader.js'].map(f=>loadScript(B+f)));
+  await loadScript(B+'postprocessing/EffectComposer.js');await Promise.all(['postprocessing/RenderPass.js','postprocessing/ShaderPass.js','postprocessing/UnrealBloomPass.js'].map(f=>loadScript(B+f)))}
+async function openAtlantis3D(){if(ATLV.on)return;ATLV.on=true;closePlace();
+  let ov=$('#atlv');if(!ov){ov=document.createElement('div');ov.id='atlv';document.body.appendChild(ov)}
+  ov.innerHTML=`<canvas id="atlvC"></canvas><div class="av-top"><div><b>Atlántida</b><span>Base de datos de ATLAS · ciudad hundida del Polo Norte</span></div>
+    <div class="av-btns"><button data-av="tour" class="on">▶ Ruta</button><button data-av="free">✥ Libre</button><button data-av="walk">🚶 A pie</button><button data-av="x" aria-label="Cerrar">✕</button></div></div>
+    <div class="av-load"><i></i><span>Emergiendo de las profundidades…</span></div><div class="av-hint"></div><div class="av-cap"></div>`;
+  ov.hidden=false;document.body.classList.add('av-open');sheetPush();
+  ov.querySelector('[data-av=x]').addEventListener('click',()=>closeAtlantis3D());
+  try{await loadAtlLibs()}catch(e){ov.querySelector('.av-load span').textContent='No se pudo cargar el motor 3D. Comprueba la conexión.';return}
+  if(!ATLV.on)return;atlvInit(ov)}
+function closeAtlantis3D(fromPop){if(!ATLV.on)return;if(fromPop!==true&&history.state&&history.state.atlasSheet){history.back();return}
+  ATLV.on=false;cancelAnimationFrame(ATLV.raf);try{ATLV.renderer&&ATLV.renderer.dispose()}catch(_){}ATLV.scene=null;const ov=$('#atlv');if(ov){ov.hidden=true;ov.innerHTML=''}document.body.classList.remove('av-open');sheetBtn()}
+window.addEventListener('popstate',()=>{if(ATLV.on)closeAtlantis3D(true)});
+function atlvInit(ov){const T=THREE,cv=ov.querySelector('#atlvC'),mob=mobile();
+  const R=new T.WebGLRenderer({canvas:cv,antialias:!mob,powerPreference:'high-performance'});R.setPixelRatio(Math.min(devicePixelRatio||1,mob?1.3:1.75));
+  R.outputEncoding=T.sRGBEncoding;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=.82;ATLV.renderer=R;
+  const S=new T.Scene();ATLV.scene=S;S.fog=new T.FogExp2(0x0a1530,0.00011);
+  const cam=new T.PerspectiveCamera(55,1,2,30000);cam.position.set(2600,900,2600);
+  // cielo nocturno con degradado y estrellas
+  const sky=new T.Mesh(new T.SphereGeometry(20000,32,16),new T.ShaderMaterial({side:T.BackSide,depthWrite:false,uniforms:{},vertexShader:'varying vec3 p;void main(){p=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',
+    fragmentShader:'varying vec3 p;void main(){float h=p.y;vec3 c=mix(vec3(.04,.07,.16),vec3(.01,.015,.05),smoothstep(0.,.6,h));c=mix(vec3(.22,.12,.30),c,smoothstep(-.05,.18,h));gl_FragColor=vec4(c,1.);}'}));S.add(sky);
+  {const n=2500,pp=new Float32Array(n*3);for(let i=0;i<n;i++){const u=Math.random()*2-1,a=Math.random()*Math.PI*2,y=Math.abs(u)*.95+.05,r=Math.sqrt(1-y*y);pp.set([Math.cos(a)*r*18000,y*18000,Math.sin(a)*r*18000],i*3)}
+    const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(pp,3));S.add(new T.Points(g,new T.PointsMaterial({color:0xdfe8ff,size:2.2,sizeAttenuation:false,fog:false})))}
+  const moon=new T.Mesh(new T.SphereGeometry(420,32,16),new T.MeshBasicMaterial({color:0xfff6e0,fog:false}));moon.position.set(-9000,5200,-11000);S.add(moon);
+  S.add(new T.HemisphereLight(0x7f96e8,0x120f22,.32));const dl=new T.DirectionalLight(0xb8c8ff,.55);dl.position.set(-9000,5200,-11000);S.add(dl);
+  const warm=new T.PointLight(0x7fe8ff,2.2,1400,1.6);warm.position.set(0,420,0);S.add(warm);
+  // agua con oleaje y destellos
+  const water=new T.Mesh(new T.CircleGeometry(16000,96),new T.ShaderMaterial({transparent:false,uniforms:{t:{value:0},fogColor:{value:new T.Color(0x0a1530)}},
+    vertexShader:'varying vec3 wp;void main(){vec4 w=modelMatrix*vec4(position,1.);wp=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}',
+    fragmentShader:`uniform float t;uniform vec3 fogColor;varying vec3 wp;
+      float n(vec2 p){return sin(p.x*.021+t*.6)*cos(p.y*.017-t*.4)+sin((p.x+p.y)*.013+t*.9)*.6+sin(p.x*.06-p.y*.05+t*1.7)*.25;}
+      void main(){float h=n(wp.xz);vec3 base=vec3(.012,.07,.11);float d=length(wp.xz);vec3 glow=vec3(.03,.22,.30)*exp(-d/1100.)*.6;
+        float spark=smoothstep(.82,1.,h*.5+.5)*.05;float rip=sin(wp.x*.09+h*2.+t)*sin(wp.z*.08-t*.7);vec3 c=base+glow+vec3(.03,.07,.1)*h*.35+vec3(.25,.35,.45)*spark+vec3(.04,.06,.08)*max(0.,rip)*exp(-d/5000.);
+        float f=1.-exp(-pow(length(wp-cameraPosition)*.00011,2.));gl_FragColor=vec4(mix(c,fogColor,f),1.);}`}));
+  water.rotation.x=-Math.PI/2;water.position.y=1;S.add(water);
+  // partículas de datos que viajan hacia el núcleo
+  const NP=mob?500:1100,pg=new T.BufferGeometry(),pp=new Float32Array(NP*3),pd=[];for(let i=0;i<NP;i++){pd.push({a:Math.random()*6.283,r:300+Math.random()*2100,h:20+Math.random()*260,v:.25+Math.random()*.6,c:Math.random()});}
+  pg.setAttribute('position',new T.BufferAttribute(pp,3));const pts=new T.Points(pg,new T.PointsMaterial({color:0x7ff6ff,size:mob?5:4,transparent:true,opacity:.85,depthWrite:false,blending:T.AdditiveBlending}));S.add(pts);
+  // post-proceso (brillo de las luces)
+  const comp=new T.EffectComposer(R);comp.addPass(new T.RenderPass(S,cam));const bloom=new T.UnrealBloomPass(new T.Vector2(512,512),mob?.5:.62,.5,.8);comp.addPass(bloom);
+  const ctl=new T.OrbitControls(cam,cv);ctl.target.set(0,90,0);ctl.enableDamping=true;ctl.dampingFactor=.08;ctl.minDistance=40;ctl.maxDistance=9000;ctl.maxPolarAngle=Math.PI*.495;ctl.screenSpacePanning=false;ctl.rotateSpeed=.6;ctl.zoomSpeed=1.1;
+  const resize=()=>{const w=ov.clientWidth,h=ov.clientHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();comp.setSize(w,h);bloom.resolution.set(w/2,h/2)};resize();window.addEventListener('resize',resize);
+  let mesh={},mode='tour',tourT=0,walk=null;const hint=ov.querySelector('.av-hint'),cap=ov.querySelector('.av-cap');
+  const setMode=m=>{mode=m;ov.querySelectorAll('[data-av]').forEach(b=>b.classList.toggle('on',b.dataset.av===m));ctl.enabled=m==='free';
+    hint.textContent=m==='free'?(mob?'Un dedo: girar · dos dedos: acercar y mover':'Arrastra para girar · rueda para acercar · botón derecho para moverte'):m==='walk'?(mob?'Toca y mantén para avanzar · arrastra para mirar':'W/A/S/D o flechas para andar · arrastra para mirar'):'Recorrido guiado · toca la pantalla para tomar el control';
+    if(m==='walk'){walk={p:new T.Vector3(0,30,1450),yaw:Math.PI,pitch:0,fwd:0,keys:{}};}
+    if(m==='free'){ctl.target.set(0,90,0)}};
+  ov.querySelectorAll('[data-av]').forEach(b=>{if(b.dataset.av!=='x')b.addEventListener('click',()=>setMode(b.dataset.av))});
+  cv.addEventListener('pointerdown',()=>{if(mode==='tour')setMode('free')});
+  // modo a pie: arrastrar para mirar, mantener pulsado o W/A/S/D para avanzar
+  let drag=null,hold=0;cv.addEventListener('pointerdown',e=>{if(mode!=='walk')return;drag={x:e.clientX,y:e.clientY,t:performance.now(),moved:false};hold=1});
+  cv.addEventListener('pointermove',e=>{if(mode!=='walk'||!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.abs(dx)+Math.abs(dy)>6){drag.moved=true;hold=0}walk.yaw-=dx*.004;walk.pitch=Math.max(-1.2,Math.min(1.2,walk.pitch-dy*.003));drag.x=e.clientX;drag.y=e.clientY});
+  window.addEventListener('pointerup',()=>{drag=null;hold=0});
+  const kd=e=>{if(walk)walk.keys[e.key.toLowerCase()]=e.type==='keydown'};window.addEventListener('keydown',kd);window.addEventListener('keyup',kd);
+  // recorrido de cámara: canales, hipódromo, torres y cúpula
+  const P=(x,y,z)=>new T.Vector3(x,y,z);
+  const tour=new T.CatmullRomCurve3([P(3400,700,0),P(2300,60,0),P(1700,40,300),P(1250,35,900),P(600,50,1300),P(-400,70,1650),P(-1500,45,950),P(-1720,28,0),P(-1500,40,-900),P(-700,180,-700),P(-260,260,-200),P(0,520,300),P(300,300,450),P(950,140,-500),P(1700,90,-1400),P(2600,500,-1600)],true,'catmullrom',.4);
+  const look=new T.CatmullRomCurve3([P(0,120,0),P(1300,40,0),P(950,50,700),P(400,60,1000),P(-200,80,800),P(-900,60,900),P(-1720,20,-300),P(-1720,20,-900),P(-900,60,-600),P(0,150,0),P(0,250,0),P(0,90,0),P(0,140,0),P(0,140,0),P(1000,80,-900),P(0,120,0)],true,'catmullrom',.4);
+  const CAPS=[[0,'La muralla de oricalco y sus torres de 300 m'],[.1,'Navegando por el canal hacia el corazón de la ciudad'],[.3,'Los templos del anillo interior'],[.45,'El gran hipódromo: 10 km de pista'],[.62,'La acrópolis y el templo-almacén de datos'],[.72,'Los anillos de datos sobre la cúpula'],[.85,'Las Torres del Saber']];
+  // carga del modelo
+  const dr=new T.DRACOLoader();dr.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+  const ld=new T.GLTFLoader();ld.setDRACOLoader(dr);
+  ld.load('data/atlantis.glb',g=>{g.scene.traverse(o=>{if(o.isMesh){mesh[o.name]=o;const m=o.material;
+      const E={trim:.7,win:1.5,lamp:2.4,core:2.2,rings:2.6,jet:1.8,boatALamp:2.2,boatBLamp:2.2,ori:.6};if(E[o.name]!=null&&m.emissive){m.emissiveIntensity=E[o.name]}
+      if(o.name==='ori'){m.envMapIntensity=1}}});
+    S.add(g.scene);ov.querySelector('.av-load').remove();setMode('tour')},
+    ev=>{const s=ov.querySelector('.av-load span');if(s&&ev.total)s.textContent=`Emergiendo de las profundidades… ${Math.round(ev.loaded/ev.total*100)} %`},
+    err=>{const s=ov.querySelector('.av-load span');if(s)s.textContent='No se pudo cargar la ciudad.';console.warn(err)});
+  let last=performance.now();
+  const tick=now=>{if(!ATLV.on)return;ATLV.raf=requestAnimationFrame(tick);const dt=Math.min(.05,(now-last)/1000);last=now;const t=now/1000;
+    water.material.uniforms.t.value=t;
+    if(mesh.rings)mesh.rings.rotation.y=t*.12;if(mesh.boatAHull){['boatAHull','boatASail','boatALamp'].forEach(k=>mesh[k]&&(mesh[k].rotation.y=t*.01))}
+    if(mesh.boatBHull){['boatBHull','boatBSail','boatBLamp'].forEach(k=>mesh[k]&&(mesh[k].rotation.y=-t*.016))}
+    if(mesh.jet)mesh.jet.material.emissiveIntensity=1.6+Math.sin(t*3)*.6;if(mesh.core)mesh.core.material.emissiveIntensity=2+Math.sin(t*1.4)*.5;warm.intensity=2+Math.sin(t*1.4)*.5;
+    const a=pg.attributes.position.array;pd.forEach((p,i)=>{p.r-=p.v*dt*60;p.a+=dt*.05;if(p.r<60){p.r=1800+Math.random()*700;p.h=20+Math.random()*200}const hh=p.h+(1-p.r/2500)*220;a[i*3]=Math.cos(p.a)*p.r;a[i*3+1]=hh;a[i*3+2]=-Math.sin(p.a)*p.r});pg.attributes.position.needsUpdate=true;
+    if(mode==='tour'){tourT=(tourT+dt/90)%1;const tt=Math.min(.9999,Math.max(0,tourT));cam.position.copy(tour.getPoint(tt));cam.lookAt(look.getPoint(tt));let c='';CAPS.forEach(([k,s])=>{if(tourT>=k)c=s});if(cap.textContent!==c)cap.textContent=c}
+    else{if(cap.textContent)cap.textContent=''}
+    if(mode==='free')ctl.update();
+    if(mode==='walk'&&walk){const k=walk.keys,f=(k.w||k.arrowup||hold?1:0)-(k.s||k.arrowdown?1:0),sd=(k.d||k.arrowright?1:0)-(k.a||k.arrowleft?1:0);if(k.arrowleft&&!k.a)walk.yaw+=dt*1.2;if(k.arrowright&&!k.d)walk.yaw-=dt*1.2;
+      const sp=(k.shift?160:70)*dt,dir=new T.Vector3(-Math.sin(walk.yaw),0,-Math.cos(walk.yaw)),rt=new T.Vector3(-dir.z,0,dir.x);walk.p.addScaledVector(dir,f*sp).addScaledVector(rt,sd*sp);
+      const r=Math.hypot(walk.p.x,walk.p.z);if(r>2400)walk.p.multiplyScalar(2400/r);walk.p.y=r<520?120:r<2080?28:22;cam.position.lerp(walk.p,.2);
+      cam.lookAt(cam.position.x-Math.sin(walk.yaw)*Math.cos(walk.pitch)*100,cam.position.y+Math.sin(walk.pitch)*100,cam.position.z-Math.cos(walk.yaw)*Math.cos(walk.pitch)*100)}
+    comp.render()};
+  ATLV.raf=requestAnimationFrame(tick)}
+
 /* ================= ATLÁNTIDA: la base de datos hundida del Polo Norte ================= */
 const ATL=[-40,84.05];
 function atlOff(dx,dy){return[ATL[0]+dx/(111.32*Math.cos(ATL[1]*Math.PI/180)),ATL[1]+dy/110.57]} // km -> lon/lat
@@ -1969,9 +2076,10 @@ function showPole(){const p=$('#mcard'),ents=searchEntities(),n={s:0,e:0,f:0};en
    <div class="pg-card"><div class="pg-n"><div><b style="color:${KIND_C.s}">${n.s}</b><span>acciones</span></div><div><b style="color:${KIND_C.e}">${n.e}</b><span>ETFs</span></div><div><b style="color:${KIND_C.f}">${n.f}</b><span>fondos</span></div></div>
    <p>Última actualización de precios: <b>${up?up.slice(8,10)+'/'+up.slice(5,7)+' a las '+up.slice(11,16)+' UTC':'—'}</b>. Se actualiza solo cada día laborable a las 19:35 y 23:25 (hora de Madrid).</p>
    <p class="mp-note">Fuentes: Yahoo Finance (precios, cifras y rentabilidades), OpenStreetMap (sedes), EODHD (respaldo de fondos), fichas de las gestoras (fondos), Mapbox (mapa) y TradingView (gráfico interactivo).</p>
-   <div class="pg-act"><button class="btn" data-pg="all">Encender todo el mapa</button><button class="btn2" data-pg="plan">Ver mi plan</button></div></div>`;
+   <button class="av-go" data-pg="3d">🏛 Explorar Atlántida en 3D</button><div class="pg-act"><button class="btn" data-pg="all">Encender todo el mapa</button><button class="btn2" data-pg="plan">Ver mi plan</button></div></div>`;
   p.hidden=false;requestAnimationFrame(()=>p.classList.add('on'));mapFocus='pole';
   p.querySelector('[data-mclose]').addEventListener('click',closePlace);
+  p.querySelector('[data-pg="3d"]').addEventListener('click',()=>openAtlantis3D());
   p.querySelector('[data-pg=all]').addEventListener('click',()=>{sq.active=true;sq.type='all';sq.sec='all';sq.fit=false;sq.q='';closePlace();updateMap()});
   p.querySelector('[data-pg=plan]').addEventListener('click',()=>{closePlace();const r=$('.right');if(r)r.scrollIntoView({behavior:'smooth'})});
   ensureAtlModel();fxOrbit=false;map.flyTo({center:ATL,zoom:mobile()?9.4:10.1,pitch:62,bearing:24,duration:2400,curve:1.5,essential:true,padding:mobile()?{...mapPad(),bottom:Math.round(innerHeight*.12)}:{...mapPad(),left:430}});map.once('moveend',()=>{if(mapFocus==='pole'&&!mobile())fxOrbit=!reduced})}
