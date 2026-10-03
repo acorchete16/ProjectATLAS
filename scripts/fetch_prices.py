@@ -37,7 +37,9 @@ def yahoo(sym):
         try:
             j = json.loads(raw(f'https://{host}.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(sym)}?range=1y&interval=1d'))
             r = j['chart']['result'][0]; q = r['indicators']
-            cl = (q.get('adjclose') or [{}])[0].get('adjclose') or q['quote'][0]['close']
+            cls = q['quote'][0].get('close') or []
+            adj = (q.get('adjclose') or [{}])[0].get('adjclose') or [None] * len(cls)
+            cl = [a if a is not None else c for a, c in zip(adj, cls)]  # el último día a veces no trae ajustado
             pts = [(datetime.datetime.utcfromtimestamp(t).date(), c) for t, c in zip(r.get('timestamp') or [], cl)]
             return pack(pts, r['meta'].get('currency'), sym)
         except Exception as e:
