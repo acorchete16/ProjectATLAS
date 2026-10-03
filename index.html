@@ -1975,7 +1975,7 @@ function atlvInit(ov){const T=THREE,cv=ov.querySelector('#atlvC'),mob=mobile();
   pg.setAttribute('position',new T.BufferAttribute(pp,3));const pts=new T.Points(pg,new T.PointsMaterial({color:0x7ff6ff,size:mob?5:4,transparent:true,opacity:.85,depthWrite:false,blending:T.AdditiveBlending}));S.add(pts);
   // post-proceso (brillo de las luces)
   const comp=new T.EffectComposer(R);comp.addPass(new T.RenderPass(S,cam));const bloom=new T.UnrealBloomPass(new T.Vector2(512,512),mob?.5:.62,.5,.8);comp.addPass(bloom);
-  const ctl=new T.OrbitControls(cam,cv);ctl.target.set(0,90,0);ctl.enableDamping=true;ctl.dampingFactor=.08;ctl.minDistance=40;ctl.maxDistance=9000;ctl.maxPolarAngle=Math.PI*.495;ctl.screenSpacePanning=false;ctl.rotateSpeed=.6;ctl.zoomSpeed=1.1;
+  const ctl=new T.OrbitControls(cam,cv);ATLV.cam=cam;ATLV.ctl=ctl;ctl.target.set(0,90,0);ctl.enableDamping=true;ctl.dampingFactor=.08;ctl.minDistance=40;ctl.maxDistance=9000;ctl.maxPolarAngle=Math.PI*.495;ctl.screenSpacePanning=false;ctl.rotateSpeed=.6;ctl.zoomSpeed=1.1;
   const resize=()=>{const w=ov.clientWidth,h=ov.clientHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();comp.setSize(w,h);bloom.resolution.set(w/2,h/2)};resize();window.addEventListener('resize',resize);
   let mesh={},mode='tour',tourT=0,walk=null;const hint=ov.querySelector('.av-hint'),cap=ov.querySelector('.av-cap');
   const setMode=m=>{mode=m;ov.querySelectorAll('[data-av]').forEach(b=>b.classList.toggle('on',b.dataset.av===m));ctl.enabled=m==='free';
@@ -1999,7 +1999,7 @@ function atlvInit(ov){const T=THREE,cv=ov.querySelector('#atlvC'),mob=mobile();
   const TEXL=new T.TextureLoader(),TX={},maxAn=R.capabilities.getMaxAnisotropy();
   const tex=(k,t)=>{const id=k+'_'+t;if(!TX[id]){const x=TEXL.load('data/tex/'+id+'.jpg');x.wrapS=x.wrapT=T.RepeatWrapping;x.anisotropy=Math.min(mob?4:8,maxAn);TX[id]=x}return TX[id]};
   const LUM={stone:.234,marble:.354,plaster:.376,roof:.307,paving:.235,grass:.122,sand:.244};
-  const TRI={stone:['stone','paving',1/4.5,1/3.2,1],marble:['marble','marble',1/4,1/4,.8],plaster:['plaster','plaster',1/5,1/5,.7],plaster2:['plaster','plaster',1/5,1/5,.7],plaster3:['plaster','plaster',1/5,1/5,.7],
+  const TRI={stone:['stone','paving',1/4.5,1/3.2,1],marble:['plaster','marble',1/6,1/9,.45],plaster:['plaster','plaster',1/5,1/5,.7],plaster2:['plaster','plaster',1/5,1/5,.7],plaster3:['plaster','plaster',1/5,1/5,.7],
     roof:['roof','roof',1/3,1/3,1.2],roof2:['roof','roof',1/3,1/3,1.2],grass:['stone','grass',1/4.5,1/28,1],sand:['stone','sand',1/4.5,1/14,.8],server:['marble','marble',1/6,1/6,.5],trunk:['stone','stone',1/2,1/2,.6],
     ori:['plaster','plaster',1/7,1/7,.35],bronze:['plaster','plaster',1/6,1/6,.35]};
   const triplanar=(m,key)=>{const [sd,tp,ss,st,ns]=TRI[key];
@@ -2033,7 +2033,7 @@ vec3 wP=normalize(wx*tb.x+wy*tb.y+wz*tb.z);normal=normalize((viewMatrix*vec4(wP,
       if(o.name==='ori'||o.name==='bronze'){m.metalness=Math.max(m.metalness,.75);m.roughness=Math.min(m.roughness,.38);m.envMapIntensity=1.6}
       if(o.name==='marble'){m.roughness=.42;m.envMapIntensity=.9}
       if(/^plaster/.test(o.name)){m.color.multiplyScalar(.78);m.roughness=.9}
-      const noCast={win:1,lamp:1,jet:1,rings:1,water2:1,core:1,boatALamp:1,boatBLamp:1,trim:1};o.castShadow=!noCast[o.name];o.receiveShadow=!(o.name in {lamp:1,jet:1,rings:1,core:1})}});
+      const noCast={win:1,winOff:1,lamp:1,jet:1,rings:1,water2:1,core:1,boatALamp:1,boatBLamp:1,trim:1};o.castShadow=!noCast[o.name];o.receiveShadow=!(o.name in {lamp:1,jet:1,rings:1,core:1})}});
     S.add(g.scene);ov.querySelector('.av-load').remove();setMode('tour')},
     ev=>{const s=ov.querySelector('.av-load span');if(s&&ev.total)s.textContent=`Emergiendo de las profundidades… ${Math.round(ev.loaded/ev.total*100)} %`},
     err=>{const s=ov.querySelector('.av-load span');if(s)s.textContent='No se pudo cargar la ciudad.';console.warn(err)});
@@ -2088,7 +2088,7 @@ function atlantis(){const F=[],add=(g,h,b,c,e=0)=>F.push({type:'Feature',geometr
 function atlWater(){return{type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'Polygon',coordinates:atlCircle(3.4,72)},properties:{}}]}}
 let _atlM=false;
 function ensureAtlModel(){if(_atlM||!MBX||!map)return;_atlM=true;
-  try{map.addModel('atlantis','data/atlantis.glb');map.addSource('atl-pt',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:ATL},properties:{}}});
+  try{map.addModel('atlantis','data/atlantis_lite.glb');map.addSource('atl-pt',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:ATL},properties:{}}});
     map.addLayer({id:'atl-model',type:'model',source:'atl-pt',minzoom:5.5,layout:{'model-id':'atlantis'},paint:{'model-scale':[1,1,1],'model-rotation':[0,0,0],'model-type':'common-3d','model-emissive-strength':1.4,'model-opacity':1}})}
   catch(e){console.warn('modelo Atlántida',e);_atlM=false}}
 function atlantisSetup(){
