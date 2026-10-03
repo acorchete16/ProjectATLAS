@@ -433,6 +433,9 @@ body.mapmode #searchFab{display:none!important}
 .hq-pin i{height:140px!important;width:3px!important;left:11.5px!important;background:linear-gradient(to top,#ffffff,#b9f6ff 30%,rgba(185,246,255,0))!important;box-shadow:0 0 18px #b9f6ff,0 0 40px rgba(185,246,255,.6)!important}
 .hq-pin{height:150px!important}
 .dmore summary{cursor:pointer;color:var(--mid);font-size:12.5px;margin-top:6px}.dmore p{font-size:12.5px;color:var(--mid)}
+.tv summary{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px;list-style:none;font-weight:600;font-size:14px}.tv summary::-webkit-details-marker{display:none}
+.tv summary small{font-weight:400;color:var(--dim);font-size:11.5px}.tv summary::after{content:'▾';color:var(--mid);margin-left:6px}.tv[open] summary::after{content:'▴'}
+.tvbox{height:420px;margin-top:10px;border-radius:10px;overflow:hidden;background:#100e22}@media (max-width:700px){.tvbox{height:360px}}
 </style>
 </head>
 <body>
@@ -1736,7 +1739,7 @@ function openDetail(kind,t,node){litNode=node;const d=$('#detail');let html='';i
      <p class="mp-note">Rentabilidad y volatilidad: PortfoliosLab, 29 sep.–2 oct. 2026. No es asesoramiento financiero.</p></div>`;
     d.innerHTML=`<div class="dbox">${html}</div>`;d.hidden=false;loadNews(`${e.u?e.u.n:e.n} ETF`,$('#dNews'))}
   {const db=d.querySelector('.dbody'),o=kind==='f'?FUNDS.find(x=>x.t===t):kind==='s'?((STOCKS[node]||[]).find(x=>x.t===t)||Object.values(STOCKS).flat().find(x=>x.t===t)):UNIV.find(x=>x.t===t);
-   if(db&&o){db.insertAdjacentHTML('afterbegin','<div class="dsec lv" id="dLive"></div>');loadLive($('#dLive'),kind,o,(NODES[node]||NODES[o.node]||{color:'#9ff8ff'}).color)}}
+   if(db&&o){db.insertAdjacentHTML('afterbegin','<div class="dsec lv" id="dLive"></div>'+tvBlock(kind,o));const tvd=db.querySelector('details.tv');if(tvd)tvd.addEventListener('toggle',()=>{if(tvd.open)tvMount(tvd)});loadLive($('#dLive'),kind,o,(NODES[node]||NODES[o.node]||{color:'#9ff8ff'}).color)}}
   d.querySelector('[data-close]').addEventListener('click',closeDetail);d.scrollTop=0;
 }
 $('#detail').addEventListener('click',e=>{if(e.target.id==='detail')closeDetail()});
@@ -1999,6 +2002,24 @@ async function loadUniverseX(){let U;try{const r=await fetch('data/universe_x.js
     FUNDS.push({t,y:x.t,tk:x.tk,n:x.n,full:x.full,isin:x.isin,node:nearestNode(x.geo[0],x.geo[1]),sec:x.sec,kind:x.kind,iss:x.iss,sede:x.geo[2].split(',').slice(-1)[0].trim(),
       ter:x.ter,exito:null,vol3:null,idx:null,cat:x.cat,w:x.cat?`Categoría Morningstar: ${x.cat}.`:'',min:null,ytdDate:null,src:[],doubt:'Ficha generada automáticamente con datos de Yahoo Finance: comprueba ISIN y clase antes de invertir.',x:true,geo:x.geo});UNIX_N.f++});
   _ents=null;if(!$('#search').hidden)renderSearch();updateMapSoon()}
+
+/* ================= TRADINGVIEW (gráfico interactivo en la ficha) ================= */
+const TV_SUF={MC:'BME',PA:'EURONEXT',AS:'EURONEXT',DE:'XETR',L:'LSE',CO:'OMXCOP',T:'TSE',HK:'HKEX',NS:'NSE',MI:'MIL',SW:'SIX',KS:'KRX',TW:'TWSE',AX:'ASX',TO:'TSX',MX:'BMV'};
+const TV_ORIG={SAN:'BME:SAN',FER:'BME:FER',AENA:'BME:AENA',ACS:'BME:ACS',IBE:'BME:IBE',ITX:'BME:ITX',MC:'EURONEXT:MC',RMS:'EURONEXT:RMS',OR:'EURONEXT:OR',DG:'EURONEXT:DG',
+  RHM:'XETR:RHM',ALV:'XETR:ALV',LSEG:'LSE:LSEG',VWS:'OMXCOP:VWS','8035':'TSE:8035','6857':'TSE:6857','9983':'TSE:9983','8058':'TSE:8058','3690':'HKEX:3690',
+  RELIANCE:'NSE:RELIANCE',TCS:'NSE:TCS',LT:'NSE:LT',BHARTIARTL:'NSE:BHARTIARTL','BRK.B':'NYSE:BRK.B'};
+function tvSym(k,o){if(k==='f')return null;const y=o.x?o.y:null;
+  if(y&&/\.[A-Z]{1,2}$/.test(y)&&!/^BRK/.test(y)){const [b,s]=[y.slice(0,y.lastIndexOf('.')),y.split('.').pop()];return TV_SUF[s]?`${TV_SUF[s]}:${b.replace(/-/g,'_')}`:null}
+  if(k==='s')return TV_ORIG[o.t]||o.t.replace('-','.');return o.t}
+function tvBlock(k,o){const s=tvSym(k,o);if(!s)return '';
+  return `<details class="dsec tv" data-tv="${esc(s)}"><summary><span>📈 Gráfico interactivo</span><small>TradingView · ${esc(s)}</small></summary><div class="tvbox"></div>
+    <p class="mp-note">Velas, zoom e indicadores. Algunas bolsas van con 15 min de retraso. <a href="https://es.tradingview.com/symbols/${encodeURIComponent(s.replace(':','-'))}/" target="_blank" rel="noopener" style="color:#9ff8ff">Abrir en TradingView ↗</a></p></details>`}
+function tvMount(det){const box=det.querySelector('.tvbox');if(!box||box.dataset.on)return;box.dataset.on=1;
+  box.innerHTML='<div class="tradingview-widget-container" style="height:100%;width:100%"><div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div></div>';
+  const sc=document.createElement('script');sc.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';sc.async=true;
+  sc.text=JSON.stringify({autosize:true,symbol:det.dataset.tv,interval:'D',range:'12M',timezone:'Europe/Madrid',theme:'dark',style:'1',locale:'es',
+    backgroundColor:'rgba(16,14,34,1)',gridColor:'rgba(255,255,255,0.05)',hide_side_toolbar:true,hide_volume:false,allow_symbol_change:false,save_image:false,calendar:false,support_host:'https://www.tradingview.com'});
+  box.firstChild.appendChild(sc)}
 
 const SEC_ICON={'Gestión activa':'🎯','Tecnología':'💻','Salud':'🧬','Energía':'⚡','Finanzas':'🏦','Consumo':'🛒','Defensa y espacio':'🚀','Infraestructuras':'🏗️','Mercado amplio':'🌍','Regiones y países':'🗺️','Bonos y oro':'🪙','Automoción':'🚗','Industria':'🏭','Lujo':'💎','Materias primas':'⛏️','Telecomunicaciones':'📡','Inmobiliario':'🏢','Otros':'◆'};
 function entEnrich(list){const o=buildPlan(profile),sp=buildStockPlan(profile),pw={};o.items.forEach(x=>pw['e'+x.e.t]=x.w);sp.items.forEach(x=>pw['s'+x.s.t]=x.w);
