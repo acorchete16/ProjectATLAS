@@ -1,1 +1,1 @@
-OK 215/215 · fuentes {'eodhd': 2, 'yahoo': 213} · fallos 0 · 74 s
+OK 215/215 · fuentes {'eodhd': 2, 'yahoo': 213} · fallos 0 · 95 s
