@@ -483,7 +483,7 @@ body.mapmode #app.simple .right{top:18px}
 .pf-quick span{color:var(--mid)}.pf-quick label,.pf-form label{display:flex;align-items:center;gap:8px;color:var(--mid);font-size:12.5px}
 .pf-quick input,.pf-form input{font:inherit;font-size:14px;padding:7px 9px;border-radius:9px;border:1px solid var(--edge2);background:rgba(255,255,255,.05);color:var(--fg);color-scheme:dark}
 .pf-form{display:flex;flex-direction:column;gap:9px;margin-top:4px}.pf-form .seg{display:flex;gap:4px}.pf-form .seg button{flex:1;font:inherit;font-size:12.5px;padding:7px;border-radius:9px;border:1px solid var(--edge2);background:none;color:var(--mid);cursor:pointer}
-.pf-form .seg button[aria-pressed="true"]{background:rgba(192,132,252,.18);color:#e9d5ff;border-color:rgba(192,132,252,.5)}.pf-ok{color:var(--good);margin:0}
+.pf-form .seg button[aria-pressed="true"]{background:rgba(192,132,252,.18);color:#e9d5ff;border-color:rgba(192,132,252,.5)}.pf-ok{color:var(--good);margin:0}.pf-old{margin-top:12px}.pf-old>.btn{width:100%}.pf-hit{font-size:12px;color:var(--mid);min-height:14px}.pf-act{display:inline-block;margin-top:3px;font-size:11.5px;color:#c084fc;text-decoration:underline}
 @media (max-width:700px){.pf-hero b{font-size:15px;white-space:nowrap}}
 .pole-gen.near .pg-lbl{display:none}
 
@@ -2339,39 +2339,69 @@ function seriesOf(p){const out=[];const add=s=>{if(!s)return;const d0=new Date(s
 function priceAt(ser,date){if(!ser.length)return null;let lo=0,hi=ser.length-1;if(date<ser[0][0])return{v:ser[0][1],early:true};
   while(lo<hi){const m=(lo+hi+1)>>1;if(ser[m][0]<=date)lo=m;else hi=m-1}return{v:ser[lo][1],early:false}}
 async function fxSeries(cur){if(!cur||cur==='EUR')return null;const fx=await loadPrice('x:EUR'+cur);return fx?seriesOf(fx):undefined}
-function pfDates(pos){if(pos.mode==='u')return[pos.date];const out=[];let [y,m]=pos.from.split('-').map(Number);const [ny,nm]=ymNow().split('-').map(Number);
+function pfDates(pos){if(pos.mode==='u'||pos.mode==='v')return[pos.date];const out=[];let [y,m]=pos.from.split('-').map(Number);const [ny,nm]=ymNow().split('-').map(Number);
   while(y<ny||(y===ny&&m<=nm)){out.push(`${y}-${String(m).padStart(2,'0')}-01`);m++;if(m>12){m=1;y++}}return out}
-async function pfValue(pos){const ent=searchEntities().find(x=>x.k===pos.k&&x.t===pos.t);if(!ent)return{pos,err:'Ya no está en la base de datos'};
+let _isinMap=null;async function isinMap(){if(_isinMap)return _isinMap;try{_isinMap=await (await fetch('data/isin_map.json?'+Date.now(),{cache:'no-store'})).json()}catch(_){_isinMap={}}return _isinMap}
+const isinOf=e=>((e.obj&&(e.obj.isin||(e.obj.u&&e.obj.u.isin)))||'').toUpperCase();
+async function findInvest(q){q=String(q||'').trim().toUpperCase().replace(/\s+/g,'');if(!q)return null;const ents=searchEntities();
+  let e=ents.find(x=>isinOf(x)===q);if(e)return e;const m=(await isinMap())[q];
+  if(m&&!m.err){e=m.k==='f'?ents.find(x=>x.k==='f'&&isinOf(x)===(m.isin||q)):ents.find(x=>x.k===m.k&&x.t===m.t);if(e)return e}
+  return ents.find(x=>x.t.toUpperCase()===q||String(x.tk||'').toUpperCase()===q)||null}
+const isinIssue=q=>`https://github.com/acorchete16/ProjectATLAS/issues/new?title=${encodeURIComponent('ISIN '+q)}&body=${encodeURIComponent('Añadir esta inversión a ATLAS para tener precios diarios. (No pongas importes aquí: este repositorio es público.)')}`;
+async function pfValue(pos){if(pos.k==='x'){const e=await findInvest(pos.t);if(e){pos.k=e.k;pos.t=e.t;pfSave()}
+    else{const inv=pos.mode==='v'?(pos.cost||pos.amt):0,val=pos.mode==='v'?pos.amt:0;return{pos,pending:true,inv,val,gain:val-inv,pct:inv?(val/inv-1)*100:0}}}
+  const ent=searchEntities().find(x=>x.k===pos.k&&x.t===pos.t);if(!ent)return{pos,err:'Ya no está en la base de datos'};
   const p=await loadPrice(priceKey(ent.k,ent.obj));if(!p)return{pos,ent,err:'Sin precios todavía'};
   let cur=p.cur||'EUR',div=1;if(CCY_FIX[cur]){[cur,div]=CCY_FIX[cur]}
   const ser=seriesOf(p),fx=await fxSeries(cur);if(fx===undefined)return{pos,ent,err:'Falta el tipo de cambio '+cur};
-  let units=0,inv=0,early=false;for(const d of pfDates(pos)){const pr=priceAt(ser,d);if(!pr)continue;early=early||pr.early;const r=fx?priceAt(fx,d).v:1;units+=pos.amt*r/(pr.v/div);inv+=pos.amt}
+  let units=0,inv=0,early=false;for(const d of pfDates(pos)){const pr=priceAt(ser,d);if(!pr)continue;early=early||pr.early;const r=fx?priceAt(fx,d).v:1;units+=pos.amt*r/(pr.v/div);inv+=pos.mode==='v'?(pos.cost||pos.amt):pos.amt}
   const last=ser[ser.length-1],rNow=fx?fx[fx.length-1][1]:1,val=units*(last[1]/div)/rNow;
   return{pos,ent,inv,val,gain:val-inv,pct:inv?(val/inv-1)*100:0,early,asOf:last[0]}}
 const eur=v=>v.toLocaleString('es-ES',{maximumFractionDigits:0})+' €';
-async function renderPf(){const el=$('#myPf');if(!el)return;
+async function renderPf(){const el=$('#myPf');if(!el)return;const _pfKeep=el.querySelector('.pf-old');
   if(!PF.length){el.innerHTML=`<div class="pf-empty"><h3>Mi cartera</h3><p>Apunta lo que ya tienes y verás cuánto vale hoy, cuánto has ganado y si vas según el plan.</p>
     <div class="pf-quick"><span>¿Empiezo con tus aportaciones?</span><b>Fidelity MSCI World · 260 €/mes</b><b>TSMC · 40 €/mes</b>
     <label>Desde <input type="month" id="pfFrom" value="${ymNow()}" max="${ymNow()}"></label><button class="btn" id="pfQuick">Añadir las dos</button></div>
-    <p class="mp-note">También puedes añadir cualquier acción, ETF o fondo desde su ficha con «＋ Añadir a mi cartera».</p></div>`;
+    <p class="mp-note">También puedes añadir cualquier acción, ETF o fondo desde su ficha con «＋ Añadir a mi cartera».</p><div id="pfOld"></div></div>`;$('#pfOld').appendChild(_pfKeep&&!_pfKeep.querySelector('.pf-form').hidden?_pfKeep:pfOldForm());
     $('#pfQuick').addEventListener('click',()=>{const f=$('#pfFrom').value||ymNow();PF.push({id:Date.now(),k:'f',t:'F_FIDW',mode:'m',amt:260,from:f},{id:Date.now()+1,k:'s',t:'TSM',mode:'m',amt:40,from:f});pfSave();renderPf();updateMapSoon()});return}
   el.innerHTML=`<div class="pf-head"><h3>Mi cartera</h3><span class="mp-note">calculando…</span></div>`;
   const rs=await Promise.all(PF.map(pfValue)),ok=rs.filter(r=>!r.err),inv=ok.reduce((a,r)=>a+r.inv,0),val=ok.reduce((a,r)=>a+r.val,0),g=val-inv,gp=inv?(val/inv-1)*100:0;
   const o=buildPlan(profile),pw={};o.items.forEach(x=>pw[(x.e.fund?'f':'e')+x.e.t]=x.w);
-  const rows=rs.map(r=>{const e=r.ent,c=e?KIND_C[e.k]:'#888',w=val&&!r.err?r.val/val:0,plan=e?pw[e.k+e.t]:null;
-    const sub=r.pos.mode==='m'?`${r.pos.amt} €/mes desde ${r.pos.from.split('-').reverse().join('/')}`:`${r.pos.amt} € el ${r.pos.date.split('-').reverse().join('/')}`;
+  const rows=rs.map(r=>{if(r.pending)return `<div class="pf-row" style="--c:#8a93a8"><div class="pf-main"><i></i><span class="pf-nm"><b>${esc(r.pos.t)}</b><small>${r.pos.mode==='m'?`${r.pos.amt} €/mes`:`${eur(r.pos.amt)} · sin precio diario aún`}</small><a class="pf-act" href="${isinIssue(r.pos.t)}" target="_blank" rel="noopener">Activar precios diarios ↗</a></span><span class="pf-v"><b>${eur(r.val)}</b><small>pendiente</small></span></div><button class="pf-x" data-id="${r.pos.id}" aria-label="Quitar">✕</button></div>`;
+    const e=r.ent,c=e?KIND_C[e.k]:'#888',w=val&&!r.err?r.val/val:0,plan=e?pw[e.k+e.t]:null;
+    const fd=d=>d.split('-').reverse().join('/'),sub=r.pos.mode==='m'?`${r.pos.amt} €/mes desde ${r.pos.from.split('-').reverse().join('/')}`:r.pos.mode==='v'?`valía ${eur(r.pos.amt)} el ${fd(r.pos.date)}${r.pos.cost?` · aportado ${eur(r.pos.cost)}`:''}`:`${r.pos.amt} € el ${fd(r.pos.date)}`;
     return `<div class="pf-row" style="--c:${c}"><button class="pf-main" data-k="${r.pos.k}" data-t="${esc(r.pos.t)}" data-n="${e?e.node:''}"><i></i><span class="pf-nm"><b>${esc(e?e.name:r.pos.t)}</b><small>${esc(sub)}${plan!=null?` · plan ${Math.round(plan*100)} %, tienes ${Math.round(w*100)} %`:''}</small></span>
-      <span class="pf-v">${r.err?`<small>${esc(r.err)}</small>`:`<b>${eur(r.val)}</b><small style="color:${r.gain<0?'var(--bad)':'var(--good)'}">${r.gain>=0?'+':''}${eur(r.gain)} · ${r.pct>=0?'+':''}${p1(r.pct,1)}</small>`}</span></button>
+      <span class="pf-v">${r.err?`<small>${esc(r.err)}</small>`:r.pos.mode==='m'&&!r.inv?`<small>empieza el 01/${r.pos.from.split('-').reverse().join('/')}</small>`:`<b>${eur(r.val)}</b><small style="color:${r.gain<0?'var(--bad)':'var(--good)'}">${r.gain>=0?'+':''}${eur(r.gain)} · ${r.pct>=0?'+':''}${p1(r.pct,1)}</small>`}</span></button>
       <button class="pf-x" data-id="${r.pos.id}" aria-label="Quitar">✕</button></div>`}).join('');
   const early=ok.some(r=>r.early),asOf=ok.map(r=>r.asOf).sort().pop();
   el.innerHTML=`<div class="pf-head"><h3>Mi cartera</h3><button class="pf-map" id="pfMap">★ Ver en el mapa</button></div>
     <div class="pf-hero"><div><span>Vale hoy</span><b>${eur(val)}</b></div><div><span>Has aportado</span><b>${eur(inv)}</b></div><div><span>Ganancia</span><b style="color:${g<0?'var(--bad)':'var(--good)'}">${g>=0?'+':''}${eur(g)}</b><small style="color:${g<0?'var(--bad)':'var(--good)'}">${gp>=0?'+':''}${p1(gp,1)}</small></div></div>
-    <div class="mp-alloc">${ok.map(r=>`<i style="width:${(r.val/val*100).toFixed(1)}%;background:${KIND_C[r.ent.k]}"></i>`).join('')}</div>
-    <div class="pf-list">${rows}</div>
+    <div class="mp-alloc">${ok.filter(r=>r.val>0).map(r=>`<i style="width:${(r.val/val*100).toFixed(1)}%;background:${r.ent?KIND_C[r.ent.k]:'#8a93a8'}"></i>`).join('')}</div>
+    <div class="pf-list">${rows}</div><div id="pfOld"></div>
     <p class="mp-note">Valorado en euros con los cierres diarios${asOf?` (último: ${asOf.split('-').reverse().join('/')})`:''} y el tipo de cambio de cada fecha. Las aportaciones mensuales se cuentan el día 1.${early?' Alguna fecha es anterior al histórico disponible (5 años): se usa el primer precio conocido.':''} Sin comisiones ni impuestos.</p>`;
   el.querySelectorAll('.pf-main').forEach(b=>b.addEventListener('click',()=>openDetail(b.dataset.k,b.dataset.t,b.dataset.n)));
   el.querySelectorAll('.pf-x').forEach(b=>b.addEventListener('click',()=>{PF=PF.filter(p=>String(p.id)!==b.dataset.id);pfSave();renderPf();updateMapSoon()}));
+  $('#pfOld').appendChild(_pfKeep&&!_pfKeep.querySelector('.pf-form').hidden?_pfKeep:pfOldForm());
   $('#pfMap').addEventListener('click',()=>{sq.active=true;sq.mine=true;sq.type='all';sq.sec='all';sq.fit=false;sq.q='';closePlace();updateMap();const st=$('#stage');if(st&&mobile())st.scrollIntoView({behavior:'smooth'})})}
+function pfOldForm(){const sec=document.createElement('div');sec.className='pf-add pf-old';const today=new Date().toISOString().slice(0,10);
+  sec.innerHTML=`<button class="btn" data-o>＋ Añadir una inversión que ya tenías</button><div class="pf-form" hidden>
+    <label>ISIN <input data-isin placeholder="IE00B5BMR087 o ticker" autocapitalize="characters" autocomplete="off" spellcheck="false"></label><small class="pf-hit" data-hit></small>
+    <label>Vale hoy <input type="number" min="1" step="any" inputmode="decimal" data-val> €</label>
+    <label>Aportado en total <input type="number" min="0" step="any" inputmode="decimal" data-cost placeholder="opcional"> €</label>
+    <label>Sigo aportando <input type="number" min="0" step="any" inputmode="decimal" data-mon placeholder="0"> €/mes</label>
+    <button class="btn" data-s>Guardar</button><small class="mp-note">Con el valor de hoy calculo tus participaciones al precio de cierre más reciente; desde ahí se mueve sola con los precios reales.</small></div>`;
+  const $q=x=>sec.querySelector(x),hit=$q('[data-hit]');let found=null,tm;
+  $q('[data-o]').addEventListener('click',e=>{e.target.hidden=true;$q('.pf-form').hidden=false;$q('[data-isin]').focus()});
+  $q('[data-isin]').addEventListener('input',e=>{clearTimeout(tm);tm=setTimeout(async()=>{const v=e.target.value.trim();if(v.length<2){hit.textContent='';found=null;return}
+    found=await findInvest(v);hit.innerHTML=found?`✓ ${esc(found.name)} <span style="color:${KIND_C[found.k]}">· ${({e:'ETF',f:'Fondo',s:'Acción'})[found.k]}</span>`:(/^[A-Z]{2}[A-Z0-9]{9}\d$/i.test(v)?'No está aún en ATLAS: lo guardo y puedes activar sus precios diarios con un toque.':'No lo encuentro: revisa el ISIN.')},250)});
+  $q('[data-s]').addEventListener('click',async()=>{const q=$q('[data-isin]').value.trim().toUpperCase().replace(/\s+/g,''),val=+$q('[data-val]').value,cost=+$q('[data-cost]').value||0,mon=+$q('[data-mon]').value||0;
+    if(!q||!(val>0)){hit.textContent='Pon el ISIN y cuánto vale hoy.';return}found=found||await findInvest(q);
+    if(!found&&!/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(q)){hit.textContent='No lo encuentro: revisa el ISIN.';return}
+    const k=found?found.k:'x',t=found?found.t:q,id=Date.now();PF.push({id,k,t,mode:'v',amt:val,cost:cost||null,date:today});
+    if(mon>0){const d=new Date();d.setMonth(d.getMonth()+1);PF.push({id:id+1,k,t,mode:'m',amt:mon,from:d.toISOString().slice(0,7)})}
+    $q('.pf-form').hidden=true;pfSave();renderPf();updateMapSoon();
+    if(!found)setTimeout(()=>{if(confirm('Guardado. Para que tenga precios diarios hay que añadirlo a la base de datos de ATLAS: se abrirá GitHub con el ISIN ya escrito (sin importes) y solo tienes que pulsar «Submit». ¿Abrir ahora?'))window.open(isinIssue(q),'_blank','noopener')},50)});
+  return sec}
 function pfAddForm(k,t){const sec=document.createElement('div');sec.className='dsec pf-add';
   sec.innerHTML=`<button class="btn" data-pfopen>＋ Añadir a mi cartera</button><div class="pf-form" hidden>
     <div class="seg pf-mode"><button data-m="m" aria-pressed="true">Cada mes</button><button data-m="u" aria-pressed="false">Compra única</button></div>

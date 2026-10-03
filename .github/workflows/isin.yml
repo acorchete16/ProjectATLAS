@@ -1,0 +1,60 @@
+name: Añadir inversión por ISIN
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+    inputs:
+      isins:
+        description: 'ISIN o tickers separados por espacios'
+        required: true
+permissions:
+  contents: write
+  issues: write
+concurrency:
+  group: prices
+  cancel-in-progress: false
+jobs:
+  add:
+    if: github.event_name == 'workflow_dispatch' || (startsWith(github.event.issue.title, 'ISIN') && github.event.issue.user.login == github.repository_owner)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Leer ISIN
+        id: q
+        env:
+          TITLE: ${{ github.event.issue.title }}
+          BODY: ${{ github.event.issue.body }}
+          INP: ${{ github.event.inputs.isins }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import os, re
+          t = ' '.join(os.environ.get(k, '') or '' for k in ('TITLE', 'BODY', 'INP'))
+          isins = re.findall(r'\b[A-Z]{2}[A-Z0-9]{9}[0-9]\b', t.upper())
+          if not isins: isins = [w for w in re.sub(r'(?i)^isin', '', os.environ.get('TITLE', '') or os.environ.get('INP', '')).split() if re.fullmatch(r'[A-Za-z0-9.\-]{1,20}', w)]
+          print('isins=' + ' '.join(dict.fromkeys(isins)))
+          PY
+      - name: Añadir al universo
+        env:
+          ISINS: ${{ steps.q.outputs.isins }}
+        run: python scripts/add_isin.py
+      - name: Ficha y precios
+        run: |
+          python scripts/enrich.py || true
+          python scripts/fetch_prices.py || true
+      - name: Guardar
+        run: |
+          git config user.name "atlas-bot"
+          git config user.email "atlas-bot@users.noreply.github.com"
+          git add data/
+          if ! git diff --cached --quiet; then git commit -m "Nueva inversión por ISIN: ${{ steps.q.outputs.isins }}"; for i in 1 2 3; do git pull --rebase origin main && git push && break; sleep 5; done; fi
+      - name: Responder
+        if: github.event_name == 'issues'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body "$(printf 'Hecho. Resultado:\n\n'; cat data/isin_log.txt; printf '\n\nEn unos minutos la app ya tendrá precios diarios (recarga la app).')"
+          gh issue close ${{ github.event.issue.number }} --repo ${{ github.repository }}

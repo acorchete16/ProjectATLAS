@@ -231,7 +231,7 @@ def main():
                 sym2 = search_isin(None, f['n'])
                 fx = fund_like(sym2, 'f', f['isin'], f['n'], u['managers'], {}) if sym2 and sym2 != sym else None
             if fx and not name_ok(f['n'], fx['full']): fx = None
-            if fx and sum(1 for v in fx['yrs'][:10] if v is not None) < 2: fails.append(f"f {f['isin']} {sym}: menos de 2 años de historia"); fx = None
+            if fx and not f.get('mine') and sum(1 for v in fx['yrs'][:10] if v is not None) < 2: fails.append(f"f {f['isin']} {sym}: menos de 2 años de historia"); fx = None
             if fx: out['f'].append(fx)
             elif not any(x.startswith(f"f {f['isin']}") for x in fails): fails.append(f"f {f['isin']} ({f['n']}): Yahoo no lo identifica con seguridad")
         except Exception as ex: fails.append(f"f {f['isin']} {sym}: {str(ex)[:80]}"); (oldmap.get(sym) and out['f'].append(oldmap[sym]))
