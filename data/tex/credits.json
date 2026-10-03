@@ -1,0 +1,69 @@
+{
+ "source": "Poly Haven (CC0)",
+ "slots": {
+  "stone": {
+   "asset": "castle_wall_slates",
+   "maps": [
+    "d",
+    "n",
+    "r"
+   ]
+  },
+  "marble": {
+   "asset": "marble_01",
+   "maps": [
+    "d",
+    "n",
+    "r"
+   ]
+  },
+  "plaster": {
+   "asset": "painted_plaster_wall",
+   "maps": [
+    "d",
+    "n",
+    "r"
+   ]
+  },
+  "roof": {
+   "asset": "roof_tiles",
+   "maps": [
+    "d",
+    "n",
+    "r"
+   ]
+  },
+  "paving": {
+   "asset": "cobblestone_floor_01",
+   "maps": [
+    "d",
+    "n",
+    "r"
+   ]
+  },
+  "grass": {
+   "asset": "aerial_grass_rock",
+   "maps": [
+    "d",
+    "n",
+    "r"
+   ]
+  },
+  "sand": {
+   "asset": "aerial_beach_01",
+   "maps": [
+    "d",
+    "n",
+    "r"
+   ]
+  },
+  "metal": {
+   "asset": "metal_plate",
+   "maps": [
+    "d",
+    "n",
+    "r"
+   ]
+  }
+ }
+}
