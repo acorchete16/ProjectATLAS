@@ -1857,7 +1857,7 @@ function roadsLit(on){const st=map.getStyle();if(!st)return;if(!_roadOrig){_road
   Object.keys(_roadOrig).forEach(id=>{try{map.setPaintProperty(id,'line-color',on?['interpolate',['linear'],['zoom'],12,'#7a4a2a',16,'#ffb35a']:_roadOrig[id])}catch(_){}})}
 
 /* Mapbox (estilo Standard de noche con ventanas y farolas encendidas) si hay token; si no, MapLibre + OpenFreeMap */
-const MAPBOX_TOKEN='';
+const MAPBOX_TOKEN='pk.eyJ1IjoiYWNvcmNoZXRlMTYiLCJhIjoiY211czRsYXc5MDIxMzJ4cjRhN3V0OWxyMCJ9.Nm2gX80Fr-_vR7uFPAVWiw';
 let GL=window.maplibregl,MBX=false;
 function mbxToken(){try{return localStorage.getItem('atlas_mbx')||MAPBOX_TOKEN}catch(_){return MAPBOX_TOKEN}}
 const FONT=()=>MBX?['DIN Pro Bold','Arial Unicode MS Bold']:['Noto Sans Bold'];
