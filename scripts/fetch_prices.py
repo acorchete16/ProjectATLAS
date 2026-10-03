@@ -41,6 +41,11 @@ def yahoo(sym):
             adj = (q.get('adjclose') or [{}])[0].get('adjclose') or [None] * len(cls)
             cl = [a if a is not None else c for a, c in zip(adj, cls)]  # el último día a veces no trae ajustado
             pts = [(datetime.datetime.utcfromtimestamp(t).date(), c) for t, c in zip(r.get('timestamp') or [], cl)]
+            m = r.get('meta', {}); px, tm = m.get('regularMarketPrice'), m.get('regularMarketTime')
+            if px and tm:
+                dl = datetime.datetime.utcfromtimestamp(tm).date()
+                pts = [p for p in pts if p[0] != dl or p[1]] 
+                if not any(p[0] == dl and p[1] for p in pts): pts.append((dl, px))  # último precio aunque la barra diaria venga vacía
             return pack(pts, r['meta'].get('currency'), sym)
         except Exception as e:
             last = e
