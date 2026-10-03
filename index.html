@@ -450,6 +450,19 @@ body.mapmode #searchFab{display:none!important}
 /* fichas: aparición suave */
 .dsheet:not([hidden]) .dbox{animation:dboxin .22s ease-out}@keyframes dboxin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.pg-ring,.pg-beam{animation:none}}
+
+/* sin cabecera en el modo mapa: más espacio */
+body.mapmode #app.simple header.top{display:none}
+body.mapmode #app.simple .mapbar{top:18px}
+body.mapmode #app.simple .right{top:18px}
+@media (max-width:1100px){body.mapmode #app.simple .mapbar{top:10px}}
+.mb-top{display:flex;gap:8px}.mb-top .mb-search{flex:1}
+.mb-ico{flex:none;width:48px;border-radius:14px;border:1px solid var(--edge2);background:rgba(16,14,36,.86);color:var(--fg);font-size:18px;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+#settings .xprow{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--mid)}
+/* baliza de la sede: pulso con CSS (no repinta el mapa) */
+.hq-pin::before{content:'';position:absolute;left:13px;bottom:8px;width:0;height:0;border-radius:50%;border:2px solid #b9f6ff;transform:translate(-50%,50%);animation:hqring 2s ease-out infinite}
+@keyframes hqring{from{width:0;height:0;opacity:.9}to{width:180px;height:180px;opacity:0}}
+.pole-gen.near .pg-ring,.pole-gen.near .pg-core,.pole-gen.near .pg-beam{display:none}.pole-gen.near{height:40px}.pole-gen.near .pg-lbl{bottom:auto;top:-30px}
 </style>
 </head>
 <body>
@@ -559,6 +572,7 @@ body.mapmode #searchFab{display:none!important}
 
 <div class="modal" id="settings" hidden>
   <div class="box glass" role="dialog" aria-label="Conexiones">
+    <div class="xprow"><span>Vista experta: agentes, terminal y tablas</span><span id="xpSlot"></span></div>
     <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:17px;font-weight:700">Precios diarios · EODHD</div><span id="eodState" class="pill s-idle">Sin conectar</span></div>
     <p style="font-size:13px;line-height:1.55;color:var(--mid);margin:0">Pega tu clave de <a href="https://eodhd.com/register" target="_blank" rel="noopener" style="color:#9ff8ff">eodhd.com</a> (gratis: 20 consultas al día). Cada ficha que abras gasta una y se guarda hasta el día siguiente.</p>
     <label class="lbl" for="eodKey">API key de EODHD</label><input id="eodKey" type="password" placeholder="tu clave" autocomplete="off">
@@ -1836,7 +1850,7 @@ function slerpLine(a,b,n=48){const R=Math.PI/180,toV=([lo,la])=>[Math.cos(la*R)*
   const d=Math.acos(Math.max(-1,Math.min(1,A[0]*B[0]+A[1]*B[1]+A[2]*B[2])));if(d<1e-6)return[a,b];const out=[];
   for(let i=0;i<=n;i++){const t=i/n,s1=Math.sin((1-t)*d)/Math.sin(d),s2=Math.sin(t*d)/Math.sin(d),v=[s1*A[0]+s2*B[0],s1*A[1]+s2*B[1],s1*A[2]+s2*B[2]];
     out.push([Math.atan2(v[1],v[0])/R,Math.atan2(v[2],Math.hypot(v[0],v[1]))/R])}return out}
-const POLE=[-40,88.5];let fxFlows=[],fxPackets=[],fxT0=performance.now(),fxOrbit=false,fxRaf=0,_roadOrig=null;
+const POLE=[-40,84.05];let fxFlows=[],fxPackets=[],fxT0=performance.now(),fxOrbit=false,fxRaf=0,_roadOrig=null;
 function fxSetup(){
   map.addImage('win-lit',winPattern(true),{pixelRatio:2});map.addImage('win-dim',winPattern(false),{pixelRatio:2});
   if(map.getLayer('b3d')){map.setPaintProperty('b3d','fill-extrusion-pattern','win-dim')}
@@ -1851,19 +1865,63 @@ function fxSetup(){
     tip.setLngLat(e.lngLat).setHTML(`<b>${esc(x.name)}</b><span>${KIND_L[x.k]} · ${an?p1(an.mean,0)+' media anual':'sin historial'}</span>`).addTo(map)});
   map.on('mouseleave','pt',()=>tip.remove());
   ['mousedown','touchstart','wheel','dragstart'].forEach(ev=>map.on(ev,()=>{fxOrbit=false}));
+  try{map.addSource('hqA',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:ATL},properties:{}}});atlantisSetup()}catch(e){console.warn('atlantis',e)}
   try{poleSetup()}catch(e){console.warn('polo',e)}
   cancelAnimationFrame(fxRaf);fxRaf=requestAnimationFrame(fxTick)}
+/* ================= ATLÁNTIDA: la base de datos hundida del Polo Norte ================= */
+const ATL=[-40,84.05];
+function atlOff(dx,dy){return[ATL[0]+dx/(111.32*Math.cos(ATL[1]*Math.PI/180)),ATL[1]+dy/110.57]} // km -> lon/lat
+function atlCircle(r,n=48,cx=0,cy=0){const p=[];for(let i=0;i<=n;i++){const a=i/n*Math.PI*2;p.push(atlOff(cx+Math.cos(a)*r,cy+Math.sin(a)*r))}return[p]}
+function atlArc(r0,r1,a0,a1,n=24){const p=[];for(let i=0;i<=n;i++){const a=a0+(a1-a0)*i/n;p.push(atlOff(Math.cos(a)*r1,Math.sin(a)*r1))}for(let i=n;i>=0;i--){const a=a0+(a1-a0)*i/n;p.push(atlOff(Math.cos(a)*r0,Math.sin(a)*r0))}p.push(p[0]);return[p]}
+function atlBox(cx,cy,w,d,rot){const c=Math.cos(rot),s=Math.sin(rot),pts=[[-w/2,-d/2],[w/2,-d/2],[w/2,d/2],[-w/2,d/2],[-w/2,-d/2]];return[pts.map(([x,y])=>atlOff(cx+x*c-y*s,cy+x*s+y*c))]}
+function atlantis(){const F=[],add=(g,h,b,c,e=0)=>F.push({type:'Feature',geometry:{type:'Polygon',coordinates:g},properties:{h,b,c,e}});
+  let seed=11;const rnd=()=>(seed=(seed*9301+49297)%233280)/233280;
+  const CAN=[0,Math.PI/2,Math.PI,Math.PI*1.5],gap=.09,MARBLE='#cfc3a3',ORI='#b5793c',STONE='#1c2340';
+  // anillos de tierra (Platón: anillos concéntricos de tierra y agua), cortados por 4 canales radiales
+  [[2.35,2.9,8],[1.35,1.85,12]].forEach(([r0,r1,h])=>CAN.forEach((a,i)=>{const a0=a+gap,a1=(CAN[i+1]??CAN[0]+Math.PI*2)-gap;add(atlArc(r0,r1,a0,a1,40),h,0,STONE)}));
+  // muralla exterior de oricalco con torres
+  for(let i=0;i<28;i++){const a=i/28*Math.PI*2;if(CAN.some(c=>Math.abs(((a-c+Math.PI*3)%(Math.PI*2))-Math.PI)<gap*1.4))continue;const broken=rnd()<.3;
+    add(atlCircle(.07,10,Math.cos(a)*2.85,Math.sin(a)*2.85),broken?40+rnd()*40:110+rnd()*60,0,ORI,.25)}
+  // columnas en ruinas sobre el anillo exterior
+  for(let i=0;i<46;i++){const a=rnd()*Math.PI*2,r=2.45+rnd()*.35;add(atlCircle(.012,8,Math.cos(a)*r,Math.sin(a)*r),8+rnd()*55,0,MARBLE,.1)}
+  // ocho templos de mármol con columnatas en el anillo medio
+  for(let i=0;i<8;i++){const a=i/8*Math.PI*2+Math.PI/8,r=1.6,cx=Math.cos(a)*r,cy=Math.sin(a)*r,rot=a+Math.PI/2;
+    add(atlBox(cx,cy,.24,.13,rot),12,0,MARBLE,.15);add(atlBox(cx,cy,.2,.09,rot),46,12,'#e6dcc0',.2);
+    for(let j=0;j<7;j++)for(const sd of[-1,1]){const lx=-.1+j*.0333,ly=sd*.058,c=Math.cos(rot),s=Math.sin(rot);add(atlCircle(.008,8,cx+lx*c-ly*s,cy+lx*s+ly*c),40,12,MARBLE,.15)}}
+  // isla central y almacén de datos (núcleo de la ciudad)
+  add(atlCircle(.95,64),16,0,'#202848');
+  add(atlCircle(.6,64),70,16,'#2a2f5c',.15);
+  add(atlCircle(.46,64),190,70,'#343a78',.2);
+  add(atlCircle(.33,64),320,190,'#3d4f98',.3);
+  add(atlCircle(.13,32),560,320,'#9ff8ff',1);
+  // racks de servidores alrededor del núcleo (franjas iluminadas)
+  for(let i=0;i<20;i++){const a=i/20*Math.PI*2;add(atlBox(Math.cos(a)*.75,Math.sin(a)*.75,.045,.11,a),150+(i%3)*40,16,i%2?'#35e0ff':'#141c3a',i%2?.9:.1)}
+  // anillos de cristal flotando alrededor del núcleo
+  [[.52,.55,250],[.38,.405,380],[.2,.22,470]].forEach(([r0,r1,b])=>add(atlArc(r0,r1,0,Math.PI*2,64),b+6,b,'#7ff6ff',.9));
+  return{type:'FeatureCollection',features:F}}
+function atlWater(){return{type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'Polygon',coordinates:atlCircle(3.4,72)},properties:{}}]}}
+function atlantisSetup(){
+  map.addSource('atl-w',{type:'geojson',data:atlWater()});
+  map.addLayer({id:'atl-water',type:'fill',source:'atl-w',minzoom:6,paint:{'fill-color':'#073c52','fill-opacity':.92}});
+  map.addLayer({id:'atl-shore',type:'line',source:'atl-w',minzoom:6,paint:{'line-color':'#35e0ff','line-width':2,'line-blur':3,'line-opacity':.7}});
+  map.addSource('atl',{type:'geojson',data:atlantis()});
+  map.addLayer({id:'atl-3d',type:'fill-extrusion',source:'atl',minzoom:6.5,paint:{'fill-extrusion-color':['get','c'],'fill-extrusion-height':['get','h'],'fill-extrusion-base':['get','b'],'fill-extrusion-opacity':.95}});
+  map.addLayer({id:'atl-glow',type:'circle',source:'hqA',minzoom:6,paint:{'circle-color':'#9ff8ff','circle-radius':['interpolate',['exponential',2],['zoom'],7,30,11,500],'circle-blur':1,'circle-opacity':.22,'circle-pitch-alignment':'map'}},'atl-3d');
+  if(MBX){try{map.setPaintProperty('atl-3d','fill-extrusion-emissive-strength',['get','e']);map.setPaintProperty('atl-water','fill-emissive-strength',.6);map.setPaintProperty('atl-shore','line-emissive-strength',1);map.setPaintProperty('atl-glow','circle-emissive-strength',1)}catch(_){}}
+  map.on('click','atl-3d',e=>{e.preventDefault&&e.preventDefault();showPole()});
+  map.on('zoom',()=>{const el=poleMk&&poleMk.getElement();if(el)el.classList.toggle('near',map.getZoom()>7.5)})}
+
 /* ---- Generador de datos del Polo Norte: aquí llegan los datos de todas las sedes ---- */
 let poleMk=null;
 function poleSetup(){const el=document.createElement('div');el.className='pole-gen';el.setAttribute('role','button');el.setAttribute('aria-label','Base de datos ATLAS en el Polo Norte');
-  el.innerHTML='<div class="pg-beam"></div><div class="pg-ring r1"></div><div class="pg-ring r2"></div><div class="pg-ring r3"></div><div class="pg-core"><i></i></div><div class="pg-lbl"><b>ATLAS · BASE DE DATOS</b><span id="pgStat">sincronizando…</span></div>';
+  el.innerHTML='<div class="pg-beam"></div><div class="pg-ring r1"></div><div class="pg-ring r2"></div><div class="pg-ring r3"></div><div class="pg-core"><i></i></div><div class="pg-lbl"><b>ATLÁNTIDA · BASE DE DATOS</b><span id="pgStat">sincronizando…</span></div>';
   el.addEventListener('click',e=>{e.stopPropagation();showPole()});
   poleMk=new GL.Marker({element:el,anchor:'bottom'}).setLngLat(POLE).addTo(map);poleStat()}
 async function poleStat(){const n=searchEntities().length;let up='';try{const r=await fetch('data/p/_meta.json',{cache:'no-cache'});if(r.ok){const m=await r.json();up=m.updated}}catch(_){}
   window._poleUp=up;const e=$('#pgStat');if(e)e.textContent=`${n} valores${up?' · act. '+up.slice(8,10)+'/'+up.slice(5,7)+' '+up.slice(11,16)+' UTC':''}`}
 function poleBlip(c){const el=poleMk&&poleMk.getElement();if(!el)return;el.style.setProperty('--blip',c||'#9ff8ff');el.classList.remove('blip');void el.offsetWidth;el.classList.add('blip')}
 function showPole(){const p=$('#mcard'),ents=searchEntities(),n={s:0,e:0,f:0};ents.forEach(x=>n[x.k]++);const up=window._poleUp||'';
-  p.innerHTML=`<div class="mc-h"><div><h3>ATLAS · Base de datos</h3><p>El generador del Polo Norte: aquí llegan los datos de todas las sedes.</p></div><button class="x-close" data-mclose aria-label="Cerrar">✕</button></div>
+  p.innerHTML=`<div class="mc-h"><div><h3>Atlántida · Base de datos</h3><p>La ciudad hundida del Polo Norte. En su núcleo, el almacén donde llegan los datos de todas las sedes.</p></div><button class="x-close" data-mclose aria-label="Cerrar">✕</button></div>
    <div class="pg-card"><div class="pg-n"><div><b style="color:${KIND_C.s}">${n.s}</b><span>acciones</span></div><div><b style="color:${KIND_C.e}">${n.e}</b><span>ETFs</span></div><div><b style="color:${KIND_C.f}">${n.f}</b><span>fondos</span></div></div>
    <p>Última actualización de precios: <b>${up?up.slice(8,10)+'/'+up.slice(5,7)+' a las '+up.slice(11,16)+' UTC':'—'}</b>. Se actualiza solo cada día laborable a las 19:35 y 23:25 (hora de Madrid).</p>
    <p class="mp-note">Fuentes: Yahoo Finance (precios, cifras y rentabilidades), OpenStreetMap (sedes), EODHD (respaldo de fondos), fichas de las gestoras (fondos), Mapbox (mapa) y TradingView (gráfico interactivo).</p>
@@ -1872,7 +1930,7 @@ function showPole(){const p=$('#mcard'),ents=searchEntities(),n={s:0,e:0,f:0};en
   p.querySelector('[data-mclose]').addEventListener('click',closePlace);
   p.querySelector('[data-pg=all]').addEventListener('click',()=>{sq.active=true;sq.type='all';sq.sec='all';sq.fit=false;sq.q='';closePlace();updateMap()});
   p.querySelector('[data-pg=plan]').addEventListener('click',()=>{closePlace();const r=$('.right');if(r)r.scrollIntoView({behavior:'smooth'})});
-  map.flyTo({center:[POLE[0],78],zoom:2.6,pitch:35,bearing:0,duration:1600,padding:mapPad()})}
+  fxOrbit=false;map.flyTo({center:ATL,zoom:mobile()?9.4:10.1,pitch:62,bearing:24,duration:2400,curve:1.5,essential:true,padding:mobile()?{...mapPad(),bottom:Math.round(innerHeight*.12)}:{...mapPad(),left:430}});map.once('moveend',()=>{if(mapFocus==='pole'&&!mobile())fxOrbit=!reduced})}
 function fxData(gj){ // flujos desde cada sede encendida hacia la base de datos del Polo Norte
   const seen=new Map();gj.features.forEach(f=>{const k=f.properties.gk;if(!seen.has(k))seen.set(k,f)});
   fxFlows=[...seen.values()].slice(0,60).map((f,i)=>({c:f.properties.c,line:slerpLine(f.geometry.coordinates,POLE,60),ph:Math.random()}));
@@ -1882,10 +1940,10 @@ const DASH=[[0,4,3],[.5,4,2.5],[1,4,2],[1.5,4,1.5],[2,4,1],[2.5,4,.5],[3,4,0],[0
 let _dashI=-1,_lastNow=performance.now();
 let _pktT=0,_ringT=0;
 function fxTick(now){fxRaf=requestAnimationFrame(fxTick);if(!mapReady||document.hidden||!$('#detail').hidden||!$('#search').hidden)return;const dt=Math.min(.05,(now-_lastNow)/1000);_lastNow=now;
-  if(fxFlows.length&&map.getZoom()<9&&now-_pktT>140){const sdt=(now-_pktT)/1000;_pktT=now;const di=Math.floor(now/260)%DASH.length;if(di!==_dashI){_dashI=di;map.setPaintProperty('flows','line-dasharray',DASH[di])}
+  if(fxFlows.length&&map.getZoom()<9&&now-_pktT>(mobile()?320:160)){const sdt=(now-_pktT)/1000;_pktT=now;const di=Math.floor(now/260)%DASH.length;if(di!==_dashI){_dashI=di;map.setPaintProperty('flows','line-dasharray',DASH[di])}
     fxPackets.forEach(p=>{p.t+=p.v*Math.min(.5,sdt);if(p.t>=1){p.t-=1;poleBlip(p.f.c)}});
     map.getSource('packets').setData({type:'FeatureCollection',features:fxPackets.map(p=>{const L=p.f.line,i=Math.min(L.length-1,Math.floor(p.t*(L.length-1)));return{type:'Feature',geometry:{type:'Point',coordinates:L[i]},properties:{c:p.f.c}}})})}
-  if(mapFocus&&now-_ringT>33){_ringT=now;const k=((now-fxT0)/1800)%1;map.setPaintProperty('hq-ring','circle-radius',10+k*140);map.setPaintProperty('hq-ring','circle-stroke-opacity',(1-k)*.8)}
+
   if(fxOrbit&&!map.isMoving())map.setBearing(map.getBearing()+dt*4)}
 function roadsLit(on){const st=map.getStyle();if(!st)return;if(!_roadOrig){_roadOrig={};st.layers.forEach(l=>{if(l.type==='line'&&/transportation|road|highway|street/i.test((l['source-layer']||'')+l.id)){_roadOrig[l.id]=map.getPaintProperty(l.id,'line-color')}})}
   Object.keys(_roadOrig).forEach(id=>{try{map.setPaintProperty(id,'line-color',on?['interpolate',['linear'],['zoom'],12,'#7a4a2a',16,'#ffb35a']:_roadOrig[id])}catch(_){}})}
@@ -1906,7 +1964,7 @@ async function initMap(){const st=$('#stage');st.classList.add('maponly');docume
 async function fallbackMapLibre(){try{await loadMapLibre()}catch(e){$('#mapMsg').textContent='No se pudo cargar el mapa. Comprueba la conexión.';return}GL=window.maplibregl;MBX=false;buildMap(false)}
 function buildMap(useMbx){
   let styled=false;
-  map=new GL.Map({container:'map',style:useMbx?'mapbox://styles/mapbox/standard':MAP_STYLE,projection:useMbx?'globe':undefined,center:[-25,32],zoom:mobile()?0.9:1.7,maxPitch:75,attributionControl:useMbx?true:{compact:true},fadeDuration:150});
+  map=new GL.Map({container:'map',style:useMbx?'mapbox://styles/mapbox/standard':MAP_STYLE,projection:useMbx?'globe':undefined,center:[-25,32],zoom:mobile()?0.9:1.7,maxPitch:75,attributionControl:useMbx?true:{compact:true},fadeDuration:0,antialias:false,performanceMetricsCollection:false,pixelRatio:mobile()?Math.min(devicePixelRatio||1,1.75):undefined,maxTileCacheSize:mobile()?60:undefined});
   if(useMbx){map.on('error',e=>{const st=e&&e.error&&(e.error.status||0);if(!styled&&(st===401||st===403||/token|unauthor/i.test(String(e.error&&e.error.message)))){console.warn('Token de Mapbox rechazado: vuelvo a MapLibre');try{map.remove()}catch(_){}fallbackMapLibre()}})}
   map.on('style.load',()=>{styled=true;
     if(MBX){try{map.setConfigProperty('basemap','lightPreset','night');map.setConfigProperty('basemap','showPointOfInterestLabels',false);map.setConfigProperty('basemap','showTransitLabels',false)}catch(_){}
@@ -1953,11 +2011,12 @@ function updateMap(first){if(!mapReady)return;const list=mapEntities(),gj=mapGeo
     else map.fitBounds(b,{padding:{...mapPad(),top:mapPad().top+30,left:40,bottom:40,right:mapPad().right+40},maxZoom:5,duration:1200})}
   if(!on)closePlace()}
 function renderMapBar(nPts,nEnt){const b=$('#mapBar');if(!b)return;const chip=(g,v,l,on)=>`<button class="mb-chip${on?' on':''}" data-g="${g}" data-v="${v}">${l}</button>`,a=filterActive();
-  b.innerHTML=`<button class="mb-search" data-g="open">⌕ <span>${sq.q?esc(sq.q):'Buscar empresa, ETF o fondo'}</span></button>
+  b.innerHTML=`<div class="mb-top"><button class="mb-search" data-g="open">⌕ <span>${sq.q?esc(sq.q):'Buscar empresa, ETF o fondo'}</span></button><button class="mb-ico" data-g="set" aria-label="Ajustes">⚙</button></div>
    <div class="mb-row">${chip('type','etf','ETFs',a&&sq.type==='etf')}${chip('type','fnd','Fondos',a&&sq.type==='fnd')}${chip('type','stk','Acciones',a&&sq.type==='stk')}${chip('type','all','Todo',a&&sq.type==='all')}${chip('fit','1','✓ Para mí',a&&sq.fit)}${chip('sec','pick',sq.sec!=='all'&&a?`${SEC_ICON[sq.sec]||''} ${esc(sq.sec)} ▾`:'Sector ▾',a&&sq.sec!=='all')}</div>
    ${a?`<div class="mb-leg"><span><i class="lg e"></i>ETF</span><span><i class="lg f"></i>Fondo</span><span><i class="lg s"></i>Acción</span></div>`:''}${a?`<div class="mb-res"><span><b>${nEnt}</b> resultado${nEnt===1?'':'s'} encendido${nEnt===1?'':'s'}</span><button data-g="list">Ver lista</button><button data-g="clear" aria-label="Quitar filtros">✕</button></div>`:`<div class="mb-hint">Elige qué quieres ver y se encenderán en el mapa</div>`}`}
 function mapBarClick(e){const b=e.target.closest('button[data-g]');if(!b)return;const g=b.dataset.g,v=b.dataset.v;
   if(g==='open'||g==='list'){openSearch();return}
+  if(g==='set'){$('#settings').hidden=false;return}
   if(g==='clear'){sq.active=false;sq.q='';sq.type='all';sq.sec='all';sq.fit=false;closePlace();updateMap();if(map)map.flyTo({center:[-25,32],zoom:mobile()?0.9:1.7,pitch:0,bearing:0,duration:1400});return}
   if(g==='sec'){sq.open=true;openSearch();return}
   if(g==='type'){if(sq.active&&sq.type===v&&v!=='all'){sq.type='all'}else{sq.type=v}sq.active=true}
@@ -1981,7 +2040,7 @@ function litCity(c){if(!mapReady)return;const src=map.getSource('hq');if(src)src
   try{roadsLit(!!c)}catch(_){}if(!c){fxOrbit=false;try{map.setPaintProperty('hq-ring','circle-stroke-opacity',0)}catch(_){}}}
 function flyHQ(c){if(hqMarker)hqMarker.remove();litCity(c);const el=document.createElement('div');el.className='hq-pin';el.innerHTML='<i></i><b></b>';
   hqMarker=new GL.Marker({element:el,anchor:'bottom'}).setLngLat(c).addTo(map);
-  fxOrbit=false;map.flyTo({center:c,zoom:16.2,pitch:60,bearing:-28,duration:1600,curve:1.3,essential:true,padding:{...mapPad(),bottom:mobile()?Math.round(innerHeight*.18):20}});map.once('moveend',()=>{if(mapFocus)fxOrbit=!reduced})}
+  fxOrbit=false;map.flyTo({center:c,zoom:16.2,pitch:60,bearing:-28,duration:1600,curve:1.3,essential:true,padding:{...mapPad(),bottom:mobile()?Math.round(innerHeight*.18):20}});map.once('moveend',()=>{if(mapFocus)fxOrbit=!reduced&&!mobile()})}
 async function refineGeo(g,coord){ // geocodifica la dirección en el móvil (OpenStreetMap) para afinar al edificio
   if(!g[2])return;try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(g[2].replace(/\(.*?\)/g,'')),{headers:{'Accept-Language':'es'}});
     const j=await r.json();if(!j||!j[0])return;const lat=+j[0].lat,lon=+j[0].lon;const d=Math.hypot((lat-g[0])*111,(lon-g[1])*111*Math.cos(g[0]*Math.PI/180));
@@ -2360,7 +2419,8 @@ function renderCard(){
   c.querySelector('.x-close').addEventListener('click',closeCard);
 }
 function refreshNode(id){renderNodes();updateLabelText();if(cardOpen===id)renderCard()}
-function refreshAll(){if(!$('#search').hidden)renderSearch();renderStocksTable();renderNodes();renderStrategy();renderMatrix();renderModel();renderSources();updateLabelText();applyProfileVisuals();if(cardOpen)renderCard()}
+const EXPERT=()=>!$('#app').classList.contains('simple');
+function refreshAll(){if(!$('#search').hidden)renderSearch();if(EXPERT()){renderStocksTable();renderNodes();renderMatrix();renderModel();renderSources()}renderStrategy();updateLabelText();applyProfileVisuals();if(cardOpen)renderCard()}
 function setProfile(pk){profile=pk;renderProfileSeg();refreshAll();stream('cao',`Perfil → ${PROFILES[pk].label} (${PROFILES[pk].range}) · ${buildPlan(pk).items.length} ETFs · ${p1(buildPlan(pk).st.g)} esperado`,'ok');robotSay('cao',`Rebalanceando a ${PROFILES[pk].short}…`)}
 function setBasis(b){basis=b;document.querySelectorAll('#basisSeg button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.b===b)));refreshAll();stream('cao',`Base de rentabilidades → ${b==='hist'?'histórica 10 años':'prospectiva'}`,'lv')}
 function tickClocks(){const f=tz=>new Intl.DateTimeFormat('es-ES',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date());
@@ -2394,7 +2454,7 @@ $('#searchBtn').addEventListener('click',openSearch);
    try{const r=await eodFetch('AAPL.US',k);eodCount();$('#eodMsg').style.color='var(--good)';$('#eodMsg').textContent=`Funciona: Apple cerró a $${r[r.length-1][1].toFixed(2)} el ${r[r.length-1][0].split('-').reverse().join('/')}. Pulsa Guardar.`}
    catch(e){$('#eodMsg').style.color='var(--bad)';$('#eodMsg').textContent=/^auth/.test(e.message)?'Clave no válida ('+e.message+').':e.message==='limit'?'Límite diario alcanzado.':'No se pudo conectar ('+e.message+'). Si persiste, puede ser un bloqueo CORS del navegador.'}})}$('#sheetX').addEventListener('click',()=>{if(!$('#detail').hidden)closeDetail();else closeSearch()});
 $('#setBtn').addEventListener('click',()=>{$('#settings').hidden=false});
-$('#expertBtn').addEventListener('click',()=>{const app=$('#app'),on=app.classList.toggle('simple');$('#expertBtn').setAttribute('aria-pressed',String(!on));$('#expertBtn').textContent=on?'Vista experta':'Vista simple';try{localStorage.setItem('atlas_view',on?'simple':'expert')}catch(_){}setTimeout(resize3d,60);refreshAll()});
+$('#xpSlot').appendChild($('#expertBtn'));$('#expertBtn').addEventListener('click',()=>{const app=$('#app'),on=app.classList.toggle('simple');$('#expertBtn').setAttribute('aria-pressed',String(!on));$('#expertBtn').textContent=on?'Vista experta':'Vista simple';try{localStorage.setItem('atlas_view',on?'simple':'expert')}catch(_){}setTimeout(resize3d,60);refreshAll()});
 try{if(localStorage.getItem('atlas_view')==='expert'){$('#app').classList.remove('simple');$('#expertBtn').textContent='Vista simple';$('#expertBtn').setAttribute('aria-pressed','true')}}catch(_){}$('#searchFab').addEventListener('click',openSearch);
 document.addEventListener('keydown',e=>{if((e.key==='/'||(e.key==='k'&&(e.ctrlKey||e.metaKey)))&&document.activeElement.tagName!=='INPUT'){e.preventDefault();openSearch();return}if(e.key==='Escape'){if(!$('#detail').hidden){closeDetail();return}if(!$('#search').hidden){closeSearch();return}closeCard();$('#settings').hidden=true}});
 let rsT;window.addEventListener('resize',()=>{clearTimeout(rsT);rsT=setTimeout(resize3d,80)});
@@ -2408,7 +2468,7 @@ try{const q=new URLSearchParams(location.search),m=+q.get('monthly');
   if(q.has('monthly')||q.has('from'))history.replaceState(null,'',location.pathname)}catch(e){}
 renderProfileSeg();syncMode();
 loadUniverseX();if(MAPMODE){initMap();$('#mapBar').addEventListener('click',mapBarClick)}else{const B='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/';loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js').then(()=>Promise.all(['shaders/CopyShader.js','shaders/LuminosityHighPassShader.js'].map(f=>loadScript(B+f)))).then(()=>loadScript(B+'postprocessing/EffectComposer.js')).then(()=>Promise.all(['postprocessing/RenderPass.js','postprocessing/ShaderPass.js','postprocessing/UnrealBloomPass.js'].map(f=>loadScript(B+f)))).then(()=>{initThree();buildLabels();applyCam()}).catch(()=>{$('#stage').insertAdjacentHTML('beforeend','<div class="nolgl">No se pudo cargar Three.js desde el CDN. Los paneles siguen funcionando.</div>')})}
-initCharts();refreshAll();renderStocksTable();tickClocks();setInterval(tickClocks,1000);
+initCharts();refreshAll();tickClocks();setInterval(tickClocks,1000);
 applyCam&&window.THREE&&applyCam();requestAnimationFrame(loop);
 setTimeout(()=>flyTo(HOME,reduced?1:3200),300);
 stream('sys','ATLAS 3D en línea · globo WebGL · 5 skylines · modelo calibrado con rentabilidades a 10 años (sep. 2026)');
