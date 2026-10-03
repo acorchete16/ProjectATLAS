@@ -189,9 +189,9 @@ def name_ok(hint, yname):
     """El nombre que devuelve Yahoo tiene que contener las palabras distintivas del fondo buscado."""
     if not hint: return True
     key = [w for w in _norm(hint) if w not in GENERIC and w not in MGRS and len(w) > 1]
-    yn = _norm(yname or '')
+    yn = [t for t in _norm(yname or '') if t not in ('eur', 'usd', 'gbp', 'chf', 'acc', 'inc', 'dis', 'hdg')]
     if not key: return True
-    hits = sum(1 for w in key if any(t.startswith(w[:4]) or w.startswith(t[:4]) for t in yn if len(t) >= 2))
+    hits = sum(1 for w in key if any(t == w or (len(t) >= 3 and len(w) >= 3 and (t.startswith(w[:4]) or w.startswith(t[:4]))) for t in yn))
     mg = [w for w in _norm(hint) if w in MGRS]
     return hits == len(key) and (not mg or any(m in yn for m in mg))
 
