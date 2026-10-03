@@ -12,7 +12,6 @@ SLOTS = {
     'paving':  ['cobblestone_floor_01', 'cobblestone_floor_001', 'grey_cartago_02', 'stone_tiles_02'],
     'grass':   ['aerial_grass_rock', 'forrest_ground_01', 'leafy_grass', 'coast_land_rocks_01'],
     'sand':    ['aerial_beach_01', 'coast_sand_01', 'sand_01'],
-    'metal':   ['metal_plate', 'rusty_metal_02', 'green_metal_rust', 'blue_metal_plate'],
 }
 UA = {'User-Agent': 'ProjectATLAS/1.0 (texture fetch)'}
 OUT = 'data/tex'; os.makedirs(OUT, exist_ok=True)

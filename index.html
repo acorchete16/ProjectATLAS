@@ -493,7 +493,7 @@ body.av-open{overflow:hidden}
 .av-top{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:12px;right:12px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;pointer-events:none}
 .av-top>div:first-child{display:flex;flex-direction:column;text-shadow:0 2px 12px #000}.av-top b{font-size:20px;letter-spacing:.06em;color:#ffe2b0}.av-top span{font-size:12px;color:#b9c6e8}
 .av-btns{display:flex;gap:5px;pointer-events:auto;flex-wrap:nowrap;justify-content:flex-end}@media(max-width:560px){.av-top>div:first-child span{display:none}.av-btns button{padding:8px 9px!important;font-size:12px!important}.av-btns [data-av=x]{width:36px}.av-btns button{white-space:nowrap}}
-.av-btns button{font:600 13px Inter,system-ui,sans-serif;padding:10px 13px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(10,12,30,.7);color:#e9f0ff;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer}
+.av-btns button{white-space:nowrap;font:600 13px Inter,system-ui,sans-serif;padding:10px 13px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(10,12,30,.7);color:#e9f0ff;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer}
 .av-btns button.on{background:#ffe2b0;color:#1a1020;border-color:#ffe2b0}.av-btns [data-av=x]{width:44px}
 .av-hint{position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font-size:12px;color:#c9d4f2;background:rgba(10,12,30,.6);padding:7px 12px;border-radius:999px;white-space:nowrap;pointer-events:none}
 .av-cap{position:absolute;left:50%;bottom:calc(64px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font:500 17px Inter,system-ui,sans-serif;color:#fff;text-shadow:0 2px 14px #000;text-align:center;width:90%;pointer-events:none;transition:opacity .4s}
@@ -1926,7 +1926,7 @@ async function loadAtlLibs(){if(window.THREE&&THREE.GLTFLoader&&THREE.OrbitContr
   const B='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/';
   if(!window.THREE)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js');
   await Promise.all(['loaders/GLTFLoader.js','loaders/DRACOLoader.js','controls/OrbitControls.js','shaders/CopyShader.js','shaders/LuminosityHighPassShader.js'].map(f=>loadScript(B+f)));
-  await loadScript(B+'postprocessing/EffectComposer.js');await Promise.all(['postprocessing/RenderPass.js','postprocessing/ShaderPass.js','postprocessing/UnrealBloomPass.js'].map(f=>loadScript(B+f)))}
+  await loadScript(B+'postprocessing/EffectComposer.js');await Promise.all(['postprocessing/RenderPass.js','postprocessing/ShaderPass.js','postprocessing/UnrealBloomPass.js','objects/Water.js'].map(f=>loadScript(B+f).catch(()=>0)))}
 async function openAtlantis3D(){if(ATLV.on)return;ATLV.on=true;closePlace();
   let ov=$('#atlv');if(!ov){ov=document.createElement('div');ov.id='atlv';document.body.appendChild(ov)}
   ov.innerHTML=`<canvas id="atlvC"></canvas><div class="av-top"><div><b>Atlántida</b><span>Base de datos de ATLAS · ciudad hundida del Polo Norte</span></div>
@@ -1941,7 +1941,7 @@ function closeAtlantis3D(fromPop){if(!ATLV.on)return;if(fromPop!==true&&history.
 window.addEventListener('popstate',()=>{if(ATLV.on)closeAtlantis3D(true)});
 function atlvInit(ov){const T=THREE,cv=ov.querySelector('#atlvC'),mob=mobile();
   const R=new T.WebGLRenderer({canvas:cv,antialias:!mob,powerPreference:'high-performance'});R.setPixelRatio(Math.min(devicePixelRatio||1,mob?1.3:1.75));
-  R.outputEncoding=T.sRGBEncoding;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=.82;ATLV.renderer=R;
+  R.outputEncoding=T.sRGBEncoding;R.toneMapping=T.ACESFilmicToneMapping;R.toneMappingExposure=.74;ATLV.renderer=R;
   const S=new T.Scene();ATLV.scene=S;S.fog=new T.FogExp2(0x0a1530,0.00011);
   const cam=new T.PerspectiveCamera(55,1,2,30000);cam.position.set(2600,900,2600);
   // cielo nocturno con degradado y estrellas
@@ -1950,10 +1950,19 @@ function atlvInit(ov){const T=THREE,cv=ov.querySelector('#atlvC'),mob=mobile();
   {const n=2500,pp=new Float32Array(n*3);for(let i=0;i<n;i++){const u=Math.random()*2-1,a=Math.random()*Math.PI*2,y=Math.abs(u)*.95+.05,r=Math.sqrt(1-y*y);pp.set([Math.cos(a)*r*18000,y*18000,Math.sin(a)*r*18000],i*3)}
     const g=new T.BufferGeometry();g.setAttribute('position',new T.BufferAttribute(pp,3));S.add(new T.Points(g,new T.PointsMaterial({color:0xdfe8ff,size:2.2,sizeAttenuation:false,fog:false})))}
   const moon=new T.Mesh(new T.SphereGeometry(420,32,16),new T.MeshBasicMaterial({color:0xfff6e0,fog:false}));moon.position.set(-9000,5200,-11000);S.add(moon);
-  S.add(new T.HemisphereLight(0x7f96e8,0x120f22,.32));const dl=new T.DirectionalLight(0xb8c8ff,.55);dl.position.set(-9000,5200,-11000);S.add(dl);
+  S.add(new T.HemisphereLight(0x7f96e8,0x120f22,.22));const dl=new T.DirectionalLight(0xc4d2ff,.85);dl.position.set(-9000,5200,-11000).normalize().multiplyScalar(7000);S.add(dl);S.add(dl.target);
+  R.shadowMap.enabled=true;R.shadowMap.type=T.PCFSoftShadowMap;dl.castShadow=true;{const sc=dl.shadow.camera;sc.left=sc.bottom=-2350;sc.right=sc.top=2350;sc.near=1500;sc.far=13000;dl.shadow.mapSize.set(mob?2048:4096,mob?2048:4096);dl.shadow.bias=-.0004;dl.shadow.normalBias=1.5}
+  {const c=document.createElement('canvas');c.width=512;c.height=256;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,256);
+   g.addColorStop(0,'#05081a');g.addColorStop(.38,'#13204a');g.addColorStop(.49,'#4a2f63');g.addColorStop(.5,'#0b2a38');g.addColorStop(1,'#020a10');x.fillStyle=g;x.fillRect(0,0,512,256);
+   const mg=x.createRadialGradient(380,80,0,380,80,40);mg.addColorStop(0,'#fff6e0');mg.addColorStop(.25,'rgba(255,240,210,.6)');mg.addColorStop(1,'rgba(255,240,210,0)');x.fillStyle=mg;x.fillRect(320,20,120,120);
+   const et=new T.CanvasTexture(c);et.mapping=T.EquirectangularReflectionMapping;et.encoding=T.sRGBEncoding;
+   const pm=new T.PMREMGenerator(R);S.environment=pm.fromEquirectangular(et).texture;pm.dispose();et.dispose()}
   const warm=new T.PointLight(0x7fe8ff,2.2,1400,1.6);warm.position.set(0,420,0);S.add(warm);
   // agua con oleaje y destellos
-  const water=new T.Mesh(new T.CircleGeometry(16000,96),new T.ShaderMaterial({transparent:false,uniforms:{t:{value:0},fogColor:{value:new T.Color(0x0a1530)}},
+  let water;if(T.Water){const wn=new T.TextureLoader().load('data/tex/water_n.jpg');wn.wrapS=wn.wrapT=T.RepeatWrapping;
+    water=new T.Water(new T.CircleGeometry(16000,96),{textureWidth:mob?384:768,textureHeight:mob?384:768,waterNormals:wn,sunDirection:new T.Vector3(-9000,5200,-11000).normalize(),sunColor:0x6a7aa0,waterColor:0x02141c,distortionScale:mob?1.6:2.4,fog:true});
+    water.material.uniforms.size.value=.9;water.material.uniforms.alpha&&(water.material.uniforms.alpha.value=1);water.material.uniforms.t=water.material.uniforms.time}
+  else water=new T.Mesh(new T.CircleGeometry(16000,96),new T.ShaderMaterial({transparent:false,uniforms:{t:{value:0},fogColor:{value:new T.Color(0x0a1530)}},
     vertexShader:'varying vec3 wp;void main(){vec4 w=modelMatrix*vec4(position,1.);wp=w.xyz;gl_Position=projectionMatrix*viewMatrix*w;}',
     fragmentShader:`uniform float t;uniform vec3 fogColor;varying vec3 wp;
       float n(vec2 p){return sin(p.x*.021+t*.6)*cos(p.y*.017-t*.4)+sin((p.x+p.y)*.013+t*.9)*.6+sin(p.x*.06-p.y*.05+t*1.7)*.25;}
@@ -1985,12 +1994,46 @@ function atlvInit(ov){const T=THREE,cv=ov.querySelector('#atlvC'),mob=mobile();
   const tour=new T.CatmullRomCurve3([P(3400,700,0),P(2300,60,0),P(1700,40,300),P(1250,35,900),P(600,50,1300),P(-400,70,1650),P(-1500,45,950),P(-1720,28,0),P(-1500,40,-900),P(-700,180,-700),P(-260,260,-200),P(0,520,300),P(300,300,450),P(950,140,-500),P(1700,90,-1400),P(2600,500,-1600)],true,'catmullrom',.4);
   const look=new T.CatmullRomCurve3([P(0,120,0),P(1300,40,0),P(950,50,700),P(400,60,1000),P(-200,80,800),P(-900,60,900),P(-1720,20,-300),P(-1720,20,-900),P(-900,60,-600),P(0,150,0),P(0,250,0),P(0,90,0),P(0,140,0),P(0,140,0),P(1000,80,-900),P(0,120,0)],true,'catmullrom',.4);
   const CAPS=[[0,'La muralla de oricalco y sus torres de 300 m'],[.1,'Navegando por el canal hacia el corazón de la ciudad'],[.3,'Los templos del anillo interior'],[.45,'El gran hipódromo: 10 km de pista'],[.62,'La acrópolis y el templo-almacén de datos'],[.72,'Los anillos de datos sobre la cúpula'],[.85,'Las Torres del Saber']];
+
+  // ---- materiales PBR con texturas reales (Poly Haven CC0), mapeo triplanar en espacio mundo
+  const TEXL=new T.TextureLoader(),TX={},maxAn=R.capabilities.getMaxAnisotropy();
+  const tex=(k,t)=>{const id=k+'_'+t;if(!TX[id]){const x=TEXL.load('data/tex/'+id+'.jpg');x.wrapS=x.wrapT=T.RepeatWrapping;x.anisotropy=Math.min(mob?4:8,maxAn);TX[id]=x}return TX[id]};
+  const LUM={stone:.234,marble:.354,plaster:.376,roof:.307,paving:.235,grass:.122,sand:.244};
+  const TRI={stone:['stone','paving',1/4.5,1/3.2,1],marble:['marble','marble',1/4,1/4,.8],plaster:['plaster','plaster',1/5,1/5,.7],plaster2:['plaster','plaster',1/5,1/5,.7],plaster3:['plaster','plaster',1/5,1/5,.7],
+    roof:['roof','roof',1/3,1/3,1.2],roof2:['roof','roof',1/3,1/3,1.2],grass:['stone','grass',1/4.5,1/28,1],sand:['stone','sand',1/4.5,1/14,.8],server:['marble','marble',1/6,1/6,.5],trunk:['stone','stone',1/2,1/2,.6],
+    ori:['plaster','plaster',1/7,1/7,.35],bronze:['plaster','plaster',1/6,1/6,.35]};
+  const triplanar=(m,key)=>{const [sd,tp,ss,st,ns]=TRI[key];
+    m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,{tdS:{value:tex(sd,'d')},tnS:{value:tex(sd,'n')},trS:{value:tex(sd,'r')},tdT:{value:tex(tp,'d')},tnT:{value:tex(tp,'n')},trT:{value:tex(tp,'r')},
+        sS:{value:ss},sT:{value:st},nStr:{value:ns},lS:{value:LUM[sd]},lT:{value:LUM[tp]}});
+      sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vWP;varying vec3 vWN;')
+        .replace('#include <fog_vertex>','#include <fog_vertex>\nvWP=(modelMatrix*vec4(transformed,1.)).xyz;vWN=normalize(mat3(modelMatrix)*objectNormal);');
+      sh.fragmentShader=sh.fragmentShader.replace('#include <common>',`#include <common>
+uniform sampler2D tdS,tnS,trS,tdT,tnT,trT;uniform float sS,sT,nStr,lS,lT;varying vec3 vWP;varying vec3 vWN;
+vec3 triB(vec3 n){vec3 b=pow(abs(n),vec3(6.));return b/(b.x+b.y+b.z);}
+vec3 lin(vec3 c){return pow(c,vec3(2.2));}`)
+        .replace('#include <map_fragment>',`vec3 wN0=normalize(vWN);vec3 tb=triB(wN0);float up=step(0.,wN0.y);
+vec2 uX=vWP.zy*sS,uZ=vWP.xy*sS,uYs=vWP.xz*sS,uYt=vWP.xz*sT;
+vec3 cX=lin(texture2D(tdS,uX).rgb)/lS,cZ=lin(texture2D(tdS,uZ).rgb)/lS,cY=mix(lin(texture2D(tdS,uYs).rgb)/lS,lin(texture2D(tdT,uYt).rgb)/lT,up);
+float macro=.68+.5*texture2D(tdS,vWP.xz*sS*.043+vWP.y*sS*.02).g;
+diffuseColor.rgb*=clamp((cX*tb.x+cY*tb.y+cZ*tb.z)*macro,0.,2.2);`)
+        .replace('#include <roughnessmap_fragment>',`float rX=texture2D(trS,uX).g,rZ=texture2D(trS,uZ).g,rY=mix(texture2D(trS,uYs).g,texture2D(trT,uYt).g,up);
+float roughnessFactor=clamp(roughness*mix(.6,1.3,rX*tb.x+rY*tb.y+rZ*tb.z),.04,1.);`)
+        .replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
+{vec3 nX=texture2D(tnS,uX).xyz*2.-1.,nZ=texture2D(tnS,uZ).xyz*2.-1.,nY=mix(texture2D(tnS,uYs).xyz,texture2D(tnT,uYt).xyz,up)*2.-1.;
+nX.xy*=nStr;nY.xy*=nStr;nZ.xy*=nStr;
+vec3 wx=vec3(nX.xy+wN0.zy,abs(nX.z)*wN0.x).zyx,wy=vec3(nY.xy+wN0.xz,abs(nY.z)*wN0.y).xzy,wz=vec3(nZ.xy+wN0.xy,abs(nZ.z)*wN0.z);
+vec3 wP=normalize(wx*tb.x+wy*tb.y+wz*tb.z);normal=normalize((viewMatrix*vec4(wP,0.)).xyz);}`);};
+    m.customProgramCacheKey=()=>'tri-'+key;m.needsUpdate=true};
   // carga del modelo
   const dr=new T.DRACOLoader();dr.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
   const ld=new T.GLTFLoader();ld.setDRACOLoader(dr);
   ld.load('data/atlantis.glb',g=>{g.scene.traverse(o=>{if(o.isMesh){mesh[o.name]=o;const m=o.material;
       const E={trim:.7,win:1.5,lamp:2.4,core:2.2,rings:2.6,jet:1.8,boatALamp:2.2,boatBLamp:2.2,ori:.6};if(E[o.name]!=null&&m.emissive){m.emissiveIntensity=E[o.name]}
-      if(o.name==='ori'){m.envMapIntensity=1}}});
+      if(TRI[o.name]&&m.isMeshStandardMaterial)triplanar(m,o.name);
+      if(o.name==='ori'||o.name==='bronze'){m.metalness=Math.max(m.metalness,.75);m.roughness=Math.min(m.roughness,.38);m.envMapIntensity=1.6}
+      if(o.name==='marble'){m.roughness=.42;m.envMapIntensity=.9}
+      if(/^plaster/.test(o.name)){m.color.multiplyScalar(.78);m.roughness=.9}
+      const noCast={win:1,lamp:1,jet:1,rings:1,water2:1,core:1,boatALamp:1,boatBLamp:1,trim:1};o.castShadow=!noCast[o.name];o.receiveShadow=!(o.name in {lamp:1,jet:1,rings:1,core:1})}});
     S.add(g.scene);ov.querySelector('.av-load').remove();setMode('tour')},
     ev=>{const s=ov.querySelector('.av-load span');if(s&&ev.total)s.textContent=`Emergiendo de las profundidades… ${Math.round(ev.loaded/ev.total*100)} %`},
     err=>{const s=ov.querySelector('.av-load span');if(s)s.textContent='No se pudo cargar la ciudad.';console.warn(err)});
