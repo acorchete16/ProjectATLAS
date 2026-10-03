@@ -485,6 +485,7 @@ body.mapmode #app.simple .right{top:18px}
 .pf-form{display:flex;flex-direction:column;gap:9px;margin-top:4px}.pf-form .seg{display:flex;gap:4px}.pf-form .seg button{flex:1;font:inherit;font-size:12.5px;padding:7px;border-radius:9px;border:1px solid var(--edge2);background:none;color:var(--mid);cursor:pointer}
 .pf-form .seg button[aria-pressed="true"]{background:rgba(192,132,252,.18);color:#e9d5ff;border-color:rgba(192,132,252,.5)}.pf-ok{color:var(--good);margin:0}
 @media (max-width:700px){.pf-hero b{font-size:15px;white-space:nowrap}}
+.pole-gen.near .pg-lbl{display:none}
 </style>
 </head>
 <body>
@@ -1935,15 +1936,23 @@ function atlantis(){const F=[],add=(g,h,b,c,e=0)=>F.push({type:'Feature',geometr
   [[.52,.55,250],[.38,.405,380],[.2,.22,470]].forEach(([r0,r1,b])=>add(atlArc(r0,r1,0,Math.PI*2,64),b+6,b,'#7ff6ff',.9));
   return{type:'FeatureCollection',features:F}}
 function atlWater(){return{type:'FeatureCollection',features:[{type:'Feature',geometry:{type:'Polygon',coordinates:atlCircle(3.4,72)},properties:{}}]}}
+let _atlM=false;
+function ensureAtlModel(){if(_atlM||!MBX||!map)return;_atlM=true;
+  try{map.addModel('atlantis','data/atlantis.glb');map.addSource('atl-pt',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:ATL},properties:{}}});
+    map.addLayer({id:'atl-model',type:'model',source:'atl-pt',minzoom:5.5,layout:{'model-id':'atlantis'},paint:{'model-scale':[1,1,1],'model-rotation':[0,0,0],'model-type':'common-3d','model-emissive-strength':1.4,'model-opacity':1}})}
+  catch(e){console.warn('modelo Atlántida',e);_atlM=false}}
 function atlantisSetup(){
   map.addSource('atl-w',{type:'geojson',data:atlWater()});
   map.addLayer({id:'atl-water',type:'fill',source:'atl-w',minzoom:6,paint:{'fill-color':'#073c52','fill-opacity':.92}});
   map.addLayer({id:'atl-shore',type:'line',source:'atl-w',minzoom:6,paint:{'line-color':'#35e0ff','line-width':2,'line-blur':3,'line-opacity':.7}});
-  map.addSource('atl',{type:'geojson',data:atlantis()});
+  if(MBX){map.on('moveend',()=>{if(map.getZoom()>5.5&&Math.abs(map.getCenter().lat-ATL[1])<4)ensureAtlModel()});
+    map.on('click',e=>{if(map.getZoom()>7&&Math.abs(e.lngLat.lat-ATL[1])<.04&&Math.abs(e.lngLat.lng-ATL[0])<.4)showPole()})}
+  if(!MBX){map.addSource('atl',{type:'geojson',data:atlantis()});
   map.addLayer({id:'atl-3d',type:'fill-extrusion',source:'atl',minzoom:6.5,paint:{'fill-extrusion-color':['get','c'],'fill-extrusion-height':['get','h'],'fill-extrusion-base':['get','b'],'fill-extrusion-opacity':.95}});
   map.addLayer({id:'atl-glow',type:'circle',source:'hqA',minzoom:6,paint:{'circle-color':'#9ff8ff','circle-radius':['interpolate',['exponential',2],['zoom'],7,30,11,500],'circle-blur':1,'circle-opacity':.22,'circle-pitch-alignment':'map'}},'atl-3d');
-  if(MBX){try{map.setPaintProperty('atl-3d','fill-extrusion-emissive-strength',['get','e']);map.setPaintProperty('atl-water','fill-emissive-strength',.6);map.setPaintProperty('atl-shore','line-emissive-strength',1);map.setPaintProperty('atl-glow','circle-emissive-strength',1)}catch(_){}}
-  map.on('click','atl-3d',e=>{e.preventDefault&&e.preventDefault();showPole()});
+  map.on('click','atl-3d',e=>{showPole()})}
+  if(MBX)map.addLayer({id:'atl-glow',type:'circle',source:'hqA',minzoom:6,paint:{'circle-color':'#9ff8ff','circle-radius':['interpolate',['exponential',2],['zoom'],7,30,11,500],'circle-blur':1,'circle-opacity':.18,'circle-pitch-alignment':'map'}});
+  if(MBX){try{map.setPaintProperty('atl-water','fill-emissive-strength',.6);map.setPaintProperty('atl-shore','line-emissive-strength',1);map.setPaintProperty('atl-glow','circle-emissive-strength',1)}catch(_){}}
   map.on('zoom',()=>{const el=poleMk&&poleMk.getElement();if(el)el.classList.toggle('near',map.getZoom()>7.5)})}
 
 /* ---- Generador de datos del Polo Norte: aquí llegan los datos de todas las sedes ---- */
@@ -1965,7 +1974,7 @@ function showPole(){const p=$('#mcard'),ents=searchEntities(),n={s:0,e:0,f:0};en
   p.querySelector('[data-mclose]').addEventListener('click',closePlace);
   p.querySelector('[data-pg=all]').addEventListener('click',()=>{sq.active=true;sq.type='all';sq.sec='all';sq.fit=false;sq.q='';closePlace();updateMap()});
   p.querySelector('[data-pg=plan]').addEventListener('click',()=>{closePlace();const r=$('.right');if(r)r.scrollIntoView({behavior:'smooth'})});
-  fxOrbit=false;map.flyTo({center:ATL,zoom:mobile()?9.4:10.1,pitch:62,bearing:24,duration:2400,curve:1.5,essential:true,padding:mobile()?{...mapPad(),bottom:Math.round(innerHeight*.12)}:{...mapPad(),left:430}});map.once('moveend',()=>{if(mapFocus==='pole'&&!mobile())fxOrbit=!reduced})}
+  ensureAtlModel();fxOrbit=false;map.flyTo({center:ATL,zoom:mobile()?9.4:10.1,pitch:62,bearing:24,duration:2400,curve:1.5,essential:true,padding:mobile()?{...mapPad(),bottom:Math.round(innerHeight*.12)}:{...mapPad(),left:430}});map.once('moveend',()=>{if(mapFocus==='pole'&&!mobile())fxOrbit=!reduced})}
 function fxData(gj){ // flujos desde cada sede encendida hacia la base de datos del Polo Norte
   const seen=new Map();gj.features.forEach(f=>{const k=f.properties.gk;if(!seen.has(k))seen.set(k,f)});
   fxFlows=[...seen.values()].slice(0,60).map((f,i)=>({c:f.properties.c,line:slerpLine(f.geometry.coordinates,POLE,60),ph:Math.random()}));
@@ -2032,7 +2041,7 @@ function buildMap(useMbx){
     map.on('click',e=>{const hit=map.queryRenderedFeatures(e.point,{layers:['cl','pt']});if(!hit.length)closePlace()});
     try{fxSetup()}catch(e){console.warn('fx',e)}
     mapReady=true;updateMap(true)});
-  map.on('error',e=>{if(e&&e.error&&/style|Failed to fetch/i.test(String(e.error.message||'')))$('#mapMsg').textContent='No se pudo cargar el mapa base. Comprueba la conexión.'});
+  setTimeout(()=>{if(!styled&&!mapReady)$('#mapMsg').textContent='El mapa tarda en cargar. Comprueba la conexión.'},12000);map.once('style.load',()=>{$('#mapMsg').textContent=''});
   window.addEventListener('resize',()=>map&&map.setPadding(mapPad()));map.setPadding(mapPad());
 }
 function mapPad(){const r=$('#stage').getBoundingClientRect();return mobile()||r.width<900?{top:110,bottom:20,left:0,right:0}:{top:120,bottom:20,left:0,right:430}}
