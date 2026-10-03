@@ -1,4 +1,4 @@
-OK 473/481 · fuentes {'yahoo': 472, 'eodhd': 1} · fallos 8 · 269 s
+OK 473/481 · fuentes {'yahoo': 472, 'eodhd': 1} · fallos 8 · 222 s
   - f:x:FEP2.MU | yahoo pocos datos ; stooq sin mercado en stooq ; eodhd HTTP Error 404: Not Found
   - f:x:FEPE.MU | yahoo pocos datos ; stooq sin mercado en stooq ; eodhd HTTP Error 404: Not Found
   - f:x:HVJ9.F | yahoo pocos datos ; stooq sin mercado en stooq ; eodhd HTTP Error 404: Not Found
