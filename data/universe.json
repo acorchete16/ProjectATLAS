@@ -343,6 +343,11 @@
 {
 "t": "LYXIB.MC",
 "isin": "FR0010251744"
+},
+{
+"t": "IWDA.L",
+"isin": "IE00B4L5Y983",
+"mine": true
 }
 ],
 "funds": [
