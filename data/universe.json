@@ -1,0 +1,539 @@
+{
+"stocks": [
+"ORCL",
+"CRM",
+"ADBE",
+"NFLX",
+"INTC",
+"QCOM",
+"AMAT",
+"LRCX",
+"KLAC",
+"ARM",
+"SNPS",
+"CDNS",
+"NOW",
+"PANW",
+"UBER",
+"ABNB",
+"SHOP",
+"PYPL",
+"BAC",
+"WFC",
+"C",
+"UNH",
+"PFE",
+"MRK",
+"ABBV",
+"TMO",
+"ABT",
+"DHR",
+"PEP",
+"NKE",
+"SBUX",
+"HD",
+"LOW",
+"DIS",
+"T",
+"VZ",
+"CVX",
+"COP",
+"BA",
+"HON",
+"UNP",
+"UPS",
+"DE",
+"LIN",
+"PM",
+"INTU",
+"ANET",
+"DELL",
+"MSTR",
+"HOOD",
+"SOFI",
+"NET",
+"SNOW",
+"DDOG",
+"ZS",
+"SPOT",
+"BKNG",
+"ADP",
+"CSCO",
+"IBM",
+"TXRH",
+"CMG",
+"LULU",
+"MAR",
+"HLT",
+"ELV",
+"CI",
+"GILD",
+"BMY",
+"ZTS",
+"SYK",
+"BSX",
+"MDT",
+"KKR",
+"APO",
+"SAP.DE",
+"SIE.DE",
+"DTE.DE",
+"BMW.DE",
+"MBG.DE",
+"VOW3.DE",
+"BAS.DE",
+"IFX.DE",
+"ADS.DE",
+"MUV2.DE",
+"DB1.DE",
+"AIR.PA",
+"SU.PA",
+"TTE.PA",
+"SAN.PA",
+"BNP.PA",
+"AI.PA",
+"EL.PA",
+"KER.PA",
+"SAF.PA",
+"CAP.PA",
+"ENEL.MI",
+"ISP.MI",
+"UCG.MI",
+"ENI.MI",
+"STLAM.MI",
+"NESN.SW",
+"ROG.SW",
+"NOVN.SW",
+"UBSG.SW",
+"ABBN.SW",
+"ZURN.SW",
+"SHEL.L",
+"AZN.L",
+"ULVR.L",
+"BP.L",
+"RIO.L",
+"GSK.L",
+"BATS.L",
+"RR.L",
+"BA.L",
+"ADYEN.AS",
+"PRX.AS",
+"HEIA.AS",
+"PHIA.AS",
+"BBVA.MC",
+"CABK.MC",
+"TEF.MC",
+"REP.MC",
+"AMS.MC",
+"CLNX.MC",
+"GRF.MC",
+"MAP.MC",
+"ELE.MC",
+"NTGY.MC",
+"IAG.MC",
+"ANA.MC",
+"SAB.MC",
+"BKT.MC",
+"RED.MC",
+"MEL.MC",
+"LOG.MC",
+"IDR.MC",
+"FDR.MC",
+"ACX.MC",
+"UNI.MC",
+"ROVI.MC",
+"PUIG.MC",
+"SLR.MC",
+"COL.MC",
+"MRL.MC",
+"ENG.MC",
+"SCYR.MC",
+"CIE.MC",
+"005930.KS",
+"000660.KS",
+"1299.HK",
+"9432.T",
+"4063.T",
+"6861.T",
+"6098.T",
+"7011.T",
+"2317.TW",
+"SBIN.NS",
+"ITC.NS",
+"HINDUNILVR.NS",
+"ADANIENT.NS",
+"BHP.AX",
+"CBA.AX",
+"CSL.AX",
+"RY.TO",
+"ENB.TO",
+"CNQ.TO",
+"BN.TO",
+"TD.TO",
+"AMX",
+"GGAL",
+"YPF",
+"WALMEX.MX"
+],
+"etfs": [
+{
+"t": "EUNL.DE",
+"isin": "IE00B4L5Y983"
+},
+{
+"t": "SXR8.DE",
+"isin": "IE00B5BMR087"
+},
+{
+"t": "VUAA.DE",
+"isin": "IE00BFMXXD54"
+},
+{
+"t": "XDWD.DE",
+"isin": "IE00BJ0KDQ92"
+},
+{
+"t": "SXRV.DE",
+"isin": "IE00B53SZB19"
+},
+{
+"t": "QDVE.DE",
+"isin": "IE00B3WJKG14"
+},
+{
+"t": "ZPRV.DE",
+"isin": "IE00BSPLC413"
+},
+{
+"t": "ZPRX.DE",
+"isin": "IE00BSPLC298"
+},
+{
+"t": "IUSN.DE",
+"isin": "IE00BF4RFH31"
+},
+{
+"t": "VHYL.AS",
+"isin": "IE00B8GKDB10"
+},
+{
+"t": "TDIV.AS",
+"isin": "NL0011683594"
+},
+{
+"t": "SPPW.DE",
+"isin": "IE00BFY0GT14"
+},
+{
+"t": "XDEW.DE",
+"isin": "IE00BLNMYC90"
+},
+{
+"t": "XDEM.DE",
+"isin": "IE00BL25JP72"
+},
+{
+"t": "IS3Q.DE",
+"isin": "IE00BP3QZ601"
+},
+{
+"t": "IS3S.DE",
+"isin": "IE00BP3QZB59"
+},
+{
+"t": "EXSA.DE",
+"isin": "DE0002635307"
+},
+{
+"t": "SXRT.DE",
+"isin": "IE00B53L3W79"
+},
+{
+"t": "SPYI.DE",
+"isin": "IE00B3YLTY66"
+},
+{
+"t": "IUSQ.DE",
+"isin": "IE00B6R52259"
+},
+{
+"t": "XAIX.DE",
+"isin": "IE00BGV5VN51"
+},
+{
+"t": "VVSM.DE",
+"isin": "IE00BMC38736"
+},
+{
+"t": "EUNA.DE",
+"isin": "IE00B3F81409"
+},
+{
+"t": "EUNH.DE",
+"isin": "IE00B4WXJJ64"
+},
+{
+"t": "VGEA.DE",
+"isin": "IE00BH04GL39"
+},
+{
+"t": "XEON.DE",
+"isin": "LU0290358497"
+},
+{
+"t": "IBGS.AS",
+"isin": "IE00B14X4Q57"
+},
+{
+"t": "EGLN.L",
+"isin": "IE00B4ND3602"
+},
+{
+"t": "NDIA.L",
+"isin": "IE00BHZRQZ17"
+},
+{
+"t": "IQQH.DE",
+"isin": "IE00B1XNHC34"
+},
+{
+"t": "VFEM.DE",
+"isin": "IE00B3VVMM84"
+},
+{
+"t": "VGWL.DE",
+"isin": "IE00B3RBWM25"
+},
+{
+"t": "VEUR.AS",
+"isin": "IE00BKX55T58"
+},
+{
+"t": "IMAE.AS",
+"isin": "IE00B4K48X80"
+},
+{
+"t": "CNDX.L",
+"isin": "IE00B53SZB19"
+},
+{
+"t": "XMME.DE",
+"isin": "IE00BTJRMP35"
+},
+{
+"t": "WTAI.MI",
+"isin": "IE00BDVPNG13"
+},
+{
+"t": "ESPO.DE",
+"isin": "IE00BYWQWR46"
+},
+{
+"t": "ECAR.L",
+"isin": "IE00BGL86Z12"
+},
+{
+"t": "HEAL.L",
+"isin": "IE00BYZK4776"
+},
+{
+"t": "RBOT.L",
+"isin": "IE00BYZK4552"
+},
+{
+"t": "LYXIB.MC",
+"isin": "FR0010251744"
+}
+],
+"funds": [
+{
+"isin": "IE00BYX5M476",
+"n": "Fidelity MSCI Emerging Markets Index P-ACC-EUR"
+},
+{
+"isin": "IE00BYX5MS15",
+"n": "Fidelity MSCI Europe Index P-ACC-EUR"
+},
+{
+"isin": "IE00BYX5P602",
+"n": "Fidelity MSCI Japan Index P-ACC-EUR"
+},
+{
+"isin": "IE00BYX5MD61",
+"n": "Fidelity MSCI Pacific ex-Japan Index P-ACC-EUR"
+},
+{
+"isin": "IE0007286036",
+"n": "Vanguard Japan Stock Index EUR Acc"
+},
+{
+"isin": "IE0007201266",
+"n": "Vanguard Pacific ex-Japan Stock Index EUR Acc"
+},
+{
+"isin": "IE0007987708",
+"n": "Vanguard European Stock Index EUR Acc"
+},
+{
+"isin": "IE00B04GQT48",
+"n": "Vanguard Euro Investment Grade Bond Index EUR Acc"
+},
+{
+"isin": "IE0007472115",
+"n": "Vanguard Euro Government Bond Index EUR Acc"
+},
+{
+"isin": "IE00B5456Q47",
+"n": "Vanguard ESG Developed World All Cap Equity Index"
+},
+{
+"isin": "LU0996180864",
+"n": "Amundi Index MSCI Europe AE-C"
+},
+{
+"isin": "LU0996179007",
+"n": "Amundi Index S&P 500 AE-C"
+},
+{
+"isin": "IE00BD0NCL49",
+"n": "iShares Europe Index Fund (IE) D Acc EUR"
+},
+{
+"isin": "IE00BDRK7S48",
+"n": "iShares Japan Index Fund (IE) D Acc EUR"
+},
+{
+"isin": "IE00BD0NCN62",
+"n": "iShares North America Index Fund (IE) D Acc EUR"
+},
+{
+"isin": "ES0112793031",
+"n": "azValor Iberia FI"
+},
+{
+"isin": "ES0119184002",
+"n": "Cobas Selección FI"
+},
+{
+"isin": "ES0114673033",
+"n": "Bestinver Bolsa FI"
+},
+{
+"isin": "ES0159201013",
+"n": "Magallanes Iberian Equity FI M"
+},
+{
+"isin": "ES0146309002",
+"n": "Horos Value Internacional FI"
+},
+{
+"isin": "ES0173323009",
+"n": "Renta 4 Nexus FI"
+},
+{
+"isin": "ES0162735031",
+"n": "Metavalor FI"
+},
+{
+"isin": "ES0138534039",
+"n": "Santalucía Espabolsa A FI"
+},
+{
+"isin": "ES0182769002",
+"n": "Valentum FI"
+},
+{
+"isin": "LU0599946893",
+"n": "DWS Concept Kaldemorgen LC"
+},
+{
+"isin": "FR0010148981",
+"n": "Carmignac Investissement A EUR Acc"
+},
+{
+"isin": "FR0010135103",
+"n": "Carmignac Patrimoine A EUR Acc"
+},
+{
+"isin": "LU0323578657",
+"n": "Flossbach von Storch Multiple Opportunities R"
+},
+{
+"isin": "IE00B6X8T619",
+"n": "Comgest Growth Europe EUR Acc"
+},
+{
+"isin": "LU0099574567",
+"n": "Fidelity Global Technology A-Dis-EUR"
+},
+{
+"isin": "LU0233138477",
+"n": "Robeco BP Global Premium Equities D EUR"
+},
+{
+"isin": "LU0552385295",
+"n": "Morgan Stanley Global Opportunity A USD"
+},
+{
+"isin": "LU0104884860",
+"n": "Pictet Water P EUR"
+},
+{
+"isin": "LU1279334210",
+"n": "Pictet Robotics P EUR"
+},
+{
+"isin": "LU0171310443",
+"n": "BlackRock World Technology A2 EUR"
+},
+{
+"isin": "IE00B42NVC37",
+"n": "Polar Capital Global Technology EUR"
+},
+{
+"isin": "LU0348926287",
+"n": "Nordea Global Climate and Environment BP EUR"
+},
+{
+"isin": "LU0210536198",
+"n": "JPMorgan US Select Equity Plus A EUR"
+},
+{
+"isin": "LU0119620416",
+"n": "Morgan Stanley US Advantage A USD"
+}
+],
+"managers": {
+"Comgest": "Comgest, 17 Square Édouard VII, Paris",
+"Robeco": "Robeco, Weena 850, Rotterdam",
+"Morgan Stanley": "Morgan Stanley, 1585 Broadway, New York",
+"Pictet": "Pictet, Route des Acacias 60, Genève",
+"Polar Capital": "Polar Capital, 16 Palace Street, London",
+"Nordea": "Nordea, Grønjordsvej 10, København",
+"Carmignac": "Carmignac, 24 Place Vendôme, Paris",
+"Flossbach von Storch": "Flossbach von Storch, Ottoplatz 1, Köln",
+"Horos": "Horos Asset Management, Calle Núñez de Balboa 120, Madrid",
+"Santalucía": "Santalucía, Plaza de España 15, Madrid",
+"Metagestión": "Metagestión, Calle Fernando el Santo 15, Madrid",
+"Renta 4": "Renta 4 Banco, Paseo de la Habana 74, Madrid",
+"Valentum": "Valentum Asset Management, Calle Velázquez 25, Madrid",
+"DWS": "DWS, Mainzer Landstraße 11-17, Frankfurt am Main",
+"JPMorgan": "JPMorgan Chase, 270 Park Avenue, New York",
+"BlackRock": "BlackRock, 50 Hudson Yards, New York",
+"Fidelity": "Fidelity International, 4 Cannon Street, London",
+"Vanguard": "Vanguard, 100 Vanguard Blvd, Malvern, Pennsylvania",
+"Amundi": "Amundi, 91 Boulevard Pasteur, Paris",
+"iShares": "BlackRock, 50 Hudson Yards, New York",
+"Xtrackers": "DWS, Mainzer Landstraße 11-17, Frankfurt am Main",
+"SPDR": "State Street, 1 Congress Street, Boston",
+"VanEck": "VanEck, 666 Third Avenue, New York",
+"Invesco": "Invesco, 1331 Spring Street NW, Atlanta",
+"WisdomTree": "WisdomTree, 250 West 34th Street, New York",
+"Deutsche Börse": "Deutsche Börse, Mergenthalerallee 61, Eschborn",
+"Lyxor": "Amundi, 91 Boulevard Pasteur, Paris",
+"Azvalor": "azValor, Paseo de la Castellana 110, Madrid",
+"Cobas": "Cobas AM, Calle José Abascal 45, Madrid",
+"Bestinver": "Bestinver, Calle Juan de Mena 8, Madrid",
+"Magallanes": "Magallanes Value Investors, Calle Lagasca 88, Madrid"
+}
+}
