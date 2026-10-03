@@ -52,6 +52,17 @@ def yahoo(sym):
         except Exception as e:
             last = e
     raise last
+def yahoo_weekly(sym):
+    """Cierres semanales de 5 años (para valorar aportaciones antiguas de la cartera)."""
+    j = json.loads(raw(f'https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(sym)}?range=5y&interval=1wk'))
+    r = j['chart']['result'][0]; q = r['indicators']
+    cls = q['quote'][0].get('close') or []
+    adj = (q.get('adjclose') or [{}])[0].get('adjclose') or [None] * len(cls)
+    pts = sorted((datetime.datetime.utcfromtimestamp(t).date(), a if a is not None else c) for t, a, c in zip(r.get('timestamp') or [], adj, cls) if (a or c))
+    if len(pts) < 5: raise ValueError('pocos datos')
+    d0 = pts[0][0]
+    return {'d0': d0.isoformat(), 'o': [(d - d0).days for d, _ in pts], 'c': [float(f'{c:.5g}') for _, c in pts]}
+
 def yahoo_isin(isin):
     for host in ('query2', 'query1'):
         try:
@@ -131,6 +142,9 @@ def main():
         if not got:
             try: got = eodhd(v)
             except Exception as e: errs.append('eodhd ' + str(e)[:60])
+        if got and got['y'] and not str(got['y']).startswith(('stooq', 'eodhd')):
+            try: got['w'] = yahoo_weekly(got['y'])
+            except Exception: pass
         if got:
             data[key] = got; fresh.add(key); s = got['y'].split(':')[0] if ':' in got['y'] else 'yahoo'; src_n[s] = src_n.get(s, 0) + 1
         else:
