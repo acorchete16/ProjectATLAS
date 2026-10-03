@@ -1,0 +1,11 @@
+crumb ok
+OK acciones 173/174 · ETFs 41/42 · fondos 32/39 · sin sede 0 · 468 s
+  - s ROG.SW: HTTP Error 404: Not Found
+  - e ESPO.DE: HTTP Error 404: Not Found
+  - f IE00B5456Q47: no encontrado en Yahoo
+  - f IE00BDRK7S48: no encontrado en Yahoo
+  - f LU0323578657: no encontrado en Yahoo
+  - f LU0552385295: no encontrado en Yahoo
+  - f LU0171310443: no encontrado en Yahoo
+  - f LU0348926287: no encontrado en Yahoo
+  - f LU0119620416: no encontrado en Yahoo

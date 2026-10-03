@@ -1,1 +1,9 @@
-OK 215/215 · fuentes {'eodhd': 2, 'yahoo': 213} · fallos 0 · 72 s
+OK 453/461 · fuentes {'yahoo': 452, 'eodhd': 1} · fallos 8 · 152 s
+  - f:x:FEP2.MU | yahoo pocos datos ; stooq sin mercado en stooq ; eodhd HTTP Error 404: Not Found
+  - f:x:FEPE.MU | yahoo pocos datos ; stooq sin mercado en stooq ; eodhd HTTP Error 404: Not Found
+  - f:x:HVJ9.F | yahoo pocos datos ; stooq sin mercado en stooq ; eodhd HTTP Error 404: Not Found
+  - f:x:Y9U6.F | yahoo pocos datos ; stooq sin mercado en stooq ; eodhd pocos datos
+  - f:x:WYZZ.MU | yahoo pocos datos ; stooq sin mercado en stooq ; eodhd HTTP Error 404: Not Found
+  - f:x:FJ2P.F | yahoo pocos datos ; stooq sin mercado en stooq ; eodhd pocos datos
+  - f:x:LU1279334210.SG | yahoo pocos datos ; stooq sin mercado en stooq ; eodhd HTTP Error 404: Not Found
+  - f:x:LU0210536198.SG | yahoo pocos datos ; stooq sin mercado en stooq ; eodhd HTTP Error 404: Not Found
