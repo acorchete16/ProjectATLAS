@@ -1,8 +1,8 @@
 crumb ok
-OK acciones 173/174 · ETFs 41/42 · fondos 13/39 · sin sede 0 · 118 s
+OK acciones 173/174 · ETFs 41/42 · fondos 12/39 · sin sede 0 · 137 s
   - s ROG.SW: HTTP Error 404: Not Found
   - e ESPO.DE: HTTP Error 404: Not Found
-  - f IE00BYX5M476 FEP2.MU: menos de 2 años de historia
+  - f IE00BYX5M476 (Fidelity MSCI Emerging Markets Index P-ACC-EUR): Yahoo no lo identifica con seguridad
   - f IE00BYX5MS15 (Fidelity MSCI Europe Index P-ACC-EUR): Yahoo no lo identifica con seguridad
   - f IE00BYX5P602 (Fidelity MSCI Japan Index P-ACC-EUR): Yahoo no lo identifica con seguridad
   - f IE00BYX5MD61 (Fidelity MSCI Pacific ex-Japan Index P-ACC-EUR): Yahoo no lo identifica con seguridad
@@ -11,6 +11,7 @@ OK acciones 173/174 · ETFs 41/42 · fondos 13/39 · sin sede 0 · 118 s
   - f IE00B04GQT48 (Vanguard Euro Investment Grade Bond Index EUR Acc): Yahoo no lo identifica con seguridad
   - f IE0007472115 (Vanguard Euro Government Bond Index EUR Acc): Yahoo no lo identifica con seguridad
   - f IE00B5456Q47: no encontrado en Yahoo
+  - f LU0996180864 (Amundi Index MSCI Europe AE-C): Yahoo no lo identifica con seguridad
   - f IE00BD0NCL49 (iShares Europe Index Fund (IE) D Acc EUR): Yahoo no lo identifica con seguridad
   - f IE00BDRK7S48: no encontrado en Yahoo
   - f IE00BD0NCN62 (iShares North America Index Fund (IE) D Acc EUR): Yahoo no lo identifica con seguridad
