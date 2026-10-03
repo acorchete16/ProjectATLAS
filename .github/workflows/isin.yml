@@ -49,6 +49,7 @@ jobs:
         run: |
           python scripts/enrich.py || true
           python scripts/fetch_prices.py || true
+          python scripts/rankings.py || true
       - name: Guardar
         run: |
           git config user.name "atlas-bot"

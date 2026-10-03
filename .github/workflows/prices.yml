@@ -27,6 +27,9 @@ jobs:
         continue-on-error: true
       - name: Descargar precios
         run: python scripts/fetch_prices.py
+      - name: Rankings en vivo
+        run: python scripts/rankings.py
+        continue-on-error: true
       - name: Guardar en el repositorio
         if: always()
         run: |

@@ -519,6 +519,16 @@ body.av-open{overflow:hidden}
 .pf-row{flex-direction:column;align-items:stretch!important}.pf-row .pf-main{width:100%;display:grid!important;grid-template-columns:34px 1fr auto 16px;gap:10px;align-items:center}.pf-main i.pf-ico{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:16px;background:color-mix(in srgb,var(--c) 22%,transparent);box-shadow:inset 0 0 0 2px var(--c)}
 .pf-pen{color:var(--dim);font-size:13px}.pf-row.open .pf-main{border-color:rgba(192,132,252,.55);background:rgba(192,132,252,.08)}.pf-edit{padding:10px 6px 6px}.pf-eb{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.pf-del{color:var(--bad)!important}
 .pp-row b{white-space:nowrap;font-size:14px}
+.sr-logo{position:relative;overflow:visible!important}.sr-rkb{position:absolute;top:-7px;left:-7px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:#1b1838;border:1px solid var(--edge2);color:#ffe2b0;font:700 10.5px/16px Inter,system-ui,sans-serif;font-style:normal;text-align:center}.sr-rkb.m{background:none;border:0;font-size:16px;line-height:18px;top:-9px;left:-9px}
+.rk-tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}.rk-tabs::-webkit-scrollbar{display:none}.rk-tabs .sc-chip{flex:none;white-space:nowrap}
+.rk-list{display:flex;flex-direction:column;gap:6px}.rk-list .sr{width:100%;gap:8px}.rk-all{width:100%;margin:8px 0 14px;justify-content:center;color:#ffe2b0!important;border-color:rgba(255,179,90,.45)!important}
+.pv-opts{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:4px 0 6px}.pv-opt{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:10px 10px 9px;border-radius:13px;border:1px solid var(--edge);background:rgba(255,255,255,.03);color:var(--fg);font:inherit;cursor:pointer;text-align:left}
+.pv-opt.on{border-color:#ffb35a;background:rgba(255,179,90,.1);box-shadow:0 0 0 1px rgba(255,179,90,.35)}.pv-i{font-size:18px}.pv-opt b{font-size:12.5px}.pv-g{font-size:18px;font-weight:700}.pv-g small{font-size:10.5px;color:var(--dim);font-weight:400}.pv-opt .pl-meter{width:100%}
+.pv-why{font-size:12.5px;color:var(--mid);margin:4px 0 8px}.pv-why span{color:var(--dim)}.pv-chg{font-size:12.5px;margin:0 0 10px;padding:7px 10px;border-radius:10px;background:rgba(53,224,255,.08);color:#9ff8ff}
+#settings .box{max-height:calc(100dvh - 32px);overflow:auto;padding-top:14px}.set-h{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-14px;z-index:2;background:rgba(8,14,24,.96);margin:-14px -20px 0;padding:12px 20px}.set-h b{font-size:18px}
+.set-adv summary{cursor:pointer;color:var(--mid);font-size:13px;padding:8px 0}.set-advb{display:flex;flex-direction:column;gap:12px;padding-top:8px}
+.dsheet{background:rgba(5,4,14,.9)}@media (max-width:700px){.dsheet{background:#07061a;backdrop-filter:none;-webkit-backdrop-filter:none}}
+body.dt-open{overflow:hidden}
 </style>
 </head>
 <body>
@@ -628,8 +638,10 @@ body.av-open{overflow:hidden}
 </div>
 
 <div class="modal" id="settings" hidden>
-  <div class="box glass" role="dialog" aria-label="Conexiones">
+  <div class="box glass" role="dialog" aria-label="Ajustes">
+    <div class="set-h"><b>⚙ Ajustes</b><button class="x-close" id="setClose" aria-label="Cerrar">✕</button></div>
     <div class="xprow"><span>Vista experta: agentes, terminal y tablas</span><span id="xpSlot"></span></div>
+    <details class="set-adv"><summary>Conexiones avanzadas (opcional)</summary><div class="set-advb">
     <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:17px;font-weight:700">Precios diarios · EODHD</div><span id="eodState" class="pill s-idle">Sin conectar</span></div>
     <p style="font-size:13px;line-height:1.55;color:var(--mid);margin:0">Pega tu clave de <a href="https://eodhd.com/register" target="_blank" rel="noopener" style="color:#9ff8ff">eodhd.com</a> (gratis: 20 consultas al día). Cada ficha que abras gasta una y se guarda hasta el día siguiente.</p>
     <label class="lbl" for="eodKey">API key de EODHD</label><input id="eodKey" type="password" placeholder="tu clave" autocomplete="off">
@@ -643,6 +655,8 @@ body.av-open{overflow:hidden}
     <label style="display:flex;gap:8px;align-items:center;font-family:var(--mono);font-size:11px;color:var(--dim)"><input type="checkbox" id="remember"> Recordar la clave en este navegador</label>
     <p id="upMsg" class="mono" style="font-size:11px;line-height:1.55;color:var(--warn);margin:0">Solo funciona abriendo el archivo .html en tu navegador: dentro de claude.ai las llamadas externas están bloqueadas. Restringe la clave en AI Studio.</p>
     <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn2" id="testBtn">Probar</button><button class="btn" id="saveUp">Guardar</button></div>
+    </div></details>
+    <button class="btn" id="setDone" style="align-self:stretch">Listo</button>
   </div>
 </div>
 
@@ -826,25 +840,31 @@ function coreFundE(pk){const t=CORE_F[pk];if(_coreE[t])return _coreE[t];const f=
   const bond=pk==='cons',tpl=UNIV.find(e=>e.grp===(bond?'bond':'core')&&!e.lev&&!e.x)||UNIV[0],an=annStats(t),full=YRS[t].slice(0,10).filter(v=>v!=null);
   const r10=full.length>=3?(Math.pow(full.reduce((p,x)=>p*(1+x/100),1),1/full.length)-1)*100:tpl.r10;
   return _coreE[t]={...tpl,t,n:f.full,ter:f.ter,u:U(f.tk,f.full,f.isin),iss:f.iss,issHq:f.sede,node:f.node,w:f.w,fund:true,ann:an,r10:+r10.toFixed(2),vol:an?+an.sd.toFixed(2):tpl.vol,vol1y:tpl.vol1y}}
-function buildPlan(pk,b=basis){
-  const key=pk+b+RF+planCore;if(planCache[key])return planCache[key];
+let planVar=(()=>{try{return localStorage.getItem('atlas_var')||'bal'}catch(_){return 'bal'}})();
+const PVAR={bal:['⚖️','Equilibrada','La mejor relación entre lo que suele ganar y lo que se mueve.'],mom:['🔥','Tendencia','Elige lo que más está subiendo estos meses: cambia con los rankings de cada día.'],def:['🛡️','Tranquila','Dentro de tu perfil, lo que menos se mueve y menos cobra.']};
+const momOf=e=>{const r=RANK&&RANK[priceKey('e',e)];if(!r)return null;const a=r.r6m,b=r.r1y;return a==null&&b==null?null:(a??b)*.55+(b??a)*.45};
+function buildPlan(pk,b=basis,pv=planVar){
+  const key=pk+b+RF+planCore+pv+(RANK?'r':'');if(planCache[key])return planCache[key];
   const P=PROFILES[pk],all=UNIV.filter(e=>!e.x).map(e=>etfInfo(e,b));
-  const inBand=all.filter(x=>x.band===pk),eligible=inBand.filter(x=>x.ok).sort((x,y)=>rankE(y)-rankE(x));
-  const picked=[],grps=new Set();let lev=0;
-  for(const x of eligible){if(picked.length>=5)break;if(grps.has(x.e.grp))continue;if(x.e.lev&&lev>=1)continue;picked.push(x);grps.add(x.e.grp);if(x.e.lev)lev++}
+  const vScore=pv==='mom'?(x=>{const m=momOf(x.e);return m==null?rankE(x)*10-50:m}):pv==='def'?(x=>-(x.e.vol+(x.e.ter||0)*20)):rankE;
+  const inBand=all.filter(x=>x.band===pk),eligible=inBand.filter(x=>x.ok).sort((x,y)=>vScore(y)-vScore(x));
+  let pool=eligible;if(pv!=='bal'){const bi=BANDS.indexOf(pk),nb=bi>0?all.filter(x=>x.ok&&x.band===BANDS[bi-1]):[];pool=[...eligible,...nb].sort((x,y)=>vScore(y)-vScore(x))}
+  const picked=[],grps=new Set(),maxN=pv==='bal'?5:4;let lev=0;
+  for(const x of pool){if(picked.length>=maxN)break;if(grps.has(x.e.grp))continue;if(x.e.lev&&lev>=1)continue;picked.push(x);grps.add(x.e.grp);if(x.e.lev)lev++}
   const filled=[];
   if(picked.length<3){ // band cannot be filled honestly: complete with the best assets of the bands below and flag them
     for(let bi=BANDS.indexOf(pk)-1;bi>=0&&picked.length<3;bi--){const pool=all.filter(x=>x.ok&&x.band===BANDS[bi]).sort((x,y)=>y.v-x.v);
       for(const x of pool){if(picked.length>=3)break;if(grps.has(x.e.grp)||(x.e.lev&&lev>=1))continue;picked.push(x);filled.push(x.e.t);grps.add(x.e.grp);if(x.e.lev)lev++}}}
   // weights: max Sharpe on sampled portfolios, 10–40 % per ETF, leveraged ETPs ≤ 25 %
-  const n=picked.length,R=rng(4242+pk.length*97+(b==='hist'?0:13));let best=null;
+  const n=picked.length,R=rng(4242+pk.length*97+(b==='hist'?0:13)+(pv==='bal'?0:pv==='mom'?7:3));let best=null;const moms=picked.map(x=>momOf(x.e)||0);
   const BROAD=new Set(['core','usbig','div','eu','em','small','bond','tbill','tips']),lo=n>=3?.10:0,hiOf=x=>x.e.lev?.25:BROAD.has(x.e.grp)?.40:.30;
   const hs=picked.map(hiOf),hsum=hs.reduce((a,c)=>a+c,0),his=hs.map(c=>hsum<1?c/hsum+1e-6:c);
   for(let it=0;it<6000;it++){let w=picked.map(()=>-Math.log(R()+1e-9));const s=w.reduce((a,c)=>a+c,0);w=w.map(c=>c/s);
     for(let k=0;k<12;k++){let ex=0;const free=[];w.forEach((c,i)=>{const hi=his[i];if(c>hi){ex+=c-hi;w[i]=hi}else if(c<lo){ex-=lo-c;w[i]=lo}else free.push(i)});if(Math.abs(ex)<1e-9)break;const fs=free.reduce((a,i)=>a+w[i],0)||1;free.forEach(i=>w[i]+=ex*w[i]/fs)}
     if(Math.abs(w.reduce((a,c)=>a+c,0)-1)>.003)continue;
     const st=stats(picked.map((x,i)=>({e:x.e,w:w[i]})),b);
-    let obj=pk==='cons'?st.g-3*Math.max(0,st.sig-7):st.sharpe; // conservative: highest return with volatility ≤ 7 %
+    let obj=pv==='def'?st.g*.25-st.sig:pk==='cons'?st.g-3*Math.max(0,st.sig-7):st.sharpe; // conservative: highest return with volatility ≤ 7 %
+    if(pv==='mom')obj+=.004*w.reduce((a,c,i)=>a+c*moms[i],0);
     if(st.g<P.lo&&!filled.length)obj-=10;
     if(!best||obj>best.obj)best={w,obj}}
   let items=picked.map((x,i)=>({...x,w:Math.round(best.w[i]*1000)/1000,filled:filled.includes(x.e.t)})).sort((x,y)=>y.w-x.w);
@@ -1689,12 +1709,19 @@ function renderMyPlan(o){
   const inp=$('#monthly');if(inp&&document.activeElement!==inp)inp.value=monthly;
   if(planView==='stk'){renderStockPlanView(el);return}
   const s=o.st,P=PROFILES[profile],col=o.items.map((x,i,a)=>itemColor(x,i,a)),gLo=Math.min(s.g,o.other.g),gHi=Math.max(s.g,o.other.g);
-  el.innerHTML=`<div class="core-seg"><span>Base del plan</span><div class="seg"><button data-core="fund" aria-pressed="${planCore==='fund'}">Fondo indexado</button><button data-core="etf" aria-pressed="${planCore==='etf'}">Solo ETFs</button></div></div>`+planHero(P,s.g,gLo,gHi,s.sig,s.dd,s.bt?s.bt.worstY:null)+
+  const vars=Object.keys(PVAR).map(k=>{const p=k===planVar?o:buildPlan(profile,basis,k);return{k,g:p.st.g,lvl:planRisk(p.st.sig),ts:p.items.map(x=>x.e.u?x.e.u.t:(x.e.tk||x.e.t))}});
+  const cur=vars.find(v=>v.k===planVar);let chg='';if(planVar==='mom'&&RANK){try{const pv=JSON.parse(localStorage.getItem('atlas_mom_'+profile)||'null');
+    if(pv&&pv.d!==RANK_U){const inn=cur.ts.filter(t=>!pv.ts.includes(t)),out=pv.ts.filter(t=>!cur.ts.includes(t));if(inn.length||out.length)chg=`🔄 Desde tu última visita: ${inn.length?'entra '+inn.join(', '):''}${inn.length&&out.length?' · ':''}${out.length?'sale '+out.join(', '):''}`}
+    if(!pv||pv.d!==RANK_U)localStorage.setItem('atlas_mom_'+profile,JSON.stringify({d:RANK_U,ts:cur.ts}))}catch(_){}}
+  el.innerHTML=`<div class="pv-opts">${vars.map(v=>`<button class="pv-opt${v.k===planVar?' on':''}" data-pv="${v.k}"><span class="pv-i">${PVAR[v.k][0]}</span><b>${PVAR[v.k][1]}</b><span class="pv-g">${p1(v.g,0)}<small>/año</small></span><i class="pl-meter">${[1,2,3,4,5].map(i=>`<i style="${i<=v.lvl?'background:'+['#4cd8a0','#9be15d','#ffd24a','#ff9a3c','#ff4d6d'][v.lvl-1]:''}"></i>`).join('')}</i></button>`).join('')}</div>
+    <p class="pv-why">${PVAR[planVar][2]}${planVar==='mom'&&RANK_U?` <span>↻ ${relWhen(RANK_U)}</span>`:''}</p>${chg?`<p class="pv-chg">${esc(chg)}</p>`:''}
+    <div class="core-seg"><span>Base del plan</span><div class="seg"><button data-core="fund" aria-pressed="${planCore==='fund'}">Fondo indexado</button><button data-core="etf" aria-pressed="${planCore==='etf'}">Solo ETFs</button></div></div>`+planHero(P,s.g,gLo,gHi,s.sig,s.dd,s.bt?s.bt.worstY:null)+
     ringChart(o.items.map((x,i)=>({w:x.w,c:col[i]})),monthly>0?`<b>${fmtN(monthly)} €</b><span>al mes</span>`:'<b>Tu plan</b>')+`
     <div class="pl-list">${o.items.map((x,i)=>planRow(x.e.fund?'f':'e',x.e.t,x.e.node,x.e.u?x.e.u.t:(x.e.tk||x.e.t),x.core?(x.e.n||'Fondo indexado'):THEME[x.e.t]||GRP_LBL[x.e.grp]||x.e.n,x.core?'la base de tu plan':x.filled?'más prudente':'',x.w,col[i],x.core?'🏛️':(SEC_ICON[x.e.sec||SEC_OF_GRP[x.e.grp]]||'◆'))).join('')}</div>
     ${o.filled.length?`<p class="pl-warn">Con tu perfil no hay suficientes ETFs comprables: ${o.filled.join(', ')} ${o.filled.length>1?'vienen':'viene'} de un perfil más prudente.</p>`:''}
     ${planBars(s.bt,P.color)}${planProj(gLo,gHi)}
     <details class="mp-why"><summary>ℹ️ Cómo se calcula</summary>${planCore==='fund'?`<p>La base es un fondo indexado porque en España puedes cambiar de fondo sin pagar impuestos (traspaso). Los ETFs de alrededor apuestan por temas concretos. El fondo calcula en euros y los ETFs con su histórico en dólares: la estimación es orientativa.</p>`:''}<p>Son estimaciones con datos pasados, no garantías.</p></details>`;
+  el.querySelectorAll('[data-pv]').forEach(b=>b.addEventListener('click',()=>{planVar=b.dataset.pv;try{localStorage.setItem('atlas_var',planVar)}catch(_){}_enrK='';refreshAll()}));
   el.querySelectorAll('[data-core]').forEach(b=>b.addEventListener('click',()=>{planCore=b.dataset.core;try{localStorage.setItem('atlas_core',planCore)}catch(_){}_enrK='';refreshAll()}));
   bindPlanRows(el);
 }
@@ -1813,7 +1840,7 @@ async function loadNews(q,box){
     if(j.status==='ok'&&j.items&&j.items.length){render(j.items.map(it=>{const m=String(it.title).match(/^(.*) - ([^-]+)$/);return{title:m?m[1]:it.title,source:m?m[2]:(it.author||''),date:String(it.pubDate||'').slice(0,10).split('-').reverse().join('/'),url:it.link}}));return}}catch(e){}
   if(apiKey){try{const res=await gemini(`Hoy es ${new Date().toISOString().slice(0,10)}. Busca las 5 noticias más recientes e importantes sobre "${q}" (preferiblemente en español). Responde SOLO con JSON: {"news":[{"title":"...","source":"...","date":"DD/MM/AAAA","url":"https://..."}]}`);const j=parseJSON(res.text);if(j.news&&j.news.length){render(j.news);return}}catch(e){}}
   box.innerHTML=`<p class="mp-note">No he podido cargar titulares desde aquí. Ábrelos directamente:</p>`+links}
-function openDetail(kind,t,node){litNode=node;const d=$('#detail');let html='';if(d.hidden)sheetPush();
+function openDetail(kind,t,node){litNode=node;const d=$('#detail');let html='';if(d.hidden)sheetPush();document.body.classList.add('dt-open');
   if(kind==='f'){const f=FUNDS.find(x=>x.t===t);if(!f)return;d.innerHTML=`<div class="dbox">${fundDetail(f)}</div>`;d.hidden=false;loadNews(`${f.n} fondo`,$('#dNews'))}
   else if(kind==='s'){const l=STOCKS[node]||Object.values(STOCKS).flat(),s=(STOCKS[node]||[]).find(x=>x.t===t)||Object.values(STOCKS).flat().find(x=>x.t===t);if(!s)return;const info=stockInfo(s),an=annStats(s.t),color=KIND_C.s;
     html=`<div class="dhead" style="--c:${color}"><div class="dlogo">${esc(dispT(s).slice(0,4))}</div><div class="dtit"><h3>${esc(s.n)}</h3><p>${esc(dispT(s))} · ${esc(s.sec||'')} · Sede: ${esc(s.hq||NODES[node].city)}</p></div><button class="x-close" data-close aria-label="Cerrar">✕</button></div>
@@ -1843,7 +1870,7 @@ function openDetail(kind,t,node){litNode=node;const d=$('#detail');let html='';i
   d.querySelector('[data-close]').addEventListener('click',closeDetail);d.scrollTop=0;
 }
 $('#detail').addEventListener('click',e=>{if(e.target.id==='detail')closeDetail()});
-function closeDetail(fromPop){const d=$('#detail');if(d.hidden)return;if(fromPop!==true&&sheetPop())return;litNode=null;d.hidden=true;d.innerHTML='';sheetBtn()}
+function closeDetail(fromPop){const d=$('#detail');if(d.hidden)return;if(fromPop!==true&&sheetPop())return;litNode=null;d.hidden=true;d.innerHTML='';document.body.classList.remove('dt-open');sheetBtn()}
 // hojas a pantalla completa: botón «Cerrar» abajo (al alcance del pulgar) y gesto/botón «atrás» del móvil
 let _sheetN=0;
 function sheetPush(){try{history.pushState({atlasSheet:++_sheetN},'')}catch(_){}setTimeout(sheetBtn,0)}
@@ -1866,7 +1893,22 @@ const SEC_OF_GRP={semis:'Tecnología',usbig:'Tecnología',sw:'Tecnología',robo:
   renov:'Energía',uran:'Energía',nucl:'Energía',util:'Energía',grid:'Energía',finus:'Finanzas',fineu:'Finanzas',fintech:'Finanzas',cdisc:'Consumo',staples:'Consumo',infra:'Infraestructuras',pave:'Infraestructuras',
   core:'Mercado amplio',div:'Mercado amplio',small:'Mercado amplio',eu:'Regiones y países',em:'Regiones y países',jp:'Regiones y países',cn:'Regiones y países',in:'Regiones y países',latam:'Regiones y países',
   bond:'Bonos y oro',tbill:'Bonos y oro',tips:'Bonos y oro',gold:'Bonos y oro'};
-const sq={q:'',type:'all',sec:'all',fit:false,sort:'mean',active:false};
+const sq={q:'',type:'all',sec:'all',fit:false,sort:'mean',active:false,top:0};
+/* ---- rankings en vivo (data/rank.json, lo calcula GitHub Actions con los precios del día) ---- */
+let RANK=null,RANK_U='';async function loadRank(){try{const j=await (await fetch('data/rank.json?'+today(),{cache:'no-cache'})).json();const m={};Object.entries(j.d).forEach(([k,v])=>{const o={};j.f.forEach((f,i)=>o[f]=v[i]);m[k]=o});RANK=m;RANK_U=j.u;
+  for(const k in planCache)delete planCache[k];_enrK='';if(typeof refreshAll==='function')refreshAll();if(!$('#search').hidden)renderSearch()}catch(_){}}
+const rkOf=x=>RANK&&x&&x.obj?RANK[priceKey(x.k,x.obj)]:null;
+const rkv=(x,f)=>{const r=rkOf(x);return r&&r[f]!=null?r[f]:null};
+const terOf=x=>x.k==='s'?null:(x.obj.ter??null);
+const SORTS={r1y:['📈 Más sube en 1 año',x=>rkv(x,'r1y'),'1 año'],r1m:['🔥 Más sube este mes',x=>rkv(x,'r1m'),'1 mes'],ytd:['📅 Más sube este año',x=>rkv(x,'ytd'),'este año'],
+  r3y:['🏔️ Mejor en 3 años',x=>rkv(x,'r3y'),'al año, 3 años'],mean:['⭐ Mejor media anual',x=>x.an?x.an.mean:null,'media anual'],
+  risk:['🛡️ Menos riesgo',x=>{const v=rkv(x,'vol')??(x.info&&x.info.vol);return v==null?null:-v},'se mueve al año'],worst:['🧱 Mejor peor año',x=>x.an?x.an.worst:null,'peor año'],
+  cheap:['🪙 Más barato',x=>{const t=terOf(x);return t==null?null:-t},'comisión al año'],az:['A–Z',null,'']};
+function sortEnts(list,sort){const f=(SORTS[sort]||SORTS.mean)[1];if(!f)return list.sort((a,b)=>a.name.localeCompare(b.name,'es'));
+  return list.map(x=>[x,f(x)]).sort((a,b)=>(b[1]==null?-1e9:b[1])-(a[1]==null?-1e9:a[1])).map(a=>a[0])}
+function metricTxt(x,sort){const f=(SORTS[sort]||SORTS.mean)[1];const v=f?f(x):null;if(v==null)return['—','var(--dim)'];
+  if(sort==='risk')return[p1(-v,0),'var(--fg)'];if(sort==='cheap')return[(-v).toFixed(2).replace('.',',')+' %','var(--fg)'];
+  return[(v>0?'+':'')+p1(v,0),v<0?'var(--bad)':'var(--good)']}
 let _mapT=0;function updateMapSoon(){if(!MAPMODE)return;clearTimeout(_mapT);_mapT=setTimeout(()=>updateMap(),250)}
 const norm=x=>String(x||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 let _ents=null;
@@ -1900,7 +1942,7 @@ function mapEntities(){ // entidades que cumplen el filtro actual
   if(!filterActive())return[];const ents=searchEntities(),words=norm(sq.q).split(/\s+/).filter(Boolean);
   const ofType=x=>sq.type==='all'||x.k===({etf:'e',stk:'s',fnd:'f'}[sq.type]);
   let r=entEnrich(ents.filter(x=>ofType(x)&&(sq.sec==='all'||x.sec===sq.sec)&&words.every(w=>x.txt.includes(w))));
-  if(sq.fit)r=r.filter(x=>x.fit||x.inPlan);if(sq.mine){const m=new Set(PF.map(p=>p.k+p.t));r=r.filter(x=>m.has(x.k+x.t))}return r}
+  if(sq.fit)r=r.filter(x=>x.fit||x.inPlan);if(sq.mine){const m=new Set(PF.map(p=>p.k+p.t));r=r.filter(x=>m.has(x.k+x.t))}if(sq.top)r=sortEnts(r,sq.sort).slice(0,sq.top);return r}
 function mapGeoJSON(list){const fs=[];list.forEach(x=>{const g=entGeo(x);if(!g)return;const c=geoCached(g[4]);const lat=c?c[0]:g[0],lon=c?c[1]:g[1];
   fs.push({type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{k:x.k,t:x.t,tk:String(x.tk),name:x.name,node:x.node,c:KIND_C[x.k],gk:g[4],fit:x.fit||x.inPlan?1:0}})});
   return{type:'FeatureCollection',features:fs}}
@@ -2477,11 +2519,11 @@ let _enrK='',_enrC=new Map(),_enrPW={};
 function entEnrich(list){const key=[profile,basis,RF,UNIX_N.s,UNIX_N.e,UNIX_N.f].join('|');
   if(key!==_enrK){_enrK=key;_enrC=new Map();_enrPW={};const o=buildPlan(profile),sp=buildStockPlan(profile);o.items.forEach(x=>_enrPW[(x.e.fund?'f':'e')+x.e.t]=x.w);sp.items.forEach(x=>_enrPW['s'+x.s.t]=x.w)}
   return list.map(x=>{const ck=x.k+x.t;let r=_enrC.get(ck);if(!r){const info=x.k==='s'?stockInfo(x.obj):x.k==='f'?fundInfo(x.obj):etfInfo(x.obj),an=annStats(x.t);r={info,an,fit:info.band===profile&&info.ok,inPlan:_enrPW[x.k+x.t]||0};_enrC.set(ck,r)}return{...x,...r}})}
-function entRow(x,showCity=true){const c=KIND_C[x.k],m=x.an?x.an.mean:null;
+function entRow(x,showCity=true,rank=0,sort=sq.sort){const c=KIND_C[x.k],mt=metricTxt(x,sort==='az'?'mean':sort);
   const nm=x.k==='s'?x.name:x.name,sub=x.k==='e'?`ETF · ${x.obj.iss||x.sec}`:x.k==='f'?`${x.obj.kind==='act'?'Fondo activo':'Fondo indexado'} · ${x.obj.iss}`:x.sec;
-  return `<button class="sr" data-k="${x.k}" data-t="${esc(x.t)}" data-n="${x.node}"><span class="sr-logo" style="--c:${c}">${esc(String(x.tk).slice(0,4))}</span>
+  return `<button class="sr" data-k="${x.k}" data-t="${esc(x.t)}" data-n="${x.node}"><span class="sr-logo" style="--c:${c}">${esc(String(x.tk).slice(0,4))}${rank?`<i class="sr-rkb${rank<=3?' m':''}">${rank<=3?['🥇','🥈','🥉'][rank-1]:rank}</i>`:''}</span>
     <span class="sr-mid"><b>${esc(nm)}</b><small>${esc(sub)}${showCity?` · ${esc(NODES[x.node].city.split(' ·')[0])}`:''}</small></span>
-    <span class="sr-r"><b style="color:${m==null?'var(--dim)':m<0?'var(--bad)':'var(--fg)'}">${m==null?'—':p1(m,0)}</b>${x.inPlan?'<i class="sr-dot plan" title="En tu plan">★</i>':x.fit?'<i class="sr-dot" title="Encaja con tu perfil">✓</i>':'<i class="sr-dot off"></i>'}</span></button>`}
+    <span class="sr-r"><b style="color:${mt[1]}">${mt[0]}</b>${x.inPlan?'<i class="sr-dot plan" title="En tu plan">★</i>':x.fit?'<i class="sr-dot" title="Encaja con tu perfil">✓</i>':'<i class="sr-dot off"></i>'}</span></button>`}
 function fundInfo(f){const an=annStats(f.t),a=YRS[f.t].slice(0,10).filter(v=>v!=null);
   const v=a.length>=3?(Math.pow(a.reduce((p,x)=>p*(1+x/100),1),1/a.length)-1)*100:null,vol=an?an.sd:(f.vol3??20);
   return{f,v,vol,...classify(v,vol,false,undefined,an)}}
@@ -2513,8 +2555,8 @@ function renderSearch(){
   let res=entEnrich(ents.filter(x=>ofType(x)&&(sq.sec==='all'||x.sec===sq.sec)&&words.every(w=>x.txt.includes(w))));
   if(sq.fit)res=res.filter(x=>x.fit||x.inPlan);
   const exact=x=>words.length&&(norm(x.tk)===words.join(' ')||norm(x.t)===words.join(' ')||norm(x.name).startsWith(words.join(' ')))?1:0;
-  const key={mean:x=>x.an?x.an.mean:-999,risk:x=>-(x.info.vol??999),worst:x=>x.an?x.an.worst:-999,az:null}[sq.sort];
-  res.sort((a,b)=>exact(b)-exact(a)||(key?key(b)-key(a):a.name.localeCompare(b.name,'es')));
+  res=sortEnts(res,sq.sort);if(words.length){const ex=res.filter(exact);if(ex.length)res=ex.concat(res.filter(x=>!exact(x)))}
+  if(sq.top)res=res.slice(0,sq.top);
   const chip=(grp,val,lbl,on,cls='')=>`<button class="sc-chip${cls}${on?' on':''}" data-g="${grp}" data-v="${esc(val)}">${lbl}</button>`;
   if(!d.querySelector('.sbox')){d.innerHTML=`<div class="sbox"><div class="shead"><span class="sic">⌕</span><input id="sQ" type="search" placeholder="Busca NVIDIA, Fidelity, Cobas, IWDA…" autocomplete="off" enterkeyhint="search"><button class="x-close" data-sclose aria-label="Cerrar">✕</button></div>
     <div class="sbar" id="sBar"></div><div class="sfil" id="sFil" hidden></div><div class="scount" id="sCount"></div><div class="slistr" id="sList"></div></div>`;
@@ -2522,25 +2564,32 @@ function renderSearch(){
     d.querySelector('[data-sclose]').addEventListener('click',closeSearch);
     d.addEventListener('click',e=>{if(e.target===d)closeSearch()});
     const onChip=e=>{const b=e.target.closest('.sc-chip');if(!b)return;const g=b.dataset.g,v=b.dataset.v;
-      if(g!=='open')sq.active=true;if(g==='fit')sq.fit=!sq.fit;else if(g==='open')sq.open=!sq.open;else if(g==='sec')sq.sec=sq.sec===v&&v!=='all'?'all':v;else sq[g]=v;renderSearch();if(g==='sec'&&b.classList.contains('stile'))$('#sList').scrollTop=0};
+      if(g!=='open')sq.active=true;if(g==='fit')sq.fit=!sq.fit;else if(g==='open')sq.open=!sq.open;else if(g==='sec')sq.sec=sq.sec===v&&v!=='all'?'all':v;else if(g==='top')sq.top=+v;else if(g==='rk'){sq.rk=v;renderSearch();return}else if(g==='rkall'){sq.sort=sq.rk||'r1y';sq.top=25;sq.active=true;sq.open=false;renderSearch();return}else sq[g]=v;renderSearch();if(g==='sec'&&b.classList.contains('stile'))$('#sList').scrollTop=0};
     ['#sBar','#sFil','#sList'].forEach(s=>$(s).addEventListener('click',onChip));
     $('#sList').addEventListener('click',e=>{const b=e.target.closest('.sr');if(!b)return;const nd=b.dataset.n;if(MAPMODE&&mapReady){const k=b.dataset.k,t=b.dataset.t;closeSearch();setTimeout(()=>{if(!focusEntOnMap(k,t))openDetail(k,t,nd)},80);return}if(gl_ok){const ll=hubLL(nd);flyTo({lat:ll.lat,lon:ll.lon,dist:NODES[nd].sty==='generic'?30:42,heading:0},1400)}openDetail(b.dataset.k,b.dataset.t,nd)})}
   if($('#sQ').value!==sq.q)$('#sQ').value=sq.q;
-  const nAdv=(sq.sec!=='all')+(sq.sort!=='mean');
+  const nAdv=(sq.sec!=='all')+(sq.sort!=='mean')+(sq.top>0);
   $('#sBar').innerHTML=`<div class="sseg">${chip('type','all','Todo',sq.type==='all')}${chip('type','etf','ETFs',sq.type==='etf')}${chip('type','fnd','Fondos',sq.type==='fnd')}${chip('type','stk','Acciones',sq.type==='stk')}</div>
     ${chip('fit','1','✓ Para mí',sq.fit,' sfit')}${chip('open','1',`Filtros${nAdv?` <em>${nAdv}</em>`:''}`,sq.open,' sfbtn')}`;
   const f=$('#sFil');f.hidden=!sq.open;
   f.innerHTML=`<div class="sgrp"><span class="slbl">Sector</span><div class="srow2">${chip('sec','all','Todos',sq.sec==='all')}${secs.map(x=>chip('sec',x,`${SEC_ICON[x]||'◆'} ${esc(x)}`,sq.sec===x)).join('')}</div></div>
-    <div class="sgrp"><span class="slbl">Ordenar por</span><div class="srow2">${chip('sort','mean','Más rentable',sq.sort==='mean')}${chip('sort','risk','Menos riesgo',sq.sort==='risk')}${chip('sort','worst','Mejor peor año',sq.sort==='worst')}${chip('sort','az','A–Z',sq.sort==='az')}</div></div>`;
+    <div class="sgrp"><span class="slbl">Ordenar por</span><div class="srow2">${Object.entries(SORTS).map(([k,v])=>chip('sort',k,v[0],sq.sort===k)).join('')}</div></div>
+    <div class="sgrp"><span class="slbl">Mostrar</span><div class="srow2">${[[0,'Todos'],[10,'🏆 Top 10'],[25,'Top 25'],[50,'Top 50']].map(([n,l])=>chip('top',String(n),l,sq.top===n)).join('')}</div></div>`;
   const L=$('#sList');
   if(home){const best=entEnrich(ents.filter(ofType)).filter(x=>x.fit||x.inPlan).sort((a,b)=>(b.inPlan-a.inPlan)||((b.an?b.an.mean:-99)-(a.an?a.an.mean:-99))).slice(0,5);
     $('#sCount').innerHTML='';updateMapSoon();sheetBtn();
     L.innerHTML=`<h5 class="shd">Explora por sector</h5><div class="stiles">${secs.map(x=>`<button class="sc-chip stile" data-g="sec" data-v="${esc(x)}"><span class="sti">${SEC_ICON[x]||'◆'}</span><b>${esc(x)}</b><small>${secCount[x]}</small></button>`).join('')}</div>
-      ${best.length?`<h5 class="shd">Lo mejor para tu perfil ${esc(P.label)} <span>media anual</span></h5>${best.map(x=>entRow(x)).join('')}`:''}`;return}
-  $('#sCount').innerHTML=`<span>${res.length} resultado${res.length===1?'':'s'}${sq.sec!=='all'?` en ${esc(sq.sec)}`:''}</span><span>media anual</span>`;
+      ${rankBlock(ents.filter(ofType))}
+      ${best.length?`<h5 class="shd">Lo mejor para tu perfil ${esc(P.label)} <span>media anual</span></h5>${best.map(x=>entRow(x,true,0,'mean')).join('')}`:''}`;return}
+  $('#sCount').innerHTML=`<span>${sq.top?`🏆 Top ${res.length}`:`${res.length} resultado${res.length===1?'':'s'}`}${sq.sec!=='all'?` en ${esc(sq.sec)}`:''}${sq.sort!=='mean'&&sq.sort!=='az'?` · ${SORTS[sq.sort][0].replace(/^\S+ /,'')}`:''}</span><span>${(SORTS[sq.sort]||SORTS.mean)[2]||'media anual'}</span>`;
   updateMapSoon();sheetBtn();
-  L.innerHTML=res.length?res.map(x=>entRow(x)).join(''):`<p class="sempty">Nada con esos filtros.<br>Prueba otra palabra o quita alguno.</p>`;
+  L.innerHTML=res.length?res.map((x,i)=>entRow(x,true,sq.top?i+1:0)).join(''):`<p class="sempty">Nada con esos filtros.<br>Prueba otra palabra o quita alguno.</p>`;
 }
+function rankBlock(list){const rk=sq.rk||'r1y',top=sortEnts(entEnrich(list.slice()),rk).filter(x=>(SORTS[rk][1])(x)!=null).slice(0,10);
+  return `<h5 class="shd">🏆 Rankings en vivo <span>${RANK_U?'↻ '+relWhen(RANK_U):''}</span></h5>
+    <div class="rk-tabs">${['r1y','r1m','ytd','r3y','risk','cheap'].map(k=>`<button class="sc-chip${rk===k?' on':''}" data-g="rk" data-v="${k}">${SORTS[k][0]}</button>`).join('')}</div>
+    <div class="rk-list">${top.map((x,i)=>entRow(x,true,i+1,rk)).join('')||'<p class="sempty">Cargando rankings…</p>'}</div>
+    <button class="sc-chip rk-all" data-g="rkall" data-v="1">Ver el top 25 y encenderlo en el mapa →</button>`}
 let cardAll={};
 function cityBody(id){const info=nodeInfo(id),P=PROFILES[profile];
   const list=entEnrich(searchEntities().filter(x=>x.node===id)).sort((a,b)=>(b.inPlan-a.inPlan)||(b.fit-a.fit)||((b.an?b.an.mean:-99)-(a.an?a.an.mean:-99)));
@@ -2798,7 +2847,7 @@ $('#clearLog').addEventListener('click',()=>{$('#stream').innerHTML=''});
 $('#zIn').addEventListener('click',()=>flyTo({...cam,dist:Math.max(30,cam.dist/1.7)},500));$('#zOut').addEventListener('click',()=>flyTo({...cam,dist:Math.min(700,cam.dist*1.7)},500));
 $('#zHome').addEventListener('click',()=>{closeCard();flyTo(HOME,1400)});
 $('#uplinkBtn').addEventListener('click',()=>{$('#settings').hidden=false;$('#apiKey').focus()});
-$('#settings').addEventListener('click',e=>{if(e.target.id==='settings')$('#settings').hidden=true});
+$('#settings').addEventListener('click',e=>{if(e.target.id==='settings')$('#settings').hidden=true});['#setClose','#setDone'].forEach(q=>$(q).addEventListener('click',()=>{$('#settings').hidden=true}));
 $('#saveUp').addEventListener('click',()=>{syncMode();$('#settings').hidden=true;renderSources();stream('sys',apiKey?'Clave Gemini cargada: la próxima misión usará datos LIVE.':'Sin clave: misión en simulación.',apiKey?'lv':'')});
 $('#testBtn').addEventListener('click',async()=>{syncMode();if(!apiKey){$('#upMsg').textContent='Pega primero tu API key.';return}setUp('run','Probando');$('#upMsg').textContent='Probando conexión…';
   try{const r=await gemini('Responde solo con el JSON {"ok":true}');setUp('done','Online');$('#upMsg').textContent='Conexión correcta: '+r.text.slice(0,80)}catch(e){setUp('err',e.blocked?'Bloqueado':'Fallo');$('#upMsg').textContent=e.message}});
@@ -2811,7 +2860,7 @@ $('#searchBtn').addEventListener('click',openSearch);
 $('#setBtn').addEventListener('click',()=>{$('#settings').hidden=false});
 $('#xpSlot').appendChild($('#expertBtn'));$('#expertBtn').addEventListener('click',()=>{const app=$('#app'),on=app.classList.toggle('simple');$('#expertBtn').setAttribute('aria-pressed',String(!on));$('#expertBtn').textContent=on?'Vista experta':'Vista simple';try{localStorage.setItem('atlas_view',on?'simple':'expert')}catch(_){}setTimeout(resize3d,60);refreshAll()});
 try{if(localStorage.getItem('atlas_view')==='expert'){$('#app').classList.remove('simple');$('#expertBtn').textContent='Vista simple';$('#expertBtn').setAttribute('aria-pressed','true')}}catch(_){}$('#searchFab').addEventListener('click',openSearch);
-document.addEventListener('keydown',e=>{if((e.key==='/'||(e.key==='k'&&(e.ctrlKey||e.metaKey)))&&document.activeElement.tagName!=='INPUT'){e.preventDefault();openSearch();return}if(e.key==='Escape'){if(!$('#detail').hidden){closeDetail();return}if(!$('#search').hidden){closeSearch();return}closeCard();$('#settings').hidden=true}});
+document.addEventListener('keydown',e=>{if((e.key==='/'||(e.key==='k'&&(e.ctrlKey||e.metaKey)))&&document.activeElement.tagName!=='INPUT'){e.preventDefault();openSearch();return}if(e.key==='Escape'){if(!$('#settings').hidden){$('#settings').hidden=true;return}if(!$('#detail').hidden){closeDetail();return}if(!$('#search').hidden){closeSearch();return}closeCard();$('#settings').hidden=true}});
 let rsT;window.addEventListener('resize',()=>{clearTimeout(rsT);rsT=setTimeout(resize3d,80)});
 
 // Enlace desde Cimientos: ?monthly=300&from=cimientos → arranca con tu aportación real y muestra un botón para volver
@@ -2822,7 +2871,7 @@ try{const q=new URLSearchParams(location.search),m=+q.get('monthly');
     document.body.appendChild(a)}
   if(q.has('monthly')||q.has('from'))history.replaceState(null,'',location.pathname)}catch(e){}
 renderProfileSeg();syncMode();
-loadUniverseX();if(MAPMODE){initMap();$('#mapBar').addEventListener('click',mapBarClick)}else{const B='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/';loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js').then(()=>Promise.all(['shaders/CopyShader.js','shaders/LuminosityHighPassShader.js'].map(f=>loadScript(B+f)))).then(()=>loadScript(B+'postprocessing/EffectComposer.js')).then(()=>Promise.all(['postprocessing/RenderPass.js','postprocessing/ShaderPass.js','postprocessing/UnrealBloomPass.js'].map(f=>loadScript(B+f)))).then(()=>{initThree();buildLabels();applyCam()}).catch(()=>{$('#stage').insertAdjacentHTML('beforeend','<div class="nolgl">No se pudo cargar Three.js desde el CDN. Los paneles siguen funcionando.</div>')})}
+loadUniverseX().then(()=>loadRank());if(MAPMODE){initMap();$('#mapBar').addEventListener('click',mapBarClick)}else{const B='https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/';loadScript('https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js').then(()=>Promise.all(['shaders/CopyShader.js','shaders/LuminosityHighPassShader.js'].map(f=>loadScript(B+f)))).then(()=>loadScript(B+'postprocessing/EffectComposer.js')).then(()=>Promise.all(['postprocessing/RenderPass.js','postprocessing/ShaderPass.js','postprocessing/UnrealBloomPass.js'].map(f=>loadScript(B+f)))).then(()=>{initThree();buildLabels();applyCam()}).catch(()=>{$('#stage').insertAdjacentHTML('beforeend','<div class="nolgl">No se pudo cargar Three.js desde el CDN. Los paneles siguen funcionando.</div>')})}
 initCharts();refreshAll();tickClocks();setInterval(tickClocks,1000);
 applyCam&&window.THREE&&applyCam();requestAnimationFrame(loop);
 setTimeout(()=>flyTo(HOME,reduced?1:3200),300);
