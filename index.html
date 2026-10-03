@@ -463,6 +463,28 @@ body.mapmode #app.simple .right{top:18px}
 .hq-pin::before{content:'';position:absolute;left:13px;bottom:8px;width:0;height:0;border-radius:50%;border:2px solid #b9f6ff;transform:translate(-50%,50%);animation:hqring 2s ease-out infinite}
 @keyframes hqring{from{width:0;height:0;opacity:.9}to{width:180px;height:180px;opacity:0}}
 .pole-gen.near .pg-ring,.pole-gen.near .pg-core,.pole-gen.near .pg-beam{display:none}.pole-gen.near{height:40px}.pole-gen.near .pg-lbl{bottom:auto;top:-30px}
+.core-seg{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;font-size:12.5px;color:var(--mid)}
+.core-seg .seg{display:flex;padding:3px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--edge)}
+.core-seg button{font:inherit;font-size:12px;padding:6px 10px;border-radius:8px;border:0;background:none;color:var(--mid);cursor:pointer}
+.core-seg button[aria-pressed="true"]{background:rgba(192,132,252,.18);color:#e9d5ff}
+
+/* mi cartera */
+.pf{display:flex;flex-direction:column;gap:10px;padding-bottom:12px;border-bottom:1px solid var(--edge)}
+.pf h3{margin:0;font-size:17px;color:#e9d5ff}.pf-head{display:flex;justify-content:space-between;align-items:center}
+.pf-map{font:inherit;font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid var(--edge2);background:rgba(255,255,255,.05);color:var(--fg);cursor:pointer}
+.pf-hero{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.pf-hero div{background:rgba(255,255,255,.04);border:1px solid var(--edge);border-radius:12px;padding:9px 10px;display:flex;flex-direction:column}
+.pf-hero span{font-size:11px;color:var(--dim)}.pf-hero b{font-size:17px;font-family:var(--mono)}.pf-hero small{font-size:11.5px;font-family:var(--mono)}
+.pf-list{display:flex;flex-direction:column;gap:6px}.pf-row{display:flex;gap:6px;align-items:stretch}
+.pf-main{flex:1;display:flex;align-items:center;gap:9px;text-align:left;font:inherit;padding:9px 10px;border-radius:11px;border:1px solid var(--edge);background:rgba(255,255,255,.03);color:var(--fg);cursor:pointer;min-width:0}
+.pf-main i{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}.pf-nm{flex:1;min-width:0;display:flex;flex-direction:column}.pf-nm b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pf-nm small{font-size:11px;color:var(--dim)}.pf-v{display:flex;flex-direction:column;align-items:flex-end;font-family:var(--mono)}.pf-v b{font-size:13.5px}.pf-v small{font-size:11px}
+.pf-x{flex:none;width:34px;border-radius:10px;border:1px solid var(--edge);background:none;color:var(--dim);cursor:pointer}
+.pf-empty p{font-size:12.5px;color:var(--mid);margin:6px 0}.pf-quick{display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:12px;border:1px dashed rgba(192,132,252,.5);background:rgba(192,132,252,.06);font-size:12.5px}
+.pf-quick span{color:var(--mid)}.pf-quick label,.pf-form label{display:flex;align-items:center;gap:8px;color:var(--mid);font-size:12.5px}
+.pf-quick input,.pf-form input{font:inherit;font-size:14px;padding:7px 9px;border-radius:9px;border:1px solid var(--edge2);background:rgba(255,255,255,.05);color:var(--fg);color-scheme:dark}
+.pf-form{display:flex;flex-direction:column;gap:9px;margin-top:4px}.pf-form .seg{display:flex;gap:4px}.pf-form .seg button{flex:1;font:inherit;font-size:12.5px;padding:7px;border-radius:9px;border:1px solid var(--edge2);background:none;color:var(--mid);cursor:pointer}
+.pf-form .seg button[aria-pressed="true"]{background:rgba(192,132,252,.18);color:#e9d5ff;border-color:rgba(192,132,252,.5)}.pf-ok{color:var(--good);margin:0}
+@media (max-width:700px){.pf-hero b{font-size:15px;white-space:nowrap}}
 </style>
 </head>
 <body>
@@ -502,6 +524,7 @@ body.mapmode #app.simple .right{top:18px}
   <aside class="glass right" aria-label="Estrategia de Nueva York">
     <div class="phead"><h2 style="color:var(--hq)"><span class="xp">Polo Norte · Estrategia</span><span class="sp">Tu plan</span></h2><span id="caoPill" class="pill s-idle">En reposo</span></div>
     <div class="pbody">
+      <div id="myPf" class="pf"></div>
       <div><div class="lbl" style="margin-bottom:6px">Tu perfil de riesgo</div>
         <div class="seg" id="profileSeg" role="group" aria-label="Perfil de riesgo"></div></div>
       <div class="mp-in"><label class="lbl" for="monthly">Cuánto aportas al mes</label>
@@ -509,7 +532,7 @@ body.mapmode #app.simple .right{top:18px}
           <div class="mp-chips" id="mpChips"><button data-m="50">50</button><button data-m="100">100</button><button data-m="150">150</button><button data-m="300">300</button><button data-m="500">500</button></div></div></div>
       <div>
         <div class="seg seg2" id="planSeg" role="group" aria-label="Tipo de plan">
-          <button data-v="etf" aria-pressed="true" style="--pc:#f5c542">Plan de ETFs</button>
+          <button data-v="etf" aria-pressed="true" style="--pc:#f5c542">Fondos y ETFs</button>
           <button data-v="stk" aria-pressed="false" style="--pc:#f5c542">Plan de acciones</button>
         </div></div>
       <div id="myPlan" class="mp"></div>
@@ -761,8 +784,16 @@ function normCdf(x){const t=1/(1+.2316419*Math.abs(x)),d=.3989423*Math.exp(-x*x/
 function rng(seed){let s=seed%2147483647||1;return()=>(s=(s*16807)%2147483647)/2147483647}
 const rankE=x=>(x.v-RF)/x.e.vol;
 const planCache={};
+/* Núcleo con fondo indexado: en España se traspasa sin pagar impuestos, así que va de base y los ETFs de satélites */
+let planCore=(()=>{try{return localStorage.getItem('atlas_core')||'fund'}catch(_){return 'fund'}})();
+const CORE_W={cons:.40,mod:.45,ag:.50,alpha:.35},CORE_F={cons:'F_VBND',mod:'F_FIDW',ag:'F_FIDW',alpha:'F_FIDW'};
+const _coreE={};
+function coreFundE(pk){const t=CORE_F[pk];if(_coreE[t])return _coreE[t];const f=FUNDS.find(x=>x.t===t);if(!f)return null;
+  const bond=pk==='cons',tpl=UNIV.find(e=>e.grp===(bond?'bond':'core')&&!e.lev&&!e.x)||UNIV[0],an=annStats(t),full=YRS[t].slice(0,10).filter(v=>v!=null);
+  const r10=full.length>=3?(Math.pow(full.reduce((p,x)=>p*(1+x/100),1),1/full.length)-1)*100:tpl.r10;
+  return _coreE[t]={...tpl,t,n:f.full,ter:f.ter,u:U(f.tk,f.full,f.isin),iss:f.iss,issHq:f.sede,node:f.node,w:f.w,fund:true,ann:an,r10:+r10.toFixed(2),vol:an?+an.sd.toFixed(2):tpl.vol,vol1y:tpl.vol1y}}
 function buildPlan(pk,b=basis){
-  const key=pk+b+RF;if(planCache[key])return planCache[key];
+  const key=pk+b+RF+planCore;if(planCache[key])return planCache[key];
   const P=PROFILES[pk],all=UNIV.filter(e=>!e.x).map(e=>etfInfo(e,b));
   const inBand=all.filter(x=>x.band===pk),eligible=inBand.filter(x=>x.ok).sort((x,y)=>rankE(y)-rankE(x));
   const picked=[],grps=new Set();let lev=0;
@@ -782,7 +813,9 @@ function buildPlan(pk,b=basis){
     let obj=pk==='cons'?st.g-3*Math.max(0,st.sig-7):st.sharpe; // conservative: highest return with volatility ≤ 7 %
     if(st.g<P.lo&&!filled.length)obj-=10;
     if(!best||obj>best.obj)best={w,obj}}
-  const items=picked.map((x,i)=>({...x,w:Math.round(best.w[i]*1000)/1000,filled:filled.includes(x.e.t)})).sort((x,y)=>y.w-x.w);
+  let items=picked.map((x,i)=>({...x,w:Math.round(best.w[i]*1000)/1000,filled:filled.includes(x.e.t)})).sort((x,y)=>y.w-x.w);
+  if(planCore==='fund'){const cf=coreFundE(pk);if(cf){const cw=CORE_W[pk];let rest=items.filter(x=>!(x.e.grp===(pk==='cons'?'bond':'core')&&!x.e.lev));const sm=rest.reduce((a,x)=>a+x.w,0)||1;
+    rest=rest.map(x=>({...x,w:Math.round(x.w/sm*(1-cw)*1000)/1000}));items=[{...etfInfo(cf,b),w:cw,core:true},...rest]}}
   const st=stats(items,b),other=stats(items,b==='hist'?'prosp':'hist');
   const res={pk,items,st,other,filled,eligible,inBand,all,reached:!filled.length&&st.g>=P.lo-.05&&st.g<P.hi+.05,
     stocks:stockPicks(pk,b)};
@@ -1527,7 +1560,7 @@ const BAND_LBL={cons:'Conservador',mod:'Moderado',ag:'Agresivo',alpha:'Alpha'};
 const bandChip=(b,dim)=>b?`<span class="pill" style="color:${PROFILES[b].color};${dim?'opacity:.55':''}">${BAND_LBL[b]}</span>`:'<span class="pill sim">—</span>';
 const perTag=p=>p&&p!=='10a'?`<span style="color:var(--warn)" title="Historial corto: ${PER_LBL[p]}">ᵃ</span>`:'';
 const basisName=()=>basis==='hist'?'histórica':'prospectiva';
-const itemColor=(x,i,items)=>{const c=NODES[x.e.node].color;const k=items.slice(0,i).filter(y=>y.e.node===x.e.node).length;return k?alpha(c,.55):c};
+const itemColor=(x,i,items)=>{if(x.e.fund)return KIND_C.f;const c=NODES[x.e.node].color;const k=items.slice(0,i).filter(y=>y.e.node===x.e.node).length;return k?alpha(c,.55):c};
 function statusOf(x,plan){if(plan.items.some(y=>y.e.t===x.e.t))return'buy';if(x.band===plan.pk)return x.ok?'alt':'out';return'other'}
 function vCell(v,why){const m={buy:['En el plan','s-done'],alt:['Alternativa','s-run'],out:['Descartado','s-err'],other:['Otro perfil','sim']}[v];return `<span class="pill ${m[1]}" ${why?`title="${esc(why)}"`:''}>${m[0]}</span>`}
 
@@ -1622,12 +1655,14 @@ function renderMyPlan(o){
   const inp=$('#monthly');if(inp&&document.activeElement!==inp)inp.value=monthly;
   if(planView==='stk'){renderStockPlanView(el);return}
   const s=o.st,P=PROFILES[profile],col=o.items.map((x,i,a)=>itemColor(x,i,a)),gLo=Math.min(s.g,o.other.g),gHi=Math.max(s.g,o.other.g);
-  el.innerHTML=planHero(P,s.g,gLo,gHi,s.sig,s.dd,s.bt?s.bt.worstY:null)+
+  el.innerHTML=`<div class="core-seg"><span>Base del plan</span><div class="seg"><button data-core="fund" aria-pressed="${planCore==='fund'}">Fondo indexado</button><button data-core="etf" aria-pressed="${planCore==='etf'}">Solo ETFs</button></div></div>`+planHero(P,s.g,gLo,gHi,s.sig,s.dd,s.bt?s.bt.worstY:null)+
     `<div class="mp-alloc" role="img" aria-label="Reparto del dinero">${o.items.map((x,i)=>`<i style="width:${(x.w*100).toFixed(1)}%;background:${col[i]}"></i>`).join('')}</div>
-    <div class="pl-list">${o.items.map((x,i)=>planRow('e',x.e.t,x.e.node,x.e.u?x.e.u.t:x.e.t,THEME[x.e.t]||GRP_LBL[x.e.grp]||x.e.n,x.filled?'banda inferior':'',x.w,col[i])).join('')}</div>
+    <div class="pl-list">${o.items.map((x,i)=>planRow(x.e.fund?'f':'e',x.e.t,x.e.node,x.e.u?x.e.u.t:x.e.t,x.core?'Núcleo · fondo indexado (traspasable)':THEME[x.e.t]||GRP_LBL[x.e.grp]||x.e.n,x.core?x.e.iss:x.filled?'banda inferior':'',x.w,col[i])).join('')}</div>
     ${o.filled.length?`<p class="pl-warn">Con tu perfil no hay suficientes ETFs comprables: ${o.filled.join(', ')} ${o.filled.length>1?'vienen':'viene'} de un perfil más prudente.</p>`:''}
     ${planBars(s.bt,P.color)}${planProj(gLo,gHi)}
-    <p class="mp-note">Estimaciones, no garantías. Toca un ETF para ver su ficha completa.</p>`;
+    ${planCore==='fund'?`<p class="mp-note">El núcleo es un fondo indexado porque en España puedes cambiarlo de fondo sin pagar impuestos (traspaso). Los ETFs de alrededor apuestan por temas concretos. El fondo calcula en euros y los ETFs con su histórico en dólares: la estimación es orientativa.</p>`:''}
+    <p class="mp-note">Estimaciones, no garantías. Toca cualquiera para ver su ficha completa.</p>`;
+  el.querySelectorAll('[data-core]').forEach(b=>b.addEventListener('click',()=>{planCore=b.dataset.core;try{localStorage.setItem('atlas_core',planCore)}catch(_){}_enrK='';refreshAll()}));
   bindPlanRows(el);
 }
 
@@ -1767,7 +1802,7 @@ function openDetail(kind,t,node){litNode=node;const d=$('#detail');let html='';i
      <p class="mp-note">Rentabilidad y volatilidad: PortfoliosLab, 29 sep.–2 oct. 2026. No es asesoramiento financiero.</p></div>`;
     d.innerHTML=`<div class="dbox">${html}</div>`;d.hidden=false;loadNews(`${e.u?e.u.n:e.n} ETF`,$('#dNews'))}
   {const db=d.querySelector('.dbody'),o=kind==='f'?FUNDS.find(x=>x.t===t):kind==='s'?((STOCKS[node]||[]).find(x=>x.t===t)||Object.values(STOCKS).flat().find(x=>x.t===t)):UNIV.find(x=>x.t===t);
-   if(db&&o){db.insertAdjacentHTML('afterbegin','<div class="dsec lv" id="dLive"></div>'+tvBlock(kind,o));const tvd=db.querySelector('details.tv');if(tvd)tvd.addEventListener('toggle',()=>{if(tvd.open)tvMount(tvd)});loadLive($('#dLive'),kind,o,KIND_C[kind]||'#9ff8ff')}}
+   if(db&&o){db.insertAdjacentHTML('afterbegin','<div class="dsec lv" id="dLive"></div>'+tvBlock(kind,o));const tvd=db.querySelector('details.tv');if(tvd)tvd.addEventListener('toggle',()=>{if(tvd.open)tvMount(tvd)});loadLive($('#dLive'),kind,o,KIND_C[kind]||'#9ff8ff');const lv=$('#dLive');if(lv)lv.after(pfAddForm(kind,t))}}
   d.querySelector('[data-close]').addEventListener('click',closeDetail);d.scrollTop=0;
 }
 $('#detail').addEventListener('click',e=>{if(e.target.id==='detail')closeDetail()});
@@ -1828,7 +1863,7 @@ function mapEntities(){ // entidades que cumplen el filtro actual
   if(!filterActive())return[];const ents=searchEntities(),words=norm(sq.q).split(/\s+/).filter(Boolean);
   const ofType=x=>sq.type==='all'||x.k===({etf:'e',stk:'s',fnd:'f'}[sq.type]);
   let r=entEnrich(ents.filter(x=>ofType(x)&&(sq.sec==='all'||x.sec===sq.sec)&&words.every(w=>x.txt.includes(w))));
-  if(sq.fit)r=r.filter(x=>x.fit||x.inPlan);return r}
+  if(sq.fit)r=r.filter(x=>x.fit||x.inPlan);if(sq.mine){const m=new Set(PF.map(p=>p.k+p.t));r=r.filter(x=>m.has(x.k+x.t))}return r}
 function mapGeoJSON(list){const fs=[];list.forEach(x=>{const g=entGeo(x);if(!g)return;const c=geoCached(g[4]);const lat=c?c[0]:g[0],lon=c?c[1]:g[1];
   fs.push({type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{k:x.k,t:x.t,tk:String(x.tk),name:x.name,node:x.node,c:KIND_C[x.k],gk:g[4],fit:x.fit||x.inPlan?1:0}})});
   return{type:'FeatureCollection',features:fs}}
@@ -2012,15 +2047,16 @@ function updateMap(first){if(!mapReady)return;const list=mapEntities(),gj=mapGeo
   if(!on)closePlace()}
 function renderMapBar(nPts,nEnt){const b=$('#mapBar');if(!b)return;const chip=(g,v,l,on)=>`<button class="mb-chip${on?' on':''}" data-g="${g}" data-v="${v}">${l}</button>`,a=filterActive();
   b.innerHTML=`<div class="mb-top"><button class="mb-search" data-g="open">⌕ <span>${sq.q?esc(sq.q):'Buscar empresa, ETF o fondo'}</span></button><button class="mb-ico" data-g="set" aria-label="Ajustes">⚙</button></div>
-   <div class="mb-row">${chip('type','etf','ETFs',a&&sq.type==='etf')}${chip('type','fnd','Fondos',a&&sq.type==='fnd')}${chip('type','stk','Acciones',a&&sq.type==='stk')}${chip('type','all','Todo',a&&sq.type==='all')}${chip('fit','1','✓ Para mí',a&&sq.fit)}${chip('sec','pick',sq.sec!=='all'&&a?`${SEC_ICON[sq.sec]||''} ${esc(sq.sec)} ▾`:'Sector ▾',a&&sq.sec!=='all')}</div>
+   <div class="mb-row">${chip('type','etf','ETFs',a&&sq.type==='etf')}${chip('type','fnd','Fondos',a&&sq.type==='fnd')}${chip('type','stk','Acciones',a&&sq.type==='stk')}${chip('type','all','Todo',a&&sq.type==='all')}${PF.length?chip('mine','1','★ Mi cartera',a&&sq.mine):''}${chip('fit','1','✓ Para mí',a&&sq.fit)}${chip('sec','pick',sq.sec!=='all'&&a?`${SEC_ICON[sq.sec]||''} ${esc(sq.sec)} ▾`:'Sector ▾',a&&sq.sec!=='all')}</div>
    ${a?`<div class="mb-leg"><span><i class="lg e"></i>ETF</span><span><i class="lg f"></i>Fondo</span><span><i class="lg s"></i>Acción</span></div>`:''}${a?`<div class="mb-res"><span><b>${nEnt}</b> resultado${nEnt===1?'':'s'} encendido${nEnt===1?'':'s'}</span><button data-g="list">Ver lista</button><button data-g="clear" aria-label="Quitar filtros">✕</button></div>`:`<div class="mb-hint">Elige qué quieres ver y se encenderán en el mapa</div>`}`}
 function mapBarClick(e){const b=e.target.closest('button[data-g]');if(!b)return;const g=b.dataset.g,v=b.dataset.v;
   if(g==='open'||g==='list'){openSearch();return}
   if(g==='set'){$('#settings').hidden=false;return}
-  if(g==='clear'){sq.active=false;sq.q='';sq.type='all';sq.sec='all';sq.fit=false;closePlace();updateMap();if(map)map.flyTo({center:[-25,32],zoom:mobile()?0.9:1.7,pitch:0,bearing:0,duration:1400});return}
+  if(g==='clear'){sq.active=false;sq.mine=false;sq.q='';sq.type='all';sq.sec='all';sq.fit=false;closePlace();updateMap();if(map)map.flyTo({center:[-25,32],zoom:mobile()?0.9:1.7,pitch:0,bearing:0,duration:1400});return}
   if(g==='sec'){sq.open=true;openSearch();return}
   if(g==='type'){if(sq.active&&sq.type===v&&v!=='all'){sq.type='all'}else{sq.type=v}sq.active=true}
   if(g==='fit'){sq.fit=!sq.fit;sq.active=true}
+  if(g==='mine'){sq.mine=!sq.mine;sq.active=true}
   closePlace();updateMap()}
 function showPlace(coord,items,exact){const p=$('#mcard');if(!items.length)return;const first=items[0];
   const ent=searchEntities().find(x=>x.k===first.k&&x.t===first.t);const g=ent&&entGeo(ent);const ck=g&&geoCached(g[4]);
@@ -2132,10 +2168,68 @@ function tvMount(det){const box=det.querySelector('.tvbox');if(!box||box.dataset
     backgroundColor:'rgba(16,14,34,1)',gridColor:'rgba(255,255,255,0.05)',hide_side_toolbar:true,hide_volume:false,allow_symbol_change:false,save_image:false,calendar:false,support_host:'https://www.tradingview.com'});
   box.firstChild.appendChild(sc)}
 
+/* ================= MI CARTERA (posiciones reales, valoradas en euros) ================= */
+let PF=(()=>{try{return JSON.parse(localStorage.getItem('atlas_pf')||'[]')}catch(_){return[]}})();
+const pfSave=()=>{try{localStorage.setItem('atlas_pf',JSON.stringify(PF))}catch(_){}};
+const ymNow=()=>new Date().toISOString().slice(0,7);
+const CCY_FIX={GBp:['GBP',100],ZAc:['ZAR',100],ILA:['ILS',100]};
+function seriesOf(p){const out=[];const add=s=>{if(!s)return;const d0=new Date(s.d0+'T00:00:00Z').getTime();s.o.forEach((o,i)=>out.push([new Date(d0+o*864e5).toISOString().slice(0,10),s.c[i]]))};
+  add(p.w);const lastW=out.length?out[out.length-1][0]:'';const dl=[];const d0=new Date(p.d0+'T00:00:00Z').getTime();p.o.forEach((o,i)=>dl.push([new Date(d0+o*864e5).toISOString().slice(0,10),p.c[i]]));
+  const firstD=dl.length?dl[0][0]:'9999';return out.filter(r=>r[0]<firstD).concat(dl)}
+function priceAt(ser,date){if(!ser.length)return null;let lo=0,hi=ser.length-1;if(date<ser[0][0])return{v:ser[0][1],early:true};
+  while(lo<hi){const m=(lo+hi+1)>>1;if(ser[m][0]<=date)lo=m;else hi=m-1}return{v:ser[lo][1],early:false}}
+async function fxSeries(cur){if(!cur||cur==='EUR')return null;const fx=await loadPrice('x:EUR'+cur);return fx?seriesOf(fx):undefined}
+function pfDates(pos){if(pos.mode==='u')return[pos.date];const out=[];let [y,m]=pos.from.split('-').map(Number);const [ny,nm]=ymNow().split('-').map(Number);
+  while(y<ny||(y===ny&&m<=nm)){out.push(`${y}-${String(m).padStart(2,'0')}-01`);m++;if(m>12){m=1;y++}}return out}
+async function pfValue(pos){const ent=searchEntities().find(x=>x.k===pos.k&&x.t===pos.t);if(!ent)return{pos,err:'Ya no está en la base de datos'};
+  const p=await loadPrice(priceKey(ent.k,ent.obj));if(!p)return{pos,ent,err:'Sin precios todavía'};
+  let cur=p.cur||'EUR',div=1;if(CCY_FIX[cur]){[cur,div]=CCY_FIX[cur]}
+  const ser=seriesOf(p),fx=await fxSeries(cur);if(fx===undefined)return{pos,ent,err:'Falta el tipo de cambio '+cur};
+  let units=0,inv=0,early=false;for(const d of pfDates(pos)){const pr=priceAt(ser,d);if(!pr)continue;early=early||pr.early;const r=fx?priceAt(fx,d).v:1;units+=pos.amt*r/(pr.v/div);inv+=pos.amt}
+  const last=ser[ser.length-1],rNow=fx?fx[fx.length-1][1]:1,val=units*(last[1]/div)/rNow;
+  return{pos,ent,inv,val,gain:val-inv,pct:inv?(val/inv-1)*100:0,early,asOf:last[0]}}
+const eur=v=>v.toLocaleString('es-ES',{maximumFractionDigits:0})+' €';
+async function renderPf(){const el=$('#myPf');if(!el)return;
+  if(!PF.length){el.innerHTML=`<div class="pf-empty"><h3>Mi cartera</h3><p>Apunta lo que ya tienes y verás cuánto vale hoy, cuánto has ganado y si vas según el plan.</p>
+    <div class="pf-quick"><span>¿Empiezo con tus aportaciones?</span><b>Fidelity MSCI World · 260 €/mes</b><b>TSMC · 40 €/mes</b>
+    <label>Desde <input type="month" id="pfFrom" value="${ymNow()}" max="${ymNow()}"></label><button class="btn" id="pfQuick">Añadir las dos</button></div>
+    <p class="mp-note">También puedes añadir cualquier acción, ETF o fondo desde su ficha con «＋ Añadir a mi cartera».</p></div>`;
+    $('#pfQuick').addEventListener('click',()=>{const f=$('#pfFrom').value||ymNow();PF.push({id:Date.now(),k:'f',t:'F_FIDW',mode:'m',amt:260,from:f},{id:Date.now()+1,k:'s',t:'TSM',mode:'m',amt:40,from:f});pfSave();renderPf();updateMapSoon()});return}
+  el.innerHTML=`<div class="pf-head"><h3>Mi cartera</h3><span class="mp-note">calculando…</span></div>`;
+  const rs=await Promise.all(PF.map(pfValue)),ok=rs.filter(r=>!r.err),inv=ok.reduce((a,r)=>a+r.inv,0),val=ok.reduce((a,r)=>a+r.val,0),g=val-inv,gp=inv?(val/inv-1)*100:0;
+  const o=buildPlan(profile),pw={};o.items.forEach(x=>pw[(x.e.fund?'f':'e')+x.e.t]=x.w);
+  const rows=rs.map(r=>{const e=r.ent,c=e?KIND_C[e.k]:'#888',w=val&&!r.err?r.val/val:0,plan=e?pw[e.k+e.t]:null;
+    const sub=r.pos.mode==='m'?`${r.pos.amt} €/mes desde ${r.pos.from.split('-').reverse().join('/')}`:`${r.pos.amt} € el ${r.pos.date.split('-').reverse().join('/')}`;
+    return `<div class="pf-row" style="--c:${c}"><button class="pf-main" data-k="${r.pos.k}" data-t="${esc(r.pos.t)}" data-n="${e?e.node:''}"><i></i><span class="pf-nm"><b>${esc(e?e.name:r.pos.t)}</b><small>${esc(sub)}${plan!=null?` · plan ${Math.round(plan*100)} %, tienes ${Math.round(w*100)} %`:''}</small></span>
+      <span class="pf-v">${r.err?`<small>${esc(r.err)}</small>`:`<b>${eur(r.val)}</b><small style="color:${r.gain<0?'var(--bad)':'var(--good)'}">${r.gain>=0?'+':''}${eur(r.gain)} · ${r.pct>=0?'+':''}${p1(r.pct,1)}</small>`}</span></button>
+      <button class="pf-x" data-id="${r.pos.id}" aria-label="Quitar">✕</button></div>`}).join('');
+  const early=ok.some(r=>r.early),asOf=ok.map(r=>r.asOf).sort().pop();
+  el.innerHTML=`<div class="pf-head"><h3>Mi cartera</h3><button class="pf-map" id="pfMap">★ Ver en el mapa</button></div>
+    <div class="pf-hero"><div><span>Vale hoy</span><b>${eur(val)}</b></div><div><span>Has aportado</span><b>${eur(inv)}</b></div><div><span>Ganancia</span><b style="color:${g<0?'var(--bad)':'var(--good)'}">${g>=0?'+':''}${eur(g)}</b><small style="color:${g<0?'var(--bad)':'var(--good)'}">${gp>=0?'+':''}${p1(gp,1)}</small></div></div>
+    <div class="mp-alloc">${ok.map(r=>`<i style="width:${(r.val/val*100).toFixed(1)}%;background:${KIND_C[r.ent.k]}"></i>`).join('')}</div>
+    <div class="pf-list">${rows}</div>
+    <p class="mp-note">Valorado en euros con los cierres diarios${asOf?` (último: ${asOf.split('-').reverse().join('/')})`:''} y el tipo de cambio de cada fecha. Las aportaciones mensuales se cuentan el día 1.${early?' Alguna fecha es anterior al histórico disponible (5 años): se usa el primer precio conocido.':''} Sin comisiones ni impuestos.</p>`;
+  el.querySelectorAll('.pf-main').forEach(b=>b.addEventListener('click',()=>openDetail(b.dataset.k,b.dataset.t,b.dataset.n)));
+  el.querySelectorAll('.pf-x').forEach(b=>b.addEventListener('click',()=>{PF=PF.filter(p=>String(p.id)!==b.dataset.id);pfSave();renderPf();updateMapSoon()}));
+  $('#pfMap').addEventListener('click',()=>{sq.active=true;sq.mine=true;sq.type='all';sq.sec='all';sq.fit=false;sq.q='';closePlace();updateMap();const st=$('#stage');if(st&&mobile())st.scrollIntoView({behavior:'smooth'})})}
+function pfAddForm(k,t){const sec=document.createElement('div');sec.className='dsec pf-add';
+  sec.innerHTML=`<button class="btn" data-pfopen>＋ Añadir a mi cartera</button><div class="pf-form" hidden>
+    <div class="seg pf-mode"><button data-m="m" aria-pressed="true">Cada mes</button><button data-m="u" aria-pressed="false">Compra única</button></div>
+    <label>Importe <input type="number" min="1" step="10" value="100" inputmode="decimal" data-amt> €</label>
+    <label data-fm>Desde <input type="month" value="${ymNow()}" max="${ymNow()}" data-from></label>
+    <label data-fu hidden>Fecha <input type="date" value="${new Date().toISOString().slice(0,10)}" max="${new Date().toISOString().slice(0,10)}" data-date></label>
+    <button class="btn" data-pfsave>Guardar</button></div>`;
+  let mode='m';sec.querySelector('[data-pfopen]').addEventListener('click',e=>{e.target.hidden=true;sec.querySelector('.pf-form').hidden=false});
+  sec.querySelectorAll('.pf-mode button').forEach(b=>b.addEventListener('click',()=>{mode=b.dataset.m;sec.querySelectorAll('.pf-mode button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));sec.querySelector('[data-fm]').hidden=mode!=='m';sec.querySelector('[data-fu]').hidden=mode!=='u'}));
+  sec.querySelector('[data-pfsave]').addEventListener('click',()=>{const amt=+sec.querySelector('[data-amt]').value;if(!(amt>0))return;
+    const pos={id:Date.now(),k,t,mode,amt};if(mode==='m')pos.from=sec.querySelector('[data-from]').value||ymNow();else pos.date=sec.querySelector('[data-date]').value;
+    PF.push(pos);pfSave();renderPf();updateMapSoon();sec.innerHTML='<p class="pf-ok">✓ Añadido a tu cartera</p>'});
+  return sec}
+
 const SEC_ICON={'Gestión activa':'🎯','Tecnología':'💻','Salud':'🧬','Energía':'⚡','Finanzas':'🏦','Consumo':'🛒','Defensa y espacio':'🚀','Infraestructuras':'🏗️','Mercado amplio':'🌍','Regiones y países':'🗺️','Bonos y oro':'🪙','Automoción':'🚗','Industria':'🏭','Lujo':'💎','Materias primas':'⛏️','Telecomunicaciones':'📡','Inmobiliario':'🏢','Otros':'◆'};
 let _enrK='',_enrC=new Map(),_enrPW={};
 function entEnrich(list){const key=[profile,basis,RF,UNIX_N.s,UNIX_N.e,UNIX_N.f].join('|');
-  if(key!==_enrK){_enrK=key;_enrC=new Map();_enrPW={};const o=buildPlan(profile),sp=buildStockPlan(profile);o.items.forEach(x=>_enrPW['e'+x.e.t]=x.w);sp.items.forEach(x=>_enrPW['s'+x.s.t]=x.w)}
+  if(key!==_enrK){_enrK=key;_enrC=new Map();_enrPW={};const o=buildPlan(profile),sp=buildStockPlan(profile);o.items.forEach(x=>_enrPW[(x.e.fund?'f':'e')+x.e.t]=x.w);sp.items.forEach(x=>_enrPW['s'+x.s.t]=x.w)}
   return list.map(x=>{const ck=x.k+x.t;let r=_enrC.get(ck);if(!r){const info=x.k==='s'?stockInfo(x.obj):x.k==='f'?fundInfo(x.obj):etfInfo(x.obj),an=annStats(x.t);r={info,an,fit:info.band===profile&&info.ok,inPlan:_enrPW[x.k+x.t]||0};_enrC.set(ck,r)}return{...x,...r}})}
 function entRow(x,showCity=true){const c=KIND_C[x.k],m=x.an?x.an.mean:null;
   const nm=x.k==='s'?x.name:x.name,sub=x.k==='e'?`ETF · ${x.obj.iss||x.sec}`:x.k==='f'?`${x.obj.kind==='act'?'Fondo activo':'Fondo indexado'} · ${x.obj.iss}`:x.sec;
@@ -2394,7 +2488,7 @@ function renderCard(){
   const id=cardOpen;if(!id)return;if($('#app').classList.contains('simple')&&id!=='cao')cardTab='sum';const n=NODES[id],c=$('#card');const o=buildPlan(profile);
   if(id==='cao'){if(cardTab==='sum')cardTab=planView==='stk'?'sp':'etf';const nStk=(STOCKS.cao||[]).length,nS=(STOCKS.cao||[]).filter(s=>{const q=stockInfo(s);return q.band===profile&&q.ok}).length;
     const head=`<div class="ch"><div><h3 style="color:${n.color}">Polo Norte · Base de datos</h3><div class="co">${n.coord} · PLAN ${PROFILES[profile].label.toUpperCase()}</div></div><button class="x-close" aria-label="Cerrar">✕</button></div>
-    <div class="ctabs" role="tablist"><button role="tab" data-ct="etf" aria-selected="${cardTab==='etf'}">Plan de ETFs</button><button role="tab" data-ct="sp" aria-selected="${cardTab==='sp'}">Plan de acciones</button></div>`;
+    <div class="ctabs" role="tablist"><button role="tab" data-ct="etf" aria-selected="${cardTab==='etf'}">Fondos y ETFs</button><button role="tab" data-ct="sp" aria-selected="${cardTab==='sp'}">Plan de acciones</button></div>`;
     if(cardTab==='sp'){const sp=buildStockPlan(profile);c.innerHTML=head+`<div class="cb"><div class="now">› Las mejores acciones de todas las ciudades para tu perfil</div>${sp.items.length?`<div class="mini"><div><span class="lbl">Rentab.</span><b style="color:${PROFILES[profile].color}">${p1(sp.st.g)}</b></div><div><span class="lbl">Peor año</span><b style="color:var(--bad)">${p1(sp.st.dd,0)}</b></div><div><span class="lbl">Empresas</span><b>${sp.items.length}</b></div><div><span class="lbl">Ciudades</span><b>${new Set(sp.items.map(x=>x.node)).size}</b></div></div>
       ${sp.items.map(x=>`<div class="spk" style="grid-template-columns:58px 1fr 44px"><span style="color:${NODES[x.node].color}">${esc(dispT(x.s))}</span><div style="height:6px;border-radius:3px;background:#1a2634;overflow:hidden"><i style="display:block;height:100%;width:${(x.w*100).toFixed(1)}%;background:${NODES[x.node].color}"></i></div><span class="num">${Math.round(x.w*100)}%</span></div>`).join('')}
       <p style="margin:0;font-size:11.5px;color:var(--dim)">Detalle completo en el panel derecho → «Plan de acciones».</p>`:'<p class="mp-note">Ninguna acción encaja con este perfil.</p>'}</div>`}
@@ -2420,7 +2514,7 @@ function renderCard(){
 }
 function refreshNode(id){renderNodes();updateLabelText();if(cardOpen===id)renderCard()}
 const EXPERT=()=>!$('#app').classList.contains('simple');
-function refreshAll(){if(!$('#search').hidden)renderSearch();if(EXPERT()){renderStocksTable();renderNodes();renderMatrix();renderModel();renderSources()}renderStrategy();updateLabelText();applyProfileVisuals();if(cardOpen)renderCard()}
+function refreshAll(){if(!$('#search').hidden)renderSearch();renderPf();if(EXPERT()){renderStocksTable();renderNodes();renderMatrix();renderModel();renderSources()}renderStrategy();updateLabelText();applyProfileVisuals();if(cardOpen)renderCard()}
 function setProfile(pk){profile=pk;renderProfileSeg();refreshAll();stream('cao',`Perfil → ${PROFILES[pk].label} (${PROFILES[pk].range}) · ${buildPlan(pk).items.length} ETFs · ${p1(buildPlan(pk).st.g)} esperado`,'ok');robotSay('cao',`Rebalanceando a ${PROFILES[pk].short}…`)}
 function setBasis(b){basis=b;document.querySelectorAll('#basisSeg button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.b===b)));refreshAll();stream('cao',`Base de rentabilidades → ${b==='hist'?'histórica 10 años':'prospectiva'}`,'lv')}
 function tickClocks(){const f=tz=>new Intl.DateTimeFormat('es-ES',{timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date());

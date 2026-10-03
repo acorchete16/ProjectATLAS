@@ -2,7 +2,7 @@
 // - index.html y archivos propios: red primero (si hay conexión, siempre la versión nueva), caché como respaldo.
 // - Librerías externas (Three.js, Chart.js, fuentes): caché primero para que cargue rápido y funcione sin red.
 // Para forzar que todos los usuarios limpien la caché antigua, sube el número de VERSION.
-const VERSION = 'atlas-v21';
+const VERSION = 'atlas-v22';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', 'icons/favicon-64.png'];
 
 self.addEventListener('install', e => {
