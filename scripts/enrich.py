@@ -131,6 +131,8 @@ def stock(sym, old):
     pts, cur = monthly(sym); yrs, r10, vol, tag = ann_stats(pts)
     name = pr.get('shortName') or pr.get('longName') or sym
     name = re.sub(r'\s+(Inc\.?|Corporation|Corp\.?|plc|PLC|S\.A\.|SA|AG|SE|N\.V\.|NV|Ltd\.?|Limited|Co\.,? Ltd\.?|Holdings?)$', '', name.strip(), flags=re.I).strip(' ,')
+    name = re.sub(r'\s+Incorporated$', '', name, flags=re.I)
+    for _ in range(2): name = re.sub(r'\s+([A-Z]|SE|SA|AG|NV|Inc\.?|Corp\.?|plc|Ltd\.?|Co\.?|Group)$', '', name.strip(), flags=re.I).strip(' ,')
     country = ap.get('country') or ''
     sec = IND.get(ap.get('industry')) or SEC.get(ap.get('sector')) or 'Otros'
     inc = (r.get('incomeStatementHistory') or {}).get('incomeStatementHistory') or []
@@ -177,13 +179,30 @@ def fund_like(sym, kind, isin, hint, managers, old):
     return {'t': sym, 'tk': tk, 'n': (hint or name), 'full': name, 'isin': isin, 'iss': iss, 'mgr': mk, 'fam': fam, 'cat': cat, 'ter': ter, 'cur': cur, 'sec': sec,
             'kind': 'act' if act else 'idx', 'yrs': yrs, 'r10': r10, 'vol': vol, 'tag': tag, 'geo': geo}
 
+GENERIC = set('fund fondo fi fil index indexado indice stock equity equities class acc dis eur usd p a c d e i m r t ae plc sicav ucits ie lc the de del of and growth'.split())
+MGRS = set('fidelity vanguard amundi ishares blackrock azvalor cobas bestinver magallanes horos renta metavalor santalucia valentum dws carmignac comgest robeco pictet polar capital nordea jpmorgan morgan stanley flossbach von storch'.split())
+def _norm(x):
+    import unicodedata
+    x = unicodedata.normalize('NFD', x.lower()); x = ''.join(c for c in x if unicodedata.category(c) != 'Mn')
+    return re.findall(r'[a-z0-9]+', x)
+def name_ok(hint, yname):
+    """El nombre que devuelve Yahoo tiene que contener las palabras distintivas del fondo buscado."""
+    if not hint: return True
+    key = [w for w in _norm(hint) if w not in GENERIC and w not in MGRS and len(w) > 1]
+    yn = _norm(yname or '')
+    if not key: return True
+    hits = sum(1 for w in key if any(t.startswith(w[:4]) or w.startswith(t[:4]) for t in yn if len(t) >= 2))
+    mg = [w for w in _norm(hint) if w in MGRS]
+    return hits == len(key) and (not mg or any(m in yn for m in mg))
+
 def search_isin(isin, hint):
     for q in (isin, hint):
         if not q: continue
         try:
             j = get('https://query2.finance.yahoo.com/v1/finance/search?q=' + urllib.parse.quote(q) + '&quotesCount=6&newsCount=0')
-            qs = [x for x in j.get('quotes', []) if x.get('symbol') and x.get('quoteType') in ('MUTUALFUND', 'ETF', 'EQUITY', None)]
-            if qs: return qs[0]['symbol']
+            qs = [x for x in j.get('quotes', []) if x.get('symbol') and x.get('quoteType') in ('MUTUALFUND', 'ETF', None)]
+            for x in qs:
+                if q == isin or name_ok(hint, x.get('longname') or x.get('shortname')): return x['symbol']
         except Exception as e: L('search', q, e)
     return None
 
@@ -202,11 +221,19 @@ def main():
         try: out['e'].append(fund_like(e['t'], 'e', e.get('isin'), None, u['managers'], oldmap.get(e['t'], {})))
         except Exception as ex: fails.append(f"e {e['t']}: {str(ex)[:80]}"); (oldmap.get(e['t']) and out['e'].append(oldmap[e['t']]))
         time.sleep(0.3)
-    sym_cache = {x.get('isin'): x['t'] for x in old.get('f', [])}
+    sym_cache = {x.get('isin'): x['t'] for x in old.get('f', []) if name_ok(next((f['n'] for f in u['funds'] if f['isin'] == x.get('isin')), ''), x.get('full'))}
     for f in u['funds']:
         sym = sym_cache.get(f['isin']) or search_isin(f['isin'], f['n'])
         if not sym: fails.append(f"f {f['isin']}: no encontrado en Yahoo"); continue
-        try: out['f'].append(fund_like(sym, 'f', f['isin'], f['n'], u['managers'], oldmap.get(sym, {})))
+        try:
+            fx = fund_like(sym, 'f', f['isin'], f['n'], u['managers'], oldmap.get(sym, {}))
+            if not name_ok(f['n'], fx['full']):
+                sym2 = search_isin(None, f['n'])
+                fx = fund_like(sym2, 'f', f['isin'], f['n'], u['managers'], {}) if sym2 and sym2 != sym else None
+            if fx and not name_ok(f['n'], fx['full']): fx = None
+            if fx and sum(1 for v in fx['yrs'][:10] if v is not None) < 2: fails.append(f"f {f['isin']} {sym}: menos de 2 años de historia"); fx = None
+            if fx: out['f'].append(fx)
+            elif not any(x.startswith(f"f {f['isin']}") for x in fails): fails.append(f"f {f['isin']} ({f['n']}): Yahoo no lo identifica con seguridad")
         except Exception as ex: fails.append(f"f {f['isin']} {sym}: {str(ex)[:80]}"); (oldmap.get(sym) and out['f'].append(oldmap[sym]))
         time.sleep(0.3)
     out['updated'] = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%MZ')
