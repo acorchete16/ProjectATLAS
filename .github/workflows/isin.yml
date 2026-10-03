@@ -40,7 +40,11 @@ jobs:
       - name: Añadir al universo
         env:
           ISINS: ${{ steps.q.outputs.isins }}
-        run: python scripts/add_isin.py
+        run: |
+          echo "ISINS=[$ISINS]"
+          python scripts/add_isin.py
+          echo "::notice title=ISIN::$(tr '\n' ' ' < data/isin_log.txt)"
+          ls -la data/isin_map.json data/isin_log.txt
       - name: Ficha y precios
         run: |
           python scripts/enrich.py || true
@@ -49,8 +53,12 @@ jobs:
         run: |
           git config user.name "atlas-bot"
           git config user.email "atlas-bot@users.noreply.github.com"
-          git add data/
-          if ! git diff --cached --quiet; then git commit -m "Nueva inversión por ISIN: ${{ steps.q.outputs.isins }}"; for i in 1 2 3; do git pull --rebase origin main && git push && break; sleep 5; done; fi
+          git add -A data/
+          git status --short | head -20
+          if git diff --cached --quiet; then echo "::warning::Sin cambios que guardar"; exit 0; fi
+          git commit -m "Nueva inversión por ISIN: ${{ steps.q.outputs.isins }}"
+          for i in 1 2 3 4; do if git pull --rebase -X theirs origin main && git push; then echo "::notice::Guardado"; exit 0; fi; git rebase --abort 2>/dev/null; sleep 8; done
+          echo "::error::No se pudo guardar"; exit 1
       - name: Responder
         if: github.event_name == 'issues'
         env:
