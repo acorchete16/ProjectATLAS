@@ -529,6 +529,13 @@ body.av-open{overflow:hidden}
 .set-adv summary{cursor:pointer;color:var(--mid);font-size:13px;padding:8px 0}.set-advb{display:flex;flex-direction:column;gap:12px;padding-top:8px}
 .dsheet{background:rgba(5,4,14,.9)}@media (max-width:700px){.dsheet{background:#07061a;backdrop-filter:none;-webkit-backdrop-filter:none}}
 body.dt-open{overflow:hidden}
+.buy-card{margin:10px 0;padding:14px;border-radius:16px;border:1px solid rgba(255,179,90,.4);background:linear-gradient(135deg,rgba(255,179,90,.1),rgba(255,93,143,.05))}
+.buy-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px}.buy-h b{font-size:15px}.buy-h span{font-size:11.5px;color:var(--mid)}
+.buy-r{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:7px 0;border-top:1px solid rgba(255,255,255,.05)}.buy-n{min-width:0;display:flex;flex-direction:column}.buy-n b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.buy-n small{font-size:10.5px;color:var(--dim)}
+.buy-a{font-size:17px;color:#ffe2b0;font-family:var(--mono)}.buy-a.z{color:var(--dim);font-size:13px}.buy-note{font-size:11.5px;color:var(--mid);margin:8px 0 10px}.buy-card .btn{width:100%}
+.pf-vs{font-size:13px;margin:-2px 0 10px;color:var(--mid)}.pf-vs b{font-family:var(--mono)}
+.bt-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px}.bt-c{padding:8px;border-radius:11px;border:1px solid var(--edge);border-top:3px solid var(--c);display:flex;flex-direction:column;gap:2px}.bt-c.on{background:rgba(255,255,255,.05)}
+.bt-c span{font-size:11px;color:var(--mid)}.bt-c b{font-size:15px}.bt-c small{font-size:10px;color:var(--dim)}.bt-ch{height:190px}
 </style>
 </head>
 <body>
@@ -1720,7 +1727,9 @@ function renderMyPlan(o){
     <div class="pl-list">${o.items.map((x,i)=>planRow(x.e.fund?'f':'e',x.e.t,x.e.node,x.e.u?x.e.u.t:(x.e.tk||x.e.t),x.core?(x.e.n||'Fondo indexado'):THEME[x.e.t]||GRP_LBL[x.e.grp]||x.e.n,x.core?'la base de tu plan':x.filled?'más prudente':'',x.w,col[i],x.core?'🏛️':(SEC_ICON[x.e.sec||SEC_OF_GRP[x.e.grp]]||'◆'))).join('')}</div>
     ${o.filled.length?`<p class="pl-warn">Con tu perfil no hay suficientes ETFs comprables: ${o.filled.join(', ')} ${o.filled.length>1?'vienen':'viene'} de un perfil más prudente.</p>`:''}
     ${planBars(s.bt,P.color)}${planProj(gLo,gHi)}
+    <div class="pl-card"><h4>Si hubieras empezado hace 5 años</h4><div id="btBox"></div></div>
     <details class="mp-why"><summary>ℹ️ Cómo se calcula</summary>${planCore==='fund'?`<p>La base es un fondo indexado porque en España puedes cambiar de fondo sin pagar impuestos (traspaso). Los ETFs de alrededor apuestan por temas concretos. El fondo calcula en euros y los ETFs con su histórico en dólares: la estimación es orientativa.</p>`:''}<p>Son estimaciones con datos pasados, no garantías.</p></details>`;
+  _btKey='';setTimeout(backtestOpts,30);
   el.querySelectorAll('[data-pv]').forEach(b=>b.addEventListener('click',()=>{planVar=b.dataset.pv;try{localStorage.setItem('atlas_var',planVar)}catch(_){}_enrK='';refreshAll()}));
   el.querySelectorAll('[data-core]').forEach(b=>b.addEventListener('click',()=>{planCore=b.dataset.core;try{localStorage.setItem('atlas_core',planCore)}catch(_){}_enrK='';refreshAll()}));
   bindPlanRows(el);
@@ -1730,6 +1739,52 @@ function renderMyPlan(o){
 /* donut de reparto (CSS conic-gradient) */
 function ringChart(parts,center){let a=0;const stops=parts.map(p=>{const s=a;a+=p.w*100;return `${p.c} ${s.toFixed(2)}% ${(a-.4).toFixed(2)}%,transparent ${(a-.4).toFixed(2)}% ${a.toFixed(2)}%`}).join(',');
   return `<div class="donut" role="img" aria-label="Reparto"><div class="donut-r" style="background:conic-gradient(${stops})"></div><div class="donut-c">${center||''}</div></div>`}
+
+/* ---- precio en euros de cualquier valor (para comparar y simular) ---- */
+const _eurSer={};
+function eurSeries(k,obj){const pk=priceKey(k,obj);if(_eurSer[pk])return _eurSer[pk];
+  return _eurSer[pk]=(async()=>{const p=await loadPrice(pk);if(!p)return null;let cur=p.cur||'EUR',div=1;if(CCY_FIX[cur])[cur,div]=CCY_FIX[cur];
+    const ser=seriesOf(p),fx=await fxSeries(cur);if(fx===undefined)return null;return ser.map(([d,v])=>[d,(v/div)/(fx?priceAt(fx,d).v:1)])})()}
+const BENCH={k:'f',t:'F_FIDW',name:'MSCI World'};
+/* ---- qué compro este mes: reparte la aportación hacia los pesos del plan ---- */
+function buyPlan(o,rs,budget){const cur={};let tot=0;rs.forEach(r=>{if(r.err||r.pending||!r.ent)return;const key=r.ent.k+r.ent.t;cur[key]=(cur[key]||0)+r.val});
+  const items=o.items.map(x=>({x,key:(x.e.fund?'f':'e')+x.e.t,w:x.w}));items.forEach(it=>{it.have=cur[it.key]||0;tot+=it.have});
+  const T=tot+budget;items.forEach(it=>it.def=Math.max(0,it.w*T-it.have));const ds=items.reduce((a,it)=>a+it.def,0);
+  items.forEach(it=>it.buy=ds>0?budget*it.def/ds:budget*it.w);
+  // redondeo a euros enteros sin perder el total
+  let left=Math.round(budget);items.forEach(it=>{it.buy=Math.floor(it.buy);left-=it.buy});items.slice().sort((a,b)=>b.def-a.def).forEach(it=>{if(left>0){it.buy++;left--}});
+  const outside=Object.entries(cur).filter(([k])=>!items.some(it=>it.key===k)).reduce((a,[,v])=>a+v,0);
+  return{items:items.filter(it=>it.buy>0||it.have>0).sort((a,b)=>b.buy-a.buy),tot,outside}}
+function buyCard(o,rs){if(!(monthly>0))return '';const bp=buyPlan(o,rs,monthly),autoM=PF.filter(p=>p.mode==='m'&&!p.to).reduce((a,p)=>a+p.amt,0);
+  const nm=x=>x.e.u?x.e.u.t:(x.e.tk||x.e.t),full=x=>x.core?(x.e.n||'Fondo indexado'):THEME[x.e.t]||x.e.n,isin=x=>x.e.isin||(x.e.u&&x.e.u.isin)||'';
+  return `<div class="buy-card"><div class="buy-h"><b>🛒 Este mes compra</b><span>${fmtN(monthly)} € · plan ${PVAR[planVar][1]}</span></div>
+    ${bp.items.map(it=>`<div class="buy-r"><i class="pl-ico" style="--c:${KIND_C[it.x.e.fund?'f':'e']}">${it.x.core?'🏛️':(SEC_ICON[it.x.e.sec||SEC_OF_GRP[it.x.e.grp]]||'◆')}</i>
+      <span class="buy-n"><b>${esc(full(it.x))}</b><small>${esc(nm(it.x))}${isin(it.x)?' · '+esc(isin(it.x)):''} · tienes ${eur(it.have)} (${bp.tot?Math.round(it.have/bp.tot*100):0} %, objetivo ${Math.round(it.w*100)} %)</small></span>
+      <b class="buy-a${it.buy?'':' z'}">${it.buy?fmtN(it.buy)+' €':'—'}</b></div>`).join('')}
+    <p class="buy-note">Va primero a lo que te falta para llegar al reparto del plan, sin vender nada.${bp.outside>0?` Lo que tienes fuera del plan (${eur(bp.outside)}) cuenta para el total pero no recibe más.`:''}${autoM?` Ojo: tus aportaciones mensuales automáticas (${fmtN(autoM)} €/mes) ya se apuntan solas; usa esto para decidir cómo repartirlas o para dinero extra.`:''}</p>
+    <button class="btn" data-buydone>✓ Hecho, apúntalo en mi cartera</button></div>`}
+/* ---- simulación: cómo habría ido cada opción del plan ---- */
+let _btCh=null,_btKey='';
+async function backtestOpts(){const box=$('#btBox');if(!box||!window.Chart)return;const m=monthly>0?monthly:150,key=profile+planCore+m+(RANK_U||'')+basis;if(key===_btKey&&_btCh)return;_btKey=key;
+  box.innerHTML='<p class="mp-note">Simulando…</p>';
+  const today=new Date().toISOString().slice(0,10),start=new Date();start.setFullYear(start.getFullYear()-5);
+  const months=[];{let y=start.getFullYear(),mo=start.getMonth()+1;while(true){const d=`${y}-${String(mo).padStart(2,'0')}-01`;if(d>today)break;months.push(d);mo++;if(mo>12){mo=1;y++}}}
+  const res={};for(const v of Object.keys(PVAR)){const o=buildPlan(profile,basis,v),sers=await Promise.all(o.items.map(x=>eurSeries(x.e.fund?'f':'e',x.e)));
+    if(sers.some(z=>!z||!z.length)){res[v]=null;continue}
+    const units=o.items.map(()=>0),val=[],inv=[];let put=0,peak=0,dd=0;
+    months.forEach(d=>{o.items.forEach((x,i)=>{units[i]+=m*x.w/priceAt(sers[i],d).v});put+=m;const v2=o.items.reduce((a,x,i)=>a+units[i]*priceAt(sers[i],d).v,0);val.push(v2);inv.push(put)});
+    const fin=o.items.reduce((a,x,i)=>a+units[i]*priceAt(sers[i],today).v,0);val.push(fin);inv.push(put);
+    // peor caída (sobre el valor de la cartera ya formada, sin contar aportaciones nuevas)
+    let idx=1;for(let k=1;k<val.length;k++){const r=(val[k]-(inv[k]-inv[k-1]))/val[k-1];idx*=r;peak=Math.max(peak,idx);dd=Math.min(dd,idx/peak-1)}
+    res[v]={val,inv,fin,put,dd:dd*100,early:sers.some(z=>z[0][0]>months[0])}}
+  const lbl=months.map(d=>d.slice(5,7)+'/'+d.slice(2,4)).concat(['hoy']),col={bal:'#ffb35a',mom:'#ff5d8f',def:'#4cd8a0'};
+  const ok=Object.entries(res).filter(([,r])=>r);if(!ok.length){box.innerHTML='<p class="mp-note">Faltan precios para simularlo.</p>';return}
+  box.innerHTML=`<div class="bt-cards">${ok.map(([v,r])=>`<div class="bt-c${v===planVar?' on':''}" style="--c:${col[v]}"><span>${PVAR[v][0]} ${PVAR[v][1]}</span><b>${eur(r.fin)}</b><small>${r.fin>=r.put?'+':''}${eur(r.fin-r.put)} · peor caída ${p1(r.dd,0)}</small></div>`).join('')}</div>
+    <div class="bt-ch"><canvas id="btCv"></canvas></div><p class="mp-note">Aportando ${fmtN(m)} €/mes desde ${months[0].split('-').reverse().join('/').slice(3)} (has puesto ${eur(ok[0][1].put)}), en euros, con los precios reales y el reparto de hoy de cada opción. ⚠️ Tendencia sale favorecida: elige lo que ya ha subido, y eso no se sabía hace 5 años.${ok.some(([,r])=>r.early)?' Algún ETF tiene menos de 5 años de precios: hasta entonces se usa su primer precio.':''}</p>`;
+  if(_btCh){_btCh.destroy();_btCh=null}
+  _btCh=new Chart($('#btCv'),{type:'line',data:{labels:lbl,datasets:ok.map(([v,r])=>({label:PVAR[v][1],data:r.val,borderColor:col[v],borderWidth:v===planVar?3:1.6,pointRadius:0,tension:.25,fill:false})).concat([{label:'Lo que pones',data:ok[0][1].inv,borderColor:'rgba(180,195,220,.6)',borderDash:[5,4],borderWidth:1.3,pointRadius:0,stepped:true}])},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#b9c6e8',boxWidth:10,font:{size:10.5}}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${eur(c.raw)}`}}},
+      scales:{x:{ticks:{color:'#7f8bab',maxTicksLimit:5,font:{size:10}},grid:{display:false}},y:{ticks:{color:'#7f8bab',font:{size:10},maxTicksLimit:4,callback:v=>fmtN(v)+' €'},grid:{color:'rgba(255,255,255,.05)'}}}}})}
 let planView='etf';
 function projBlock(gLo,gHi,color){if(!(monthly>0))return `<div class="mp-proj"><h4>Indica cuánto aportas al mes para ver la proyección.</h4></div>`;
   const hz=[10,20,30],hiMax=Math.max(...hz.map(y=>fvMonthly(monthly,gHi,y)));
@@ -2404,7 +2459,7 @@ function priceAt(ser,date){if(!ser.length)return null;let lo=0,hi=ser.length-1;i
   while(lo<hi){const m=(lo+hi+1)>>1;if(ser[m][0]<=date)lo=m;else hi=m-1}return{v:ser[lo][1],early:false}}
 async function fxSeries(cur){if(!cur||cur==='EUR')return null;const fx=await loadPrice('x:EUR'+cur);return fx?seriesOf(fx):undefined}
 function pfDates(pos){if(pos.mode==='u'||pos.mode==='v')return[pos.date];const out=[];let [y,m]=pos.from.split('-').map(Number);const [ny,nm]=ymNow().split('-').map(Number);
-  while(y<ny||(y===ny&&m<=nm)){out.push(`${y}-${String(m).padStart(2,'0')}-01`);m++;if(m>12){m=1;y++}}return out}
+  const [ty,tm]=(pos.to||'9999-12').split('-').map(Number);while((y<ny||(y===ny&&m<=nm))&&(y<ty||(y===ty&&m<=tm))){out.push(`${y}-${String(m).padStart(2,'0')}-01`);m++;if(m>12){m=1;y++}}return out}
 let _isinMap=null;async function isinMap(){if(_isinMap)return _isinMap;try{_isinMap=await (await fetch('data/isin_map.json?'+Date.now(),{cache:'no-store'})).json()}catch(_){_isinMap={}}return _isinMap}
 const isinOf=e=>((e.obj&&(e.obj.isin||(e.obj.u&&e.obj.u.isin)))||'').toUpperCase();
 async function findInvest(q){q=String(q||'').trim().toUpperCase().replace(/\s+/g,'');if(!q)return null;const ents=searchEntities();
@@ -2421,7 +2476,7 @@ async function pfValue(pos){if(pos.k==='x'){const e=await findInvest(pos.t);if(e
   let units=0,inv=0,early=false;const lots=[];for(const d of pfDates(pos)){const pr=priceAt(ser,d);if(!pr)continue;early=early||pr.early;const r=fx?priceAt(fx,d).v:1,u=pos.amt*r/(pr.v/div),iv=pos.mode==='v'?(pos.cost||pos.amt):pos.amt;units+=u;inv+=iv;lots.push([d,u,iv])}
   const last=ser[ser.length-1],rNow=fx?fx[fx.length-1][1]:1,val=units*(last[1]/div)/rNow;
   const valAt=t=>{let u=0;lots.forEach(l=>{if(l[0]<=t)u+=l[1]});if(!u)return 0;const pr=priceAt(ser,t),rr=fx?priceAt(fx,t).v:1;return u*(pr.v/div)/rr},invAt=t=>lots.reduce((a,l)=>a+(l[0]<=t?l[2]:0),0);
-  return{pos,ent,inv,val,gain:val-inv,pct:inv?(val/inv-1)*100:0,early,asOf:last[0],valAt,invAt,first:lots.length?lots[0][0]:null}}
+  return{pos,ent,inv,val,gain:val-inv,pct:inv?(val/inv-1)*100:0,early,asOf:last[0],valAt,invAt,lots,first:lots.length?lots[0][0]:null}}
 const eur=v=>(v<0?'−':'')+fmtN(Math.abs(v))+' €';
 async function renderPf(){const el=$('#myPf');if(!el)return;const _pfKeep=el.querySelector('.pf-old');
   if(!PF.length){el.innerHTML=`<div class="pf-empty"><h3>Mi cartera</h3><p>Apunta lo que ya tienes y verás cuánto vale hoy, cuánto has ganado y si vas según el plan.</p>
@@ -2445,33 +2500,40 @@ async function renderPf(){const el=$('#myPf');if(!el)return;const _pfKeep=el.que
   const early=ok.some(r=>r.early),asOf=ok.map(r=>r.asOf).filter(Boolean).sort().pop();
   el.innerHTML=`<div class="pf-head"><h3>Mi cartera</h3><button class="pf-map" id="pfMap">★ En el mapa</button></div>
     <div class="pf-big"><span>Vale hoy</span><b>${eur(val)}</b><div class="pf-sub">Has puesto <b>${eur(inv)}</b><span class="pf-chip big ${g<0?'dn':'up'}">${g<0?'▼':'▲'} ${eur(Math.abs(g))} · ${p1(Math.abs(gp),1)}</span></div></div>
+    <div id="pfBuy">${buyCard(o,rs)}</div>
     <div class="pf-viz">${ringChart(gl.map(x=>({w:x.val/val,c:x.c})),`<b>${gl.length}</b><span>${gl.length===1?'inversión':'inversiones'}</span>`)}
       <ul class="pf-leg">${gl.map(x=>`<li><i style="background:${x.c}"></i><span>${esc(x.name)}</span><b>${Math.round(x.val/val*100)} %</b></li>`).join('')}</ul></div>
-    <div class="pf-chart"><canvas id="pfChart" height="170"></canvas></div>
+    <div class="pf-chart"><canvas id="pfChart" height="170"></canvas></div><p class="pf-vs" id="pfVs"></p>
     <h4 class="pf-h4">Tus inversiones <small>toca una para editarla</small></h4>
     <div class="pf-list">${rows}</div><div id="pfOld"></div>
     <details class="mp-why"><summary>ℹ️ Cómo se calcula</summary><p>En euros, con los precios de cierre de cada día${asOf?` (último: ${fd(asOf)})`:''} y el cambio de divisa de cada fecha. Las aportaciones mensuales se cuentan el día 1. Sin comisiones ni impuestos.${early?' Alguna fecha es anterior a los 5 años de histórico: se usa el primer precio conocido.':''}</p></details>`;
   $('#pfOld').appendChild(_pfKeep&&!_pfKeep.querySelector('.pf-form').hidden?_pfKeep:pfOldForm());
   pfChart(ok);
+  {const bd=el.querySelector('[data-buydone]');if(bd)bd.addEventListener('click',()=>{const bp=buyPlan(o,rs,monthly),d=new Date().toISOString().slice(0,10);let n=0;
+    bp.items.forEach((it,i)=>{if(it.buy>0){PF.push({id:Date.now()+i,k:it.x.e.fund?'f':'e',t:it.x.e.t,mode:'u',amt:it.buy,date:d});n++}});pfSave();renderPf();updateMapSoon()})}
   el.querySelectorAll('[data-ed]').forEach(b=>b.addEventListener('click',e=>{if(e.target.closest('a'))return;const row=b.parentElement,ed=row.querySelector('.pf-ed');
     if(!ed.hidden){ed.hidden=true;row.classList.remove('open');return}el.querySelectorAll('.pf-ed').forEach(x=>{x.hidden=true;x.parentElement.classList.remove('open')});
     const r=rs.find(x=>String(x.pos.id)===b.dataset.ed);ed.innerHTML='';ed.appendChild(pfEditor(r));ed.hidden=false;row.classList.add('open')}));
   $('#pfMap').addEventListener('click',()=>{sq.active=true;sq.mine=true;sq.type='all';sq.sec='all';sq.fit=false;sq.q='';closePlace();updateMap();const st=$('#stage');if(st&&mobile())st.scrollIntoView({behavior:'smooth'})})}
 let _pfCh=null;
-function pfChart(ok){const cv=$('#pfChart');if(!cv||!window.Chart)return;const firsts=ok.map(r=>r.first).filter(Boolean).sort();
+async function pfChart(ok){const cv=$('#pfChart');if(!cv||!window.Chart)return;const firsts=ok.map(r=>r.first).filter(Boolean).sort();
   const box=cv.parentElement;if(!firsts.length){box.hidden=true;return}
   const today=new Date().toISOString().slice(0,10),pts=[];let [y,m]=firsts[0].slice(0,7).split('-').map(Number);
   while(true){const d=`${y}-${String(m).padStart(2,'0')}-01`;if(d>today)break;pts.push(d);m++;if(m>12){m=1;y++}}pts.push(today);
   if(pts.length<3){box.hidden=true;return}
   const V=pts.map(t=>ok.reduce((a,r)=>a+(r.valAt?r.valAt(t):0),0)),I=pts.map(t=>ok.reduce((a,r)=>a+(r.invAt?r.invAt(t):0),0));
+  let B=null;try{const bs=await eurSeries(BENCH.k,FUNDS.find(f=>f.t===BENCH.t)),lots=ok.flatMap(r=>r.lots||[]);if(bs&&lots.length){const bu=lots.map(l=>[l[0],l[2]/priceAt(bs,l[0]).v]);
+    B=pts.map(t=>bu.reduce((a,[d,u])=>a+(d<=t?u:0),0)*priceAt(bs,t).v)}}catch(_){}
+  if(!cv.isConnected)return;
   if(_pfCh){_pfCh.destroy();_pfCh=null}
   const ctx=cv.getContext('2d'),gr=ctx.createLinearGradient(0,0,0,170);gr.addColorStop(0,'rgba(192,132,252,.45)');gr.addColorStop(1,'rgba(192,132,252,0)');
   _pfCh=new Chart(cv,{type:'line',data:{labels:pts.map(d=>d.slice(5,7)+'/'+d.slice(2,4)),datasets:[
     {label:'Lo que vale',data:V,borderColor:'#c084fc',backgroundColor:gr,fill:true,tension:.3,pointRadius:0,borderWidth:2.5},
-    {label:'Lo que has puesto',data:I,borderColor:'rgba(180,195,220,.7)',borderDash:[5,4],fill:false,tension:0,pointRadius:0,borderWidth:1.5,stepped:true}]},
+    {label:'Lo que has puesto',data:I,borderColor:'rgba(180,195,220,.7)',borderDash:[5,4],fill:false,tension:0,pointRadius:0,borderWidth:1.5,stepped:true}].concat(B?[{label:'Todo en el MSCI World',data:B,borderColor:'#35e0ff',borderWidth:1.6,fill:false,tension:.3,pointRadius:0}]:[])},
     options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{labels:{color:'#b9c6e8',boxWidth:12,font:{size:11}}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${eur(c.raw)}`}}},
-      scales:{x:{ticks:{color:'#7f8bab',maxTicksLimit:5,font:{size:10}},grid:{display:false}},y:{ticks:{color:'#7f8bab',font:{size:10},callback:v=>fmtN(v)+' €',maxTicksLimit:4},grid:{color:'rgba(255,255,255,.05)'}}}}})}
+      scales:{x:{ticks:{color:'#7f8bab',maxTicksLimit:5,font:{size:10}},grid:{display:false}},y:{ticks:{color:'#7f8bab',font:{size:10},callback:v=>fmtN(v)+' €',maxTicksLimit:4},grid:{color:'rgba(255,255,255,.05)'}}}}});
+  const vs=$('#pfVs');if(vs&&B){const a=V[V.length-1],b=B[B.length-1],d=a-b;vs.innerHTML=Math.abs(d)<Math.max(20,b*.005)?'🤝 Vas igual que si lo hubieras metido todo en el MSCI World.':d>0?`🏆 Le ganas al MSCI World por <b style="color:var(--good)">${eur(d)}</b> con el mismo dinero y las mismas fechas.`:`📉 El MSCI World te gana por <b style="color:var(--bad)">${eur(-d)}</b>: con lo mismo metido solo ahí tendrías ${eur(b)}.`}}
 function pfEditor(r){const p=r.pos,box=document.createElement('div');box.className='pf-edit';
   const f=p.mode==='m'?`<label>Aportas <input type="number" min="1" step="any" inputmode="decimal" data-f="amt" value="${p.amt}"> € al mes</label><label>Desde <input type="month" data-f="from" value="${p.from}" max="${ymNow()}"></label>`:
     p.mode==='v'?`<label>Valía <input type="number" min="1" step="any" inputmode="decimal" data-f="amt" value="${p.amt}"> €</label><label>El día <input type="date" data-f="date" value="${p.date}" max="${new Date().toISOString().slice(0,10)}"></label><label>Has puesto <input type="number" min="0" step="any" inputmode="decimal" data-f="cost" value="${p.cost||''}" placeholder="opcional"> €</label>`:
