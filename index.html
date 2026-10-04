@@ -549,6 +549,10 @@ body.dt-open{overflow:hidden}
 .bt-rank{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}.bt-row{display:grid;grid-template-columns:26px minmax(0,1.1fr) 1fr auto;gap:8px;align-items:center;padding:8px 10px;border-radius:12px;border:1px solid var(--edge);background:rgba(255,255,255,.03);color:var(--fg);font:inherit;cursor:pointer;text-align:left}
 .bt-row.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 10%,transparent)}.bt-pos{font-size:16px;text-align:center;font-weight:700;color:var(--mid)}.bt-nm{font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bt-bar{height:8px;border-radius:4px;background:rgba(255,255,255,.06);overflow:hidden}.bt-bar i{display:block;height:100%;background:var(--c);border-radius:4px}.bt-row b{font-size:13px;font-family:var(--mono)}
 .bt-ch2{height:220px;margin:4px 0 8px}
+.pf-per{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:2px 0 8px}.pf-per::-webkit-scrollbar{display:none}.pf-per button{flex:none;padding:6px 10px;border-radius:999px;border:1px solid var(--edge);background:none;color:var(--mid);font:600 11.5px Inter,system-ui,sans-serif;cursor:pointer;white-space:nowrap}
+.pf-per button[aria-pressed=true]{background:rgba(192,132,252,.2);border-color:rgba(192,132,252,.6);color:#fff}.pf-per button:disabled{opacity:.35}.pf-chart{height:190px!important}
+.tg{margin:4px 0 12px;padding:8px;border-radius:14px;border:1px solid color-mix(in srgb,var(--c) 30%,transparent);background:color-mix(in srgb,var(--c) 5%,transparent);display:flex;flex-direction:column;gap:6px}
+.tg-h{display:flex;align-items:center;gap:7px;font-weight:700;font-size:12.5px;color:var(--c);text-transform:uppercase;letter-spacing:.06em;padding:2px 4px}.tg .sr{width:100%}
 </style>
 </head>
 <body>
@@ -1737,7 +1741,7 @@ function renderMyPlan(o){
     <p class="pv-why">${PVAR[planVar][2]}${planVar==='mom'&&RANK_U?` <span>↻ ${relWhen(RANK_U)}</span>`:''}</p>${chg?`<p class="pv-chg">${esc(chg)}</p>`:''}
     <div class="core-seg"><span>Base del plan</span><div class="seg"><button data-core="fund" aria-pressed="${planCore==='fund'}">Fondo indexado</button><button data-core="etf" aria-pressed="${planCore==='etf'}">Solo ETFs</button></div></div>`+planHero(P,s.g,gLo,gHi,s.sig,s.dd,s.bt?s.bt.worstY:null)+
     ringChart(o.items.map((x,i)=>({w:x.w,c:col[i]})),monthly>0?`<b>${fmtN(monthly)} €</b><span>al mes</span>`:'<b>Tu plan</b>')+`
-    <div class="pl-list">${o.items.map((x,i)=>planRow(x.e.fund?'f':'e',x.e.t,x.e.node,x.e.u?x.e.u.t:(x.e.tk||x.e.t),x.core?(x.e.n||'Fondo indexado'):THEME[x.e.t]||GRP_LBL[x.e.grp]||x.e.n,x.core?'la base de tu plan':x.filled?'más prudente':'',x.w,col[i],x.core?'🏛️':(SEC_ICON[x.e.sec||SEC_OF_GRP[x.e.grp]]||'◆'))).join('')}</div>
+    <div class="pl-list">${(()=>{const rows=o.items.map((x,i)=>({k:x.e.fund?'f':'e',h:planRow(x.e.fund?'f':'e',x.e.t,x.e.node,x.e.u?x.e.u.t:(x.e.tk||x.e.t),x.core?(x.e.n||'Fondo indexado'):THEME[x.e.t]||GRP_LBL[x.e.grp]||x.e.n,x.core?'la base de tu plan':x.filled?'más prudente':'',x.w,col[i],x.core?'🏛️':(SEC_ICON[x.e.sec||SEC_OF_GRP[x.e.grp]]||'◆'))}));const gs=[['f','Fondos','■'],['e','ETFs','⬢']].map(([k,l,ic])=>[k,l,ic,rows.filter(r=>r.k===k)]).filter(g=>g[3].length);return gs.map(([k,l,ic,rs])=>`<div class="tg" style="--c:${KIND_C[k]}"><div class="tg-h"><span>${ic}</span>${l}</div>${rs.map(r=>r.h).join('')}</div>`).join('')})()}</div>
     ${o.filled.length?`<p class="pl-warn">Con tu perfil no hay suficientes ETFs comprables: ${o.filled.join(', ')} ${o.filled.length>1?'vienen':'viene'} de un perfil más prudente.</p>`:''}
     ${planBars(s.bt,P.color)}${planProj(gLo,gHi)}
     <div class="pl-card"><h4>Si hubieras empezado hace 5 años</h4><div id="btBox"></div></div>
@@ -2521,7 +2525,7 @@ async function renderPf(){const el=$('#myPf');if(!el)return;const _pfKeep=el.que
       <h4 class="pf-h4">Tus inversiones <small>toca una para editarla</small></h4>
       <div class="pf-list">${rows}</div><div id="pfOld"></div>
       <details class="mp-why"><summary>ℹ️ Cómo se calcula</summary><p>En euros, con los precios de cierre de cada día${asOf?` (último: ${fd(asOf)})`:''} y el cambio de divisa de cada fecha. Las aportaciones mensuales se cuentan el día 1. Sin comisiones ni impuestos.${early?' Alguna fecha es anterior a los 5 años de histórico: se usa el primer precio conocido.':''}</p></details></div>
-    <div class="pf-pane" data-pane="evo"${pfTab==='evo'?'':' hidden'}><p class="pf-lead">Cómo ha crecido tu dinero desde tu primera aportación, frente a haberlo metido todo en el MSCI World.</p><div class="pf-chart"><canvas id="pfChart" height="170"></canvas></div><p class="pf-vs" id="pfVs"></p></div>
+    <div class="pf-pane" data-pane="evo"${pfTab==='evo'?'':' hidden'}><div class="pf-per" id="pfPer"></div><div class="pf-chart"><canvas id="pfChart" height="190"></canvas></div><p class="pf-vs" id="pfVs"></p></div>
     <div class="pf-pane" data-pane="opt"${pfTab==='opt'?'':' hidden'}><div id="pfOpt"><p class="mp-note">Calculando opciones…</p></div></div>
     <div class="pf-pane" data-pane="bt"${pfTab==='bt'?'':' hidden'}><div id="pfBt"><p class="mp-note">Simulando 5 años…</p></div></div>
     <div class="pf-pane" data-pane="buy"${pfTab==='buy'?'':' hidden'}><div id="pfBuy">${buyCard(o,rs)||'<p class="mp-note">Indica en el plan cuánto aportas al mes.</p>'}</div></div>`;
@@ -2584,24 +2588,44 @@ async function pfOptions(gl,val,tab){const autoM=PF.filter(p=>p.mode==='m'&&!p.t
     options:{responsive:true,maintainAspectRatio:false,animation:{duration:500},interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${eur(c.raw)}`}}},
       scales:{x:{ticks:{color:'#7f8bab',maxTicksLimit:5,font:{size:10}},grid:{display:false}},y:{ticks:{color:'#7f8bab',font:{size:10},maxTicksLimit:4,callback:v=>fmtN(v)+' €'},grid:{color:'rgba(255,255,255,.05)'}}}}})}
 let _pfCh=null;
-async function pfChart(ok){const cv=$('#pfChart');if(!cv||!window.Chart)return;const firsts=ok.map(r=>r.first).filter(Boolean).sort();
-  const box=cv.parentElement;if(!firsts.length){box.hidden=true;return}
-  const today=new Date().toISOString().slice(0,10),pts=[];let [y,m]=firsts[0].slice(0,7).split('-').map(Number);
-  while(true){const d=`${y}-${String(m).padStart(2,'0')}-01`;if(d>today)break;pts.push(d);m++;if(m>12){m=1;y++}}pts.push(today);
-  if(pts.length<3){box.hidden=true;return}
-  const V=pts.map(t=>ok.reduce((a,r)=>a+(r.valAt?r.valAt(t):0),0)),I=pts.map(t=>ok.reduce((a,r)=>a+(r.invAt?r.invAt(t):0),0));
-  let B=null;try{const bs=await eurSeries(BENCH.k,FUNDS.find(f=>f.t===BENCH.t)),lots=ok.flatMap(r=>r.lots||[]);if(bs&&lots.length){const bu=lots.map(l=>[l[0],l[2]/priceAt(bs,l[0]).v]);
-    B=pts.map(t=>bu.reduce((a,[d,u])=>a+(d<=t?u:0),0)*priceAt(bs,t).v)}}catch(_){}
-  if(!cv.isConnected)return;
-  if(_pfCh){_pfCh.destroy();_pfCh=null}
-  const ctx=cv.getContext('2d'),gr=ctx.createLinearGradient(0,0,0,170);gr.addColorStop(0,'rgba(192,132,252,.45)');gr.addColorStop(1,'rgba(192,132,252,0)');
-  _pfCh=new Chart(cv,{type:'line',data:{labels:pts.map(d=>d.slice(5,7)+'/'+d.slice(2,4)),datasets:[
-    {label:'Lo que vale',data:V,borderColor:'#c084fc',backgroundColor:gr,fill:true,tension:.3,pointRadius:0,borderWidth:2.5},
-    {label:'Lo que has puesto',data:I,borderColor:'rgba(180,195,220,.7)',borderDash:[5,4],fill:false,tension:0,pointRadius:0,borderWidth:1.5,stepped:true}].concat(B?[{label:'Todo en el MSCI World',data:B,borderColor:'#35e0ff',borderWidth:1.6,fill:false,tension:.3,pointRadius:0}]:[])},
-    options:{responsive:true,maintainAspectRatio:false,animation:false,interaction:{mode:'index',intersect:false},
+let pfPer=null;
+async function pfChart(ok){const cv=$('#pfChart');if(!cv||!window.Chart)return;const box=cv.parentElement;box.hidden=false;
+  const today=new Date().toISOString().slice(0,10),firsts=ok.map(r=>r.first).filter(Boolean).sort(),spanD=firsts.length?(Date.now()-new Date(firsts[0]).getTime())/864e5:0;
+  if(!pfPer)pfPer=spanD>=45?'start':'1y';
+  const segs=[['start','Desde que empezaste'],['1m','1 mes'],['6m','6 meses'],['1y','1 año'],['5y','5 años']];
+  const sg=$('#pfPer');if(sg){sg.innerHTML=segs.map(([k,l])=>`<button data-per="${k}" aria-pressed="${pfPer===k}"${k==='start'&&spanD<2?' disabled':''}>${l}</button>`).join('');
+    sg.querySelectorAll('[data-per]').forEach(b=>b.onclick=()=>{pfPer=b.dataset.per;pfChart(ok)})}
+  const bs=await eurSeries(BENCH.k,FUNDS.find(f=>f.t===BENCH.t));
+  let lbl=[],V=[],I=null,B=null,mode=pfPer;
+  if(mode==='start'){const pts=[];if(spanD<120){const d=new Date(firsts[0]);while(d.toISOString().slice(0,10)<=today){const k=d.toISOString().slice(0,10);if(d.getDay()%6)pts.push(k);d.setDate(d.getDate()+1)}if(pts[pts.length-1]!==today)pts.push(today)}
+    else{let [y,m]=firsts[0].slice(0,7).split('-').map(Number);while(true){const d=`${y}-${String(m).padStart(2,'0')}-01`;if(d>today)break;pts.push(d);m++;if(m>12){m=1;y++}}pts.push(today)}
+    V=pts.map(t=>ok.reduce((a,r)=>a+(r.valAt?r.valAt(t):0),0));I=pts.map(t=>ok.reduce((a,r)=>a+(r.invAt?r.invAt(t):0),0));
+    const lots=ok.flatMap(r=>r.lots||[]);if(bs&&lots.length){const bu=lots.map(l=>[l[0],l[2]/priceAt(bs,l[0]).v]);B=pts.map(t=>bu.reduce((a,[d,u])=>a+(d<=t?u:0),0)*priceAt(bs,t).v)}
+    lbl=pts.map(d=>spanD<120?d.slice(8,10)+'/'+d.slice(5,7):d.slice(5,7)+'/'+d.slice(2,4))}
+  else{ // lo que tienes hoy, movido con los precios del periodo
+    const days={'1m':31,'6m':183,'1y':366,'5y':1827}[mode],from=new Date(Date.now()-days*864e5).toISOString().slice(0,10);
+    const hold=[];for(const r of ok){if(!r.ent||!r.lots||!r.lots.length)continue;const u=r.lots.reduce((a,l)=>a+l[1],0);if(u>0)hold.push({ent:r.ent,u})}
+    const sers=await Promise.all(hold.map(h=>eurSeries(h.ent.k,h.ent.obj)));
+    // unidades en € de hoy -> escala: valor actual de cada posición / precio € de hoy
+    const scale=hold.map((h,i)=>{const r=ok.find(x=>x.ent===h.ent);return sers[i]?(ok.filter(x=>x.ent===h.ent).reduce((a,x)=>a+x.val,0))/priceAt(sers[i],today).v:0});
+    const base=sers.find(Boolean)||bs||[];let pts=base.map(p=>p[0]).filter(d=>d>=from);if(mode==='5y')pts=pts.filter((d,i)=>i%5===0||i===pts.length-1);if(!pts.length||pts[pts.length-1]!==today)pts.push(today);
+    V=pts.map(t=>hold.reduce((a,h,i)=>a+(sers[i]?scale[i]*priceAt(sers[i],t).v:0),0));
+    if(bs){const k=V[0]/priceAt(bs,pts[0]).v;B=pts.map(t=>k*priceAt(bs,t).v)}
+    lbl=pts.map(d=>mode==='1m'?d.slice(8,10)+'/'+d.slice(5,7):d.slice(5,7)+'/'+d.slice(2,4))}
+  if(!cv.isConnected)return;if(_pfCh){_pfCh.destroy();_pfCh=null}
+  if(V.length<2){box.hidden=true;$('#pfVs').innerHTML='Aún no hay suficiente historia: vuelve en unos días.';return}
+  const up=V[V.length-1]>=V[0]||mode==='start',col=mode==='start'||up?'#c084fc':'#ff5d8f';
+  const ctx=cv.getContext('2d'),gr=ctx.createLinearGradient(0,0,0,190);gr.addColorStop(0,alpha(col,.45));gr.addColorStop(1,alpha(col,0));
+  _pfCh=new Chart(cv,{type:'line',data:{labels:lbl,datasets:[{label:mode==='start'?'Lo que vale':'Tu cartera de hoy',data:V,borderColor:col,backgroundColor:gr,fill:true,tension:.3,pointRadius:0,borderWidth:2.5}]
+      .concat(I?[{label:'Lo que has puesto',data:I,borderColor:'rgba(180,195,220,.7)',borderDash:[5,4],fill:false,tension:0,pointRadius:0,borderWidth:1.5,stepped:true}]:[])
+      .concat(B?[{label:'MSCI World',data:B,borderColor:'#35e0ff',borderWidth:1.6,fill:false,tension:.3,pointRadius:0}]:[])},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:400},interaction:{mode:'index',intersect:false},
       plugins:{legend:{labels:{color:'#b9c6e8',boxWidth:12,font:{size:11}}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${eur(c.raw)}`}}},
       scales:{x:{ticks:{color:'#7f8bab',maxTicksLimit:5,font:{size:10}},grid:{display:false}},y:{ticks:{color:'#7f8bab',font:{size:10},callback:v=>fmtN(v)+' €',maxTicksLimit:4},grid:{color:'rgba(255,255,255,.05)'}}}}});
-  const vs=$('#pfVs');if(vs&&B){const a=V[V.length-1],b=B[B.length-1],d=a-b;vs.innerHTML=Math.abs(d)<Math.max(20,b*.005)?'🤝 Vas igual que si lo hubieras metido todo en el MSCI World.':d>0?`🏆 Le ganas al MSCI World por <b style="color:var(--good)">${eur(d)}</b> con el mismo dinero y las mismas fechas.`:`📉 El MSCI World te gana por <b style="color:var(--bad)">${eur(-d)}</b>: con lo mismo metido solo ahí tendrías ${eur(b)}.`}}
+  const vs=$('#pfVs');if(!vs)return;const a=V[V.length-1];
+  if(mode==='start'){if(!B){vs.innerHTML='';return}const b=B[B.length-1],d=a-b;vs.innerHTML=Math.abs(d)<Math.max(20,b*.005)?'🤝 Vas igual que si lo hubieras metido todo en el MSCI World.':d>0?`🏆 Le ganas al MSCI World por <b style="color:var(--good)">${eur(d)}</b> con el mismo dinero y las mismas fechas.`:`📉 El MSCI World te gana por <b style="color:var(--bad)">${eur(-d)}</b>: con lo mismo metido solo ahí tendrías ${eur(b)}.`;return}
+  const pc=(a/V[0]-1)*100,pb=B?(B[B.length-1]/B[0]-1)*100:null,per={'1m':'el último mes','6m':'los últimos 6 meses','1y':'el último año','5y':'los últimos 5 años'}[mode];
+  vs.innerHTML=`Con lo que tienes hoy, en ${per} habrías pasado de <b>${eur(V[0])}</b> a <b>${eur(a)}</b> <span class="pf-chip ${pc<0?'dn':'up'}">${pc<0?'▼':'▲'} ${p1(Math.abs(pc),1)}</span>${pb!=null?` · MSCI World <span class="pf-chip ${pb<0?'dn':'up'}">${pb<0?'▼':'▲'} ${p1(Math.abs(pb),1)}</span>`:''}`}
 function pfEditor(r){const p=r.pos,box=document.createElement('div');box.className='pf-edit';
   const f=p.mode==='m'?`<label>Aportas <input type="number" min="1" step="any" inputmode="decimal" data-f="amt" value="${p.amt}"> € al mes</label><label>Desde <input type="month" data-f="from" value="${p.from}" max="${ymNow()}"></label>`:
     p.mode==='v'?`<label>Valía <input type="number" min="1" step="any" inputmode="decimal" data-f="amt" value="${p.amt}"> €</label><label>El día <input type="date" data-f="date" value="${p.date}" max="${new Date().toISOString().slice(0,10)}"></label><label>Has puesto <input type="number" min="0" step="any" inputmode="decimal" data-f="cost" value="${p.cost||''}" placeholder="opcional"> €</label>`:
@@ -2706,19 +2730,23 @@ function renderSearch(){
     <div class="sgrp"><span class="slbl">Ordenar por</span><div class="srow2">${Object.entries(SORTS).map(([k,v])=>chip('sort',k,v[0],sq.sort===k)).join('')}</div></div>
     <div class="sgrp"><span class="slbl">Mostrar</span><div class="srow2">${[[0,'Todos'],[10,'🏆 Top 10'],[25,'Top 25'],[50,'Top 50']].map(([n,l])=>chip('top',String(n),l,sq.top===n)).join('')}</div></div>`;
   const L=$('#sList');
-  if(home){const best=entEnrich(ents.filter(ofType)).filter(x=>x.fit||x.inPlan).sort((a,b)=>(b.inPlan-a.inPlan)||((b.an?b.an.mean:-99)-(a.an?a.an.mean:-99))).slice(0,5);
+  if(home){const bestAll=entEnrich(ents.filter(ofType)).filter(x=>x.fit||x.inPlan).sort((a,b)=>(b.inPlan-a.inPlan)||((b.an?b.an.mean:-99)-(a.an?a.an.mean:-99)));
     $('#sCount').innerHTML='';updateMapSoon();sheetBtn();
     L.innerHTML=`<h5 class="shd">Explora por sector</h5><div class="stiles">${secs.map(x=>`<button class="sc-chip stile" data-g="sec" data-v="${esc(x)}"><span class="sti">${SEC_ICON[x]||'◆'}</span><b>${esc(x)}</b><small>${secCount[x]}</small></button>`).join('')}</div>
       ${rankBlock(ents.filter(ofType))}
-      ${best.length?`<h5 class="shd">Lo mejor para tu perfil ${esc(P.label)} <span>media anual</span></h5>${best.map(x=>entRow(x,true,0,'mean')).join('')}`:''}`;return}
+      ${bestAll.length?`<h5 class="shd">✓ Lo mejor para tu perfil ${esc(P.label)} <span>media anual</span></h5>${typeGroups(bestAll,sq.type==='all'?3:6,(x,i)=>entRow(x,true,0,'mean'))}`:''}`;return}
   $('#sCount').innerHTML=`<span>${sq.top?`🏆 Top ${res.length}`:`${res.length} resultado${res.length===1?'':'s'}`}${sq.sec!=='all'?` en ${esc(sq.sec)}`:''}${sq.sort!=='mean'&&sq.sort!=='az'?` · ${SORTS[sq.sort][0].replace(/^\S+ /,'')}`:''}</span><span>${(SORTS[sq.sort]||SORTS.mean)[2]||'media anual'}</span>`;
   updateMapSoon();sheetBtn();
   L.innerHTML=res.length?res.map((x,i)=>entRow(x,true,sq.top?i+1:0)).join(''):`<p class="sempty">Nada con esos filtros.<br>Prueba otra palabra o quita alguno.</p>`;
 }
-function rankBlock(list){const rk=sq.rk||'r1y',top=sortEnts(entEnrich(list.slice()),rk).filter(x=>(SORTS[rk][1])(x)!=null).slice(0,10);
+const KGRP=[['f','Fondos','■'],['e','ETFs','⬢'],['s','Acciones','●']];
+function typeGroups(list,n,row){const gs=KGRP.map(([k,l,ic])=>[k,l,ic,list.filter(x=>x.k===k).slice(0,n)]).filter(g=>g[3].length);
+  if(gs.length===1)return gs[0][3].map(row).join('');
+  return gs.map(([k,l,ic,xs])=>`<div class="tg" style="--c:${KIND_C[k]}"><div class="tg-h"><span>${ic}</span>${l}</div>${xs.map(row).join('')}</div>`).join('')}
+function rankBlock(list){const rk=sq.rk||'r1y',all=sortEnts(entEnrich(list.slice()),rk).filter(x=>(SORTS[rk][1])(x)!=null),top=all.slice(0,10);
   return `<h5 class="shd">🏆 Rankings en vivo <span>${RANK_U?'↻ '+relWhen(RANK_U):''}</span></h5>
     <div class="rk-tabs">${['r1y','r1m','ytd','r3y','risk','cheap'].map(k=>`<button class="sc-chip${rk===k?' on':''}" data-g="rk" data-v="${k}">${SORTS[k][0]}</button>`).join('')}</div>
-    <div class="rk-list">${top.map((x,i)=>entRow(x,true,i+1,rk)).join('')||'<p class="sempty">Cargando rankings…</p>'}</div>
+    <div class="rk-list">${(sq.type==='all'?typeGroups(all,5,(x,i)=>entRow(x,true,i+1,rk)):top.map((x,i)=>entRow(x,true,i+1,rk)).join(''))||'<p class="sempty">Cargando rankings…</p>'}</div>
     <button class="sc-chip rk-all" data-g="rkall" data-v="1">Ver el top 25 y encenderlo en el mapa →</button>`}
 let cardAll={};
 function cityBody(id){const info=nodeInfo(id),P=PROFILES[profile];
