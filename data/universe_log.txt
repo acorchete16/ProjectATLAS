@@ -1,5 +1,5 @@
 crumb ok
-OK acciones 173/174 · ETFs 42/43 · fondos 12/39 · sin sede 0 · 195 s
+OK acciones 173/174 · ETFs 42/43 · fondos 12/39 · sin sede 0 · 151 s
   - s ROG.SW: HTTP Error 404: Not Found
   - e ESPO.DE: HTTP Error 404: Not Found
   - f IE00BYX5M476 (Fidelity MSCI Emerging Markets Index P-ACC-EUR): Yahoo no lo identifica con seguridad
@@ -27,5 +27,5 @@ OK acciones 173/174 · ETFs 42/43 · fondos 12/39 · sin sede 0 · 195 s
   - f LU1279334210 LU1279334210.SG: menos de 2 años de historia
   - f LU0171310443: no encontrado en Yahoo
   - f LU0348926287: no encontrado en Yahoo
-  - f LU0210536198 (JPMorgan US Select Equity Plus A EUR): Yahoo no lo identifica con seguridad
+  - f LU0210536198: no encontrado en Yahoo
   - f LU0119620416: no encontrado en Yahoo
