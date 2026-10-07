@@ -44,6 +44,8 @@ Los ETFs de EE. UU. sin ficha en justETF usan, cuando existe, el ETF UCITS que r
 | Geografía | 100 − 2·(1er país − 60 pp) si >60 %; −15 si <5 países con >1 % |
 | Sectores | 100 − 2,5·(1er sector − 25 pp) si >25 % |
 | Correlación | (1 − correlación media ponderada) × 130 |
+| Solapamiento entre ETFs | 100 − 1,5 · solapamiento medio ponderado entre pares de ETFs |
+| Apuestas independientes | grupos de activos con correlación semanal ≥ 0,85; apuestas = 1/Σ(peso del grupo)²; score = 25 · apuestas (máx. 100) |
 | Volatilidad | 100 − 4·(vol. anual − 8) |
 | Caída máxima | 100 − 2,5·(|caída máx.| − 10) |
 | Coste | 100 − 50 · TER medio |
@@ -68,3 +70,14 @@ Pesos por defecto 20/20/10/15/20/15 (configurables). Confianza: Alta con 6 compo
 - País = país que publica justETF (domicilio de la empresa), no país de los ingresos.
 - Fondos de gestión activa (Cobas, Azvalor…) y ETFs USA sin equivalente UCITS: sin reparto por países (se aproxima con sus 10 mayores posiciones; el resto queda «sin desglose»).
 - No hay datos de beneficios ni de valoración histórica por ETF.
+
+## Radar · señales para investigar
+Comparaciones relativas con datos reales (rankings diarios de ATLAS + composición). Ninguna señal es una recomendación.
+- **Geografía**: ETFs con ≥ 80 % en un país (excepto EE. UU.): rentabilidad a 12 meses menos la del MSCI World (URTH). Se muestran los 2 mejores (≥ +5 pp) y el peor (≤ −10 pp).
+- **Sector**: ETFs con ≥ 60 % en un sector: rentabilidad a 6 meses menos la del MSCI World (≥ +4 pp), uno por sector.
+- **Valoración**: P/E de la cartera del ETF ≤ 0,8 × la mediana de los ETFs de su mismo sector o país (mínimo 3 comparables).
+- **Riesgo**: volatilidad de 1 año ≥ 1,6 × la mediana de los ETFs de acciones.
+- Se excluyen ETFs apalancados. Los cambios de composición quedan pendientes hasta tener historial de fotos.
+
+## Comparar · «¿cuál diversifica mejor mi cartera?»
+Se añade un 10 % de cada ETF a tu cartera (el resto se reduce en proporción) y se recalcula la salud. Gana el que más la mejora, penalizando 5 puntos por cada 1,0 de correlación con tu cartera actual. Sharpe = (rentabilidad anual histórica − tipo sin riesgo de Ajustes) / volatilidad.

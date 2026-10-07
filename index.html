@@ -2763,9 +2763,9 @@ function initHub(){if(!MAPMODE||$('#dock'))return;const R=$('.right');if(!R)retu
   ph.querySelector('.hub-x').addEventListener('click',()=>closeHub());ph.querySelector('.hub-ref').addEventListener('click',e=>refreshMarket(e.currentTarget));
   const bb=document.createElement('nav');bb.id='bbar';bb.setAttribute('aria-label','Menú');
   bb.innerHTML=`<button class="bb-menu" aria-label="Menú" aria-expanded="false"><i></i><i></i><i></i></button><button class="bb-search"><span>⌕</span><b id="bbarQ">Buscar empresa, ETF o fondo</b></button><button class="bb-ref" data-g="ref" aria-label="Actualizar mercado">↻</button>`;
-  const MENU=[['Tu cartera',[['ov','◎','Resumen','Qué pasa con tu cartera'],['pf','★','Mi cartera','Posiciones y rentabilidad'],['doc','🩺','Análisis','Salud, riesgos y solapamientos'],['xp','🌍','Explorar','Dónde está tu dinero'],['cmp','⚖️','Comparar','Tu cartera frente a alternativas']]],
-    ['Descubrir',[['radar','🎯','Opportunity Radar','Qué merece investigarse'],['plan','💡','Ideas de cartera','Carteras para tu perfil'],['watch','👀','Ones to watch','Noticias que pueden moverlas'],['rank','🏆','Rankings','Lo que más sube']]],
-    ['Herramientas',[['calc','🧮','Calculadora','¿Cuánto tendrías hoy?'],['db','🗄','Base de datos','La ciudad 3D'],['set','⚙','Ajustes','Modo experto y conexiones']]]];
+  const MENU=[['Tu cartera',[['ov','◎','Resumen','Cómo va tu cartera'],['pf','★','Mi cartera','Tus posiciones'],['doc','◐','Análisis','Salud, riesgos y solapamientos'],['xp','◍','Globo','Dónde está tu dinero'],['radar','◇','Radar','Qué merece investigarse'],['cmp','⇄','Comparar','Escenarios y ETFs lado a lado']]],
+    ['Explorar',[['srch','⌕','Buscar mercados','ETFs, fondos y acciones'],['rank','↑','Rankings','Lo que más sube'],['plan','◈','Ideas de cartera','Carteras modelo'],['watch','◉','Ones to watch','Noticias que pueden moverlas']]],
+    ['Herramientas',[['calc','∑','Calculadora','¿Cuánto tendrías hoy?'],['db','▦','Base de datos','La ciudad 3D'],['set','⚙','Ajustes','Modo experto y conexiones']]]];
   const mn=document.createElement('div');mn.id='menu';mn.hidden=true;
   mn.innerHTML=`<div class="mn-box"><div class="mn-h"><b>ATLAS</b><span>${new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})}</span></div>${MENU.map(([g,items],gi)=>`<div class="mn-sec">${g}</div><div class="${gi?'mn-list':'mn-grid mn-main'}">${items.map(([k,i,l,sub])=>`<button data-hub="${k}" style="--c:#7aa2ff"><span class="mn-i">${i}</span><b>${l}</b><small>${sub}</small></button>`).join('')}</div>`).join('')}</div>`;
   document.body.appendChild(mn);document.body.appendChild(bb);
@@ -3233,8 +3233,8 @@ stream('sys','ATLAS 3D en línea · globo WebGL · 5 skylines · modelo calibrad
 stream('sys',apiKey?'Uplink Gemini configurado: misión LIVE.':'Sin clave Gemini: misión en simulación. Configúrala en «Uplink Gemini».',apiKey?'lv':'wn');
 setTimeout(()=>{if(EXPERT())run()},3600);
 </script>
-<link rel="stylesheet" href="css/intel.css?v=6">
-<script src="js/intel.js?v=6"></script>
+<link rel="stylesheet" href="css/intel.css?v=10">
+<script src="js/intel.js?v=8"></script>
 <script>if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
 </body>
 </html>
