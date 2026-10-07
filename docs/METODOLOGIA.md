@@ -88,8 +88,22 @@ Comparaciones relativas con datos reales (rankings diarios de ATLAS + composici�
 ## Comparar · «¿cuál diversifica mejor mi cartera?»
 Se añade un 10 % de cada ETF a tu cartera (el resto se reduce en proporción) y se recalcula la salud. Gana el que más la mejora, penalizando 5 puntos por cada 1,0 de correlación con tu cartera actual. Sharpe = (rentabilidad anual histórica − tipo sin riesgo de Ajustes) / volatilidad.
 
-## «N productos → ≈ X apuestas reales»
-Grupos = activos unidos por correlación semanal ≥ 0,85 (5 años, en euros; enlace simple: basta con parecerse mucho a otro del grupo). Apuestas = 1 / Σ(peso de cada grupo)². La etiqueta de cada grupo sale de su propia exposición: país si uno supera el 50 % («Emergentes» si los emergentes suman ≥ 50 %, «Global» si no), y sector si uno supera el 30 %. Se muestra la correlación media y la mínima entre pares del grupo; un activo suelto muestra su correlación máxima con el resto. Activos sin 40 semanas de precios cuentan como grupo propio y se indica.
+## «N productos → ≈ X apuestas independientes» (estimación)
+**Qué es:** una estimación de cuántas apuestas *diferenciadas en riesgo* contiene la cartera, basada en cómo se han movido los productos. No es una clasificación económica: dos productos poco correlacionados no son por fuerza apuestas económicas independientes, y una correlación histórica alta puede no mantenerse (en crisis suele subir).
+
+**Cifra:** ratio de diversificación al cuadrado (Choueifaty): N = (Σ wᵢσᵢ)² / Σᵢⱼ wᵢwⱼσᵢσⱼρ⁺ᵢⱼ, con rentabilidades semanales en euros de 5 años y correlaciones negativas puestas a 0 (prudente). Todo se mueve igual → 1; nada se parece y mismo riesgo → nº de productos. Sin umbral elegido a mano.
+
+**Por qué no el umbral de correlación:** el método anterior (agrupar si ρ ≥ 0,85) salta de golpe. Con 0,80 / 0,85 / 0,90: Nasdaq + Semiconductores + NVIDIA daba 1,0 / 1,8 / 3,0 apuestas, y Mundo + Emergentes + Small caps + Bonos 2,3 / 2,3 / 3,6. Los grupos con 0,85 se siguen mostrando solo para explicar de dónde viene el parecido.
+
+**Estabilidad:** se recalcula con 3 años. Robusta si la diferencia es ≤ 0,25 (o ≤ 15 %); moderada ≤ 0,5 (o ≤ 30 %); sensible si no, y entonces se muestra un rango.
+
+**Confianza:** depende de los precios (la cifra no usa la composición). Alta: todos los productos con 5 años de precios comunes y resultado no sensible. Media: algún producto sin precios, < 200 semanas o resultado sensible. Baja: > 10 % del peso sin precios o < 2 años.
+
+**Exposición duplicada (p. ej. NVIDIA directa + dentro de QQQ y SMH):** no se cuenta dos veces como apuesta, porque los precios de esos ETFs ya la incluyen. La exposición económica consolidada se muestra aparte («≥ X % de tu cartera»).
+
+**Precisión mostrada:** un decimal por debajo de 3 (la variación medida entre periodos es de ~0,05–0,1) y entero por encima.
+
+**Perfiles de control (5 años, oct 2026):** 100 % S&P 500 → 1,0 · Mundo+S&P+Nasdaq → 1,05 · Mundo+S&P+Nasdaq+Semis → 1,1 · Nasdaq+Semis+NVIDIA → 1,1 · S&P+Emergentes → 1,3 · Mundo+Emergentes+Small caps+Bonos → 1,4 · Mundo+Emergentes+Bonos → 1,7 · Mundo+Emergentes+Bonos+Oro → 2,1.
 
 ## Comparar · estado inicial
 Sin A y B elegidos se proponen puntos de partida calculados con tu cartera (no son recomendaciones): tus dos fondos de más peso entre sí, tu cartera frente al MSCI World de referencia y tu cartera + 10 % del ETF amplio de ATLAS con menor correlación semanal con ella (se excluyen apalancados y temáticos).

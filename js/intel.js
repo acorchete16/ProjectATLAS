@@ -97,8 +97,8 @@ async function riskOf(P,years=5){const grid=weeklyGrid(years),R=await Promise.al
   let idx=1,pk=1,dd=0;const path=[1];pr.forEach(x=>{if(x!=null){idx*=1+x;pk=Math.max(pk,idx);dd=Math.min(dd,idx/pk-1)}path.push(idx)});
   const r12=[];for(let i=52;i<path.length;i++)r12.push(path[i]/path[i-52]-1);r12.sort((a,b)=>a-b);
   const yrs=v.length/52,cagr=Math.pow(idx,1/yrs)-1;
-  const M=ok.map(a=>ok.map(b=>a===b?1:corr(a.r.r,b.r.r)));const firstData=ok.map(x=>x.r.first).sort().pop();
-  return{vol:sd*Math.sqrt(52)*100,dd:dd*100,worst12:r12.length?r12[0]*100:null,p5:r12.length?r12[Math.floor(r12.length*.05)]*100:null,cagr:cagr*100,weeks:v.length,firstData,M,assets:ok.map(x=>x.e),pr,grid,coverage:tw}}
+  const M=ok.map(a=>ok.map(b=>a===b?1:corr(a.r.r,b.r.r)));const sig=ok.map(x=>{const v=x.r.r.filter(y=>y!=null);if(v.length<30)return null;const m=v.reduce((a,y)=>a+y,0)/v.length;return Math.sqrt(v.reduce((a,y)=>a+(y-m)**2,0)/(v.length-1)*52)});const firstData=ok.map(x=>x.r.first).sort().pop();
+  return{vol:sd*Math.sqrt(52)*100,dd:dd*100,worst12:r12.length?r12[0]*100:null,p5:r12.length?r12[Math.floor(r12.length*.05)]*100:null,cagr:cagr*100,weeks:v.length,firstData,M,sig,assets:ok.map(x=>x.e),pr,grid,coverage:tw}}
 
 /* ------------------------------ 3 · PORTFOLIO DOCTOR: puntuaciones ------------------------------ */
 let DOC=(()=>{try{return {tab:'doctor',...(JSON.parse(localStorage.getItem('atlas_doc')||'null')||{src:'pf',rows:[]})}}catch(_){return{src:'pf',rows:[],tab:'doctor'}}})();
@@ -121,11 +121,29 @@ const SCORE_DOC={
   bets:['Apuestas independientes','¿Cuántas apuestas distintas haces de verdad?','Se agrupan los activos cuya correlación semanal es ≥ 0,85 (se mueven como uno solo). Apuestas = 1 / Σ(peso de cada grupo)². 1 apuesta → 25; 2 → 50; 3 → 75; 4 o más → 100.','Precios'],
   cost:['Coste','¿Cuánto pagas en comisiones?','100 − 50 × gastos anuales medios ponderados (TER, %). 0,1 % → 95; 0,5 % → 75; 1,5 % → 25.','Costes']};
 /* Apuestas independientes: grupos de activos con correlación ≥ 0,85 (unión por enlace simple). Activos sin precios = grupo propio. */
-function betsOf(R,P){const parent=P.map((_,i)=>i),f=i=>parent[i]===i?i:(parent[i]=f(parent[i]));
-  if(R)R.assets.forEach((a,i)=>R.assets.forEach((b,j)=>{if(j<=i)return;const c=R.M[i][j];if(c!=null&&c>=.85){const ia=P.findIndex(x=>x.e===a),ib=P.findIndex(x=>x.e===b);parent[f(ia)]=f(ib)}}));
+function betsOf(R,P,th=.85){const parent=P.map((_,i)=>i),f=i=>parent[i]===i?i:(parent[i]=f(parent[i]));
+  if(R)R.assets.forEach((a,i)=>R.assets.forEach((b,j)=>{if(j<=i)return;const c=R.M[i][j];if(c!=null&&c>=th){const ia=P.findIndex(x=>x.e===a),ib=P.findIndex(x=>x.e===b);parent[f(ia)]=f(ib)}}));
   const g=new Map();P.forEach((x,i)=>{const r=f(i);const o=g.get(r)||{w:0,m:[]};o.w+=x.w;o.m.push(x.e);g.set(r,o)});const groups=[...g.values()].sort((a,b)=>b.w-a.w);
   return{nb:1/groups.reduce((a,x)=>a+x.w*x.w,0),groups}}
-function docScores(L,R,P){const S={},ev={};const known=L.comps.reduce((a,c)=>a+c.w*c.w,0)/1e4;
+/* Cifra estrella: apuestas independientes EFECTIVAS (estimación, no clasificación económica).
+   N = (Σ wᵢσᵢ)² / Σᵢⱼ wᵢwⱼσᵢσⱼρ⁺ᵢⱼ  — ratio de diversificación al cuadrado (Choueifaty): con pesos por riesgo, sin umbral.
+     · ρ⁺ = correlación semanal en euros con los negativos a 0 (prudente: una correlación negativa no cuenta como «más de una» apuesta).
+     · Todo se mueve igual → 1. Nada se parece y mismo riesgo → nº de productos.
+     · NVDA directa + NVDA dentro de QQQ/SMH: no se cuenta dos veces como apuesta, porque los precios de QQQ y SMH ya incluyen NVDA
+       (su correlación lo recoge). La exposición económica consolidada se muestra aparte.
+   Robustez: se recalcula con 3 años en vez de 5 (las correlaciones cambian con el tiempo). También se calculan los grupos con umbral
+   0,80 / 0,85 / 0,90 solo como referencia (modo experto): ese método salta de golpe y no se usa para la cifra. */
+function drSq(R,P){if(!R||!R.sig)return null;const ix=P.map(x=>R.assets.indexOf(x.e)),sg=R.sig.filter(v=>v!=null).sort((a,b)=>a-b),sMed=sg.length?sg[Math.floor(sg.length/2)]:.15;
+  const s=P.map((x,i)=>ix[i]>=0&&R.sig[ix[i]]!=null?R.sig[ix[i]]:sMed);let num=0,den=0;P.forEach((a,i)=>{num+=a.w*s[i];P.forEach((b,j)=>{let c;if(i===j)c=1;else if(ix[i]<0||ix[j]<0)c=0;else{const v=R.M[ix[i]][ix[j]];c=v==null?0:Math.max(0,v)}den+=a.w*b.w*s[i]*s[j]*c})});
+  return den>0?num*num/den:null}
+function betsRobust(R,P,R3){if(!R||!P.length)return null;const T=[.8,.85,.9].map(th=>({th,nb:betsOf(R,P,th).nb}));const d5=drSq(R,P),d3=R3?drSq(R3,P):null;if(d5==null)return null;
+  const lo=d3!=null?Math.min(d5,d3):d5,hi=d3!=null?Math.max(d5,d3):d5,sp=hi-lo,rel=sp/((lo+hi)/2);
+  const cls=d3==null?'na':(sp<=.25||rel<=.15)?'robust':(sp<=.5||rel<=.3)?'moderate':'sensitive';
+  const ix=P.map(x=>R.assets.indexOf(x.e)),noPx=P.filter((x,i)=>ix[i]<0).reduce((a,x)=>a+x.w,0),wk=R.weeks||0;
+  const conf=(noPx>.1||wk<104)?'low':(noPx>0||wk<200||cls==='sensitive')?'medium':'high';
+  const r5=v=>Math.max(1,Math.round(v*2)/2);const tl=T.map(t=>t.nb);
+  return{T,d5,d3,main:d5,lo,hi,cls,conf,weeks:wk,noPx,thLo:Math.min(...tl),thHi:Math.max(...tl),disp:{main:r5(d5),lo:r5(lo),hi:r5(hi)}}}
+function docScores(L,R,P,R3){const S={},ev={};const known=L.comps.reduce((a,c)=>a+c.w*c.w,0)/1e4;
   const neff=known?1/known:null;const top1=L.comps[0]?L.comps[0].w:0,top10=L.comps.slice(0,10).reduce((a,c)=>a+c.w,0);
   if(neff){S.div=clamp(100*Math.log(Math.max(1,neff))/Math.log(200));ev.div=[`Como mucho ≈ ${num(neff)} empresas equivalentes`,`Composición conocida: ${pct(L.cover,0)} de la cartera`,L.uniq.hi?`Empresas distintas: entre ${num(L.uniq.lo)} y ${num(L.uniq.hi)}`:`Empresas distintas: al menos ${num(L.uniq.lo)}`]}
   const narrow=P.filter(x=>isNarrow(x.e)).reduce((a,x)=>a+x.w*100,0);S.conc=clamp(100-1.5*Math.max(0,narrow-10));ev.conc=[`Acciones individuales y ETFs temáticos/sectoriales: ${pct(narrow,0)}`,`Mayor posición: ${P.slice().sort((a,b)=>b.w-a.w)[0].e.name} ${pct(P.slice().sort((a,b)=>b.w-a.w)[0].w*100,0)}`];
@@ -135,7 +153,7 @@ function docScores(L,R,P){const S={},ev={};const known=L.comps.reduce((a,c)=>a+c
   let ac=null;if(R){if(R.M.length>1){let s=0,ww=0;R.assets.forEach((a,i)=>R.assets.forEach((b,j)=>{if(j<=i)return;const c=R.M[i][j];if(c==null)return;const wi=P.find(x=>x.e===a).w*P.find(x=>x.e===b).w;s+=wi*c;ww+=wi}));if(ww){ac=s/ww;S.corr=clamp((1-ac)*130);ev.corr=[`Correlación media: ${ac.toFixed(2).replace('.',',')}`]}}
     S.vol=clamp(100-4*(R.vol-8));ev.vol=[`Volatilidad anual: ${pct(R.vol)}`];S.dd=clamp(100-2.5*(Math.abs(R.dd)-10));ev.dd=[`Caída máxima: ${pct(R.dd)}`,R.worst12!=null?`Peor año móvil: ${pct(R.worst12)}`:null].filter(Boolean)}
   const fu=P.filter(x=>x.e.k!=='s');let ovAvg=null;if(fu.length>1){let s2=0,w2=0;fu.forEach((a,i)=>fu.slice(i+1).forEach(b=>{const o=overlap(a.e,b.e);if(o==null)return;const ww=a.w*b.w;s2+=ww*o;w2+=ww}));if(w2){ovAvg=s2/w2;S.ovl=clamp(100-1.5*ovAvg);ev.ovl=[`Solapamiento medio entre tus ETFs: ≥ ${pct(ovAvg,0)}`]}}
-  const B=betsOf(R,P);if(R&&P.length){S.bets=clamp(25*B.nb);ev.bets=[`≈ ${num(B.nb,1)} apuestas independientes con ${P.length} producto${P.length>1?'s':''}`,...B.groups.filter(g=>g.m.length>1).slice(0,3).map(g=>`Se mueven juntos: ${g.m.map(e=>e.tk).join(' + ')} (${pct(g.w*100,0)})`)]}
+  const B=betsOf(R,P),RB=betsRobust(R,P,R3);if(RB){B.nb=RB.main;B.rob=RB}if(R&&P.length){S.bets=clamp(25*B.nb);ev.bets=[`≈ ${num(B.nb,1)} apuestas independientes con ${P.length} producto${P.length>1?'s':''}`,...B.groups.filter(g=>g.m.length>1).slice(0,3).map(g=>`Se mueven juntos: ${g.m.map(e=>e.tk).join(' + ')} (${pct(g.w*100,0)})`)]}
   if(L.ter!=null){S.cost=clamp(100-50*L.ter);ev.cost=[`TER medio ponderado: ${pct(L.ter,2)} al año`,L.terW<.99?`Sin dato de coste en el ${pct((1-L.terW)*100,0)}`:null].filter(Boolean)}
   const miss=Object.keys(SCORE_DOC).filter(k=>S[k]==null);const vals=Object.values(S);
   return{S,ev,miss,health:vals.length?vals.reduce((a,v)=>a+v,0)/vals.length:null,neff,top1,top10,narrow,avgCorr:ac,ovAvg,bets:B}}
@@ -177,7 +195,7 @@ let ANA=null;const _AC=new Map();
 const sigOf=P=>P.map(x=>x.e.k+x.e.t+':'+x.w.toFixed(4)).join('|');
 async function analyzeSrc(srcName){await loadExpo();const src=await docPortfolio(srcName);if(!src.P.length)return{empty:true,src};
   const sig=src.src+sigOf(src.P);if(_AC.has(sig))return _AC.get(sig);
-  const p=(async()=>{const P=src.P,L=lookThrough(P),R=await riskOf(P),SC=docScores(L,R,P);const A={P,L,R,SC,name:src.name,src,asof:(P.map(x=>expOf(x.e).asof).filter(Boolean).sort().pop())||null};A.D=diagnose(A);return A})();
+  const p=(async()=>{const P=src.P,L=lookThrough(P),[R,R3]=await Promise.all([riskOf(P),riskOf(P,3)]),SC=docScores(L,R,P,R3);const A={P,L,R,R3,SC,name:src.name,src,asof:(P.map(x=>expOf(x.e).asof).filter(Boolean).sort().pop())||null};A.D=diagnose(A);return A})();
   _AC.set(sig,p);if(_AC.size>12)_AC.delete(_AC.keys().next().value);return p}
 async function analyze(){const A=await analyzeSrc(DOC.src);ANA=A;window.ATLAS_DOC=A;return A}
 
@@ -258,21 +276,41 @@ function betGroups(A){const {R,P,SC}=A;if(!R||!SC.bets)return null;const idx=e=>
     const others=P.filter(x=>!g.m.includes(x.e)).map(x=>cc(g.m[0],x.e)).filter(v=>v!=null);const noPx=g.m.filter(e=>idx(e)<0);
     return{...g,label:parts.join(' · ')||'Sin desglose suficiente',avg:pr.length?pr.reduce((a,v)=>a+v,0)/pr.length:null,min:pr.length?Math.min(...pr):null,maxOut:g.m.length===1&&others.length?Math.max(...others):null,noPx}})}
 const c2=v=>v.toFixed(2).replace('.',',');
-function wowBlock(A){const {L,SC,P,R}=A,n=P.length,nb=SC.bets&&R?SC.bets.nb:null,G=betGroups(A);
-  if(nb==null||n<2)return `<section class="ix-wow" data-reveal><div class="wv"><div><b>${n}</b><span>producto${n>1?'s':''}</span></div><i>→</i><div class="hot"><b>${L.uniq.hi?`${num(L.uniq.lo)}–${num(L.uniq.hi)}`:`≥ ${num(L.uniq.lo)}`}</b><span>empresas por debajo</span></div></div>${n<2?'':'<p class="wv-t">Sin histórico de precios suficiente para medir cuántas apuestas independientes haces.</p>'}</section>`;
-  const few=nb<n*.6,multi=G.filter(g=>g.m.length>1);
+const fmtB=v=>v<3?num(v,1):String(Math.round(v));
+const CONF_L={high:['Confianza alta','Precios semanales de 5 años de todos tus productos.'],medium:['Confianza media','Algún producto tiene menos historial de precios o el resultado varía según el periodo.'],low:['Confianza baja','Faltan precios de una parte de la cartera: esa parte se cuenta como independiente y la cifra puede estar inflada.']};
+function wowBlock(A){const {L,SC,P,R}=A,n=P.length,B=SC.bets,RB=B&&B.rob,G=betGroups(A);
+  if(!RB||n<2)return `<section class="ix-wow" data-reveal><div class="wv"><div><b>${n}</b><span>producto${n>1?'s':''}</span></div><i>→</i><div class="hot"><b>${L.uniq.hi?`${num(L.uniq.lo)}–${num(L.uniq.hi)}`:`≥ ${num(L.uniq.lo)}`}</b><span>empresas por debajo</span></div></div>${n<2?'':'<p class="wv-t">Sin historial de precios suficiente para estimar cuántas apuestas independientes haces.</p>'}</section>`;
+  const nb=RB.main,few=nb<n*.6,rng=RB.cls==='sensitive'&&fmtB(RB.lo)!==fmtB(RB.hi),pl=nb>=1.05;
+  const big=rng?`${fmtB(RB.lo)}–${fmtB(RB.hi)}`:`≈ ${fmtB(nb)}`;
   const chips=P.slice().sort((a,b)=>b.w-a.w).map(x=>`<span class="bt-chip">${tk(x.e)}</span>`).join('');
+  const multi=G.filter(g=>g.m.length>1);
   const grp=G.map((g,i)=>`<div class="bt-g${g.m.length>1?' many':''}"><div class="bt-gh"><b>Grupo ${i+1}</b><span>${esc(g.label)}</span><em>${pct(g.w*100,0)}</em></div>
       <ul>${g.m.slice().sort((a,b)=>P.find(x=>x.e===b).w-P.find(x=>x.e===a).w).map(e=>`<li><span class="bt-tk">${tk(e)}</span><span class="bt-nm">${esc(e.name)}</span><em>${pct(P.find(x=>x.e===e).w*100,0)}</em></li>`).join('')}</ul>
-      <p class="bt-n">${g.m.length>1?`Suben y bajan casi a la vez: correlación semanal media ${c2(g.avg)} entre ellos${g.min!=null&&g.m.length>2?` (la pareja más distinta, ${c2(g.min)})`:''}.`:g.noPx.length?'Sin histórico de precios suficiente: se cuenta aparte, aunque podría no serlo.':g.maxOut!=null?(g.maxOut>=.75?`Se parece al resto, pero no llega al umbral de 0,85 (correlación máxima ${c2(g.maxOut)}).`:`Va por su cuenta: correlación máxima con el resto ${c2(g.maxOut)}.`):'Va por su cuenta.'}</p></div>`).join('<i class="bt-plus">+</i>');
+      <p class="bt-n">${g.m.length>1?`Suben y bajan casi a la vez: correlación semanal media ${c2(g.avg)} entre ellos${g.min!=null&&g.m.length>2?` (la pareja más distinta, ${c2(g.min)})`:''}.`:g.noPx.length?'Sin historial de precios suficiente: se cuenta aparte, aunque podría no serlo.':g.maxOut!=null?`Correlación máxima con el resto: ${c2(g.maxOut)}. ${g.maxOut>=.5?'No se mueve igual, pero se parece: cuenta solo en parte como apuesta distinta.':'Se mueve bastante por su cuenta.'}`:''}</p></div>`).join('<i class="bt-plus">+</i>');
+  /* exposición consolidada: acciones que tienes directamente y además dentro de tus ETFs */
+  const dup=P.filter(x=>x.e.k==='s').map(x=>{const c=L.comps.find(c=>c.by.some(b=>b.e===x.e)&&c.by.some(b=>b.e!==x.e));return c?{c,via:c.by.filter(b=>b.e!==x.e)}:null}).filter(Boolean);
+  const [cl,cd]=CONF_L[RB.conf];
   return `<section class="ix-wow" data-reveal>
-    <div class="wv"><div><b data-count="${n}">${n}</b><span>productos</span></div><i>→</i><div class="hot"><b>≈ ${num(nb,1)}</b><span>apuesta${nb>=1.05?'s':''} real${nb>=1.05?'es':''}</span></div></div>
-    <p class="wv-t">${few?`Tienes ${n} productos. Pero ${multi.length===1&&multi[0].m.length>=n-1?'casi todos':'varios'} se comportan como una misma apuesta.`:`Tienes ${n} productos y se mueven de forma bastante independiente.`}</p>
+    <div class="wv"><div><b data-count="${n}">${n}</b><span>productos</span></div><i>→</i><div class="hot"><b>${big}</b><span>apuesta${pl?'s':''} independiente${pl?'s':''}</span></div></div>
+    <p class="wv-t">${few?`Tienes ${n} productos, pero por cómo se han movido equivalen a ${rng?'entre '+fmtB(RB.lo)+' y '+fmtB(RB.hi):'unas '+fmtB(nb)} apuesta${pl?'s':''} independiente${pl?'s':''}.`:`Tienes ${n} productos y se mueven de forma bastante distinta entre sí.`}</p>
+    <p class="wv-c"><span class="cf ${RB.conf}">${cl}</span>${RB.cls==='robust'?'Resultado estable: con 3 años de datos sale casi lo mismo.':RB.cls==='moderate'?`Varía algo según el periodo: ${fmtB(RB.lo)}–${fmtB(RB.hi)}.`:RB.cls==='sensitive'?'Resultado sensible al periodo analizado: por eso se muestra un rango.':''}</p>
     <div class="ix-btns"><button class="btn2 sm" data-go="share">Compartir mis rayos X</button></div>
     <div class="ix-k">¿Por qué?</div>
     <div class="bt-chips">${chips}</div><div class="bt-arrow">↓</div>
     <div class="bt-gs">${grp}</div>
-    <p class="mp-note">Dos productos cuentan como la misma apuesta si su correlación semanal (5 años, en euros) es ≥ 0,85: suben y bajan casi a la vez. Apuestas = 1 / Σ(peso de cada grupo)². ${srcl('Yahoo Finance (precios)',R.grid?R.grid[R.grid.length-1]:null)}</p>
+    ${multi.length||G.length>1?`<p class="bt-sum">La cifra no es el número de grupos: también cuenta el parecido parcial entre grupos y cuánto oscila cada producto. Por eso sale ${big} y no ${G.length}.</p>`:''}
+    ${dup.map(d=>`<p class="bt-dup"><b>${esc(d.c.name)}</b>: la tienes directamente y también dentro de ${(v=>v.length>1?v.slice(0,-1).join(', ')+' y '+v[v.length-1]:v[0])(d.via.map(b=>tk(b.e)))}. Exposición total ≥ ${pct(d.c.w,1)} de tu cartera. En la cifra de apuestas no se cuenta dos veces: los precios de esos ETFs ya la incluyen.</p>`).join('')}
+    <details class="bt-meth"><summary>¿Qué significa «apuestas independientes»?</summary>
+      <p>ATLAS estima cuántas apuestas <b>diferenciadas en riesgo</b> contiene tu cartera, no cuántos productos tienes. Si dos productos han subido y bajado casi a la vez, cuentan como una sola; si se parecen a medias, cuentan a medias.</p>
+      <p class="bt-mh">Método</p><ul><li>Correlación de rentabilidades <b>semanales en euros</b>, últimos <b>5 años</b>${R&&R.grid?` (hasta ${fdate(R.grid[R.grid.length-1])})`:''}.</li><li>Cifra = ratio de diversificación al cuadrado: (Σ peso × volatilidad)² ÷ volatilidad de la cartera². Las correlaciones negativas cuentan como 0 (prudente).</li><li>Sin umbral elegido a mano. Comprobación de estabilidad: se repite con 3 años (${fmtB(RB.d5)} con 5 años · ${RB.d3!=null?fmtB(RB.d3):'n/d'} con 3 años).</li><li>Los grupos de arriba (correlación ≥ 0,85) solo explican de dónde viene el parecido.</li></ul>
+      <p class="bt-mh">Limitaciones</p><ul><li>Las correlaciones históricas pueden cambiar, sobre todo en crisis (suelen subir).</li><li>Es una estimación estadística, no una clasificación económica: dos productos poco correlacionados no son necesariamente apuestas económicas independientes.</li><li>Usa precios, no la composición: no depende de conocer todas las posiciones de cada ETF.</li></ul></details>
+    ${XPT()?`<div class="xr-rob"><div class="ix-k">X-ray robustness · modo experto</div><table><tbody>
+      ${RB.T.map(t=>`<tr><th>Grupos con umbral ${String(t.th).replace('.',',')}</th><td>${num(t.nb,2)}</td></tr>`).join('')}
+      <tr class="hl"><th>Sin umbral · 5 años (cifra mostrada)</th><td>${num(RB.d5,2)}</td></tr><tr><th>Sin umbral · 3 años</th><td>${RB.d3!=null?num(RB.d3,2):'n/d'}</td></tr>
+      <tr><th>Estabilidad</th><td>${({robust:'Robusta',moderate:'Moderada',sensitive:'Sensible',na:'n/d'})[RB.cls]}</td></tr>
+      <tr><th>Semanas de precios comunes</th><td>${RB.weeks}</td></tr><tr><th>Peso sin precios</th><td>${pct(RB.noPx*100,0)}</td></tr>
+      <tr><th>Composición conocida (holdings)</th><td>${pct(L.cover,0)}</td></tr><tr><th>Confianza de la cifra</th><td>${({high:'ALTA',medium:'MEDIA',low:'BAJA'})[RB.conf]}</td></tr></tbody></table>
+      <p class="mp-note">La composición conocida afecta a empresas, solapamiento y concentración; la cifra de apuestas usa solo precios.</p></div>`:''}
   </section>`}
 /* ---------- Tarjeta compartible «Rayos X» (sin importes; los productos solo si el usuario lo elige) ---------- */
 function xrayFacts(A){const {L,SC,P}=A,ss=Object.entries(L.S).filter(([s])=>s!==UNK&&s!=='Otros').sort((a,b)=>b[1]-a[1])[0],cs=Object.entries(L.C).filter(([c])=>c!=='XX').sort((a,b)=>b[1]-a[1])[0],c1=L.comps[0];
@@ -282,17 +320,17 @@ function drawXray(A,withP){const W=1080,H=1350,cv=document.createElement('canvas
   const T=(t,x,y,sz,w,c,al)=>{g.font=`${w} ${sz}px ${F}`;g.fillStyle=c;g.textAlign=al||'left';g.fillText(t,x,y)};const n=A.P.length,nb=A.SC.bets?A.SC.bets.nb:null;
   T('ATLAS',90,140,34,800,'#5ee7ff');T('RAYOS X DE CARTERA',250,140,26,700,'#6b7a90');
   T(String(n),90,380,150,800,'#8a97ab');T(n===1?'PRODUCTO':'PRODUCTOS',95,440,30,700,'#6b7a90');
-  if(nb!=null){T('→',330,350,80,500,'#3a4558');T('≈ '+num(nb,1),450,380,190,800,'#ffffff');T(nb>=1.05?'APUESTAS REALES':'APUESTA REAL',462,440,30,800,'#5ee7ff')}
+  if(nb!=null){T('→',330,350,80,500,'#3a4558');T('≈ '+fmtB(nb),450,380,190,800,'#ffffff');T(nb>=1.05?'APUESTAS INDEPENDIENTES':'APUESTA INDEPENDIENTE',462,440,28,800,'#5ee7ff')}
   let y=560;g.fillStyle='rgba(255,255,255,.07)';g.fillRect(90,y-50,W-180,2);
   y+=30;xrayFacts(A).forEach(([k,v])=>{T(k.length>24?k.slice(0,23)+'…':k,90,y+20,44,600,'#cfd8e6');T(v,W-90,y+20,48,800,'#ffffff','right');y+=118});
   if(withP){y+=10;T('Productos: '+A.P.slice().sort((a,b)=>b.w-a.w).map(x=>String(x.e.tk)).join(' · ').slice(0,60),90,y+10,30,600,'#8a97ab')}
-  T('Correlación semanal (5 años, en euros) y composición publicada',90,H-188,24,500,'#55627a');T('por justETF y Yahoo Finance · '+fdate(A.asof),90,H-152,24,500,'#55627a');
+  T('Estimación por correlación semanal (5 años, en euros) · composición publicada',90,H-188,24,500,'#55627a');T('por justETF y Yahoo Finance · '+fdate(A.asof),90,H-152,24,500,'#55627a');
   T('Análisis, no una recomendación de inversión.',90,H-116,24,500,'#55627a');T('acorchete16.github.io/ProjectATLAS',90,H-60,30,700,'#5ee7ff');return cv}
 async function shareXray(A){let m=$('#xrs');if(m)m.remove();m=document.createElement('div');m.id='xrs';m.className='xrs';document.body.appendChild(m);let withP=false;
   const draw=()=>{const cv=drawXray(A,withP);const url=cv.toDataURL('image/png');m.innerHTML=`<div class="xrs-b" role="dialog" aria-label="Compartir rayos X"><div class="xrs-h"><b>Comparte tus rayos X</b><button class="x-close" data-x aria-label="Cerrar">✕</button></div><img src="${url}" alt="Tarjeta de rayos X de la cartera"><label class="xrs-c"><input type="checkbox" data-p${withP?' checked':''}> Mostrar mis productos</label><p class="xrs-n">Nunca incluye importes. Solo lo que ves en la imagen.</p><div class="xrs-a"><button class="btn" data-s>Compartir</button><button class="btn2" data-d>Descargar</button></div></div>`;
     m.querySelector('[data-x]').onclick=()=>m.remove();m.onclick=e=>{if(e.target===m)m.remove()};m.querySelector('[data-p]').onchange=e=>{withP=e.target.checked;draw()};
     const blob=()=>new Promise(r=>cv.toBlob(r,'image/png'));const dl=async()=>{const a=document.createElement('a');a.href=url;a.download='atlas-rayos-x.png';a.click()};
-    m.querySelector('[data-d]').onclick=dl;m.querySelector('[data-s]').onclick=async()=>{try{const f=new File([await blob()],'atlas-rayos-x.png',{type:'image/png'});const txt=`Tengo ${A.P.length} productos, pero ATLAS dice que son ≈ ${num(A.SC.bets.nb,1)} apuestas reales.`;
+    m.querySelector('[data-d]').onclick=dl;m.querySelector('[data-s]').onclick=async()=>{try{const f=new File([await blob()],'atlas-rayos-x.png',{type:'image/png'});const txt=`Tengo ${A.P.length} productos, pero según ATLAS equivalen a ≈ ${fmtB(A.SC.bets.nb)} apuestas independientes.`;
       if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],text:txt});else{await dl();toast('Imagen descargada')}}catch(_){}}};
   if(document.fonts&&document.fonts.ready)await document.fonts.ready;draw()}
 function flowBlock(A){const {L,SC}=A,nC=Object.entries(L.C).filter(([c,v])=>c!=='XX'&&v>=.05).length;
@@ -672,7 +710,7 @@ async function renderOverview(){if(OV.hidden||XP||typeof MAPMODE==='undefined'||
   const SRC=PF.length?'pf':'custom',A=await analyzeSrc(SRC);if(OV.hidden||XP||!A||A.empty)return;
   const v=_pfV||{val:0,inv:0},ret=v.inv?(v.val/v.inv-1)*100:null,ins=A.D.filter(d=>d.sev!=='info').slice(0,mobile()?2:3);
   b.innerHTML=`${brand}<div class="ov-h">${SRC==='pf'?`<div class="ov-v"><small>Tu cartera</small><b data-count="${Math.round(v.val)}">${num(v.val)}</b><span class="ov-eur">€</span><em class="${(ret||0)<0?'dn':'up'}">${ret==null?'—':(ret>0?'+':'')+pct(ret,1)}</em></div>`:`<div class="ov-v"><small>Cartera rápida · por pesos</small><b class="ov-q">Rayos X</b><button class="lnk" data-ov="qp">Editar</button></div>`}<button class="ov-g" data-ov="doc" title="Ver por qué">${gauge(A.SC,96)}</button><button data-ov="col" class="ov-c" aria-label="${OV.collapsed?'Desplegar':'Plegar'}">${OV.collapsed?'▴':'▾'}</button></div>
-    ${OV.collapsed?'':`${A.SC.bets&&A.R&&A.P.length>1?`<button class="ov-bets" data-ov="doc"><span><b>${A.P.length}</b> productos</span><i>→</i><span><b>≈ ${num(A.SC.bets.nb,1)}</b> apuesta${A.SC.bets.nb>=1.05?'s':''} real${A.SC.bets.nb>=1.05?'es':''}</span><em>Ver por qué</em></button>`:''}<p class="ov-lead">${esc(headline(A))}</p><ul class="ov-i">${ins.map(d=>`<li style="--c:${SEV[d.sev][2]}"><b>${esc(d.t)}</b><em>${esc(d.metric)}</em></li>`).join('')}</ul>
+    ${OV.collapsed?'':`${A.SC.bets&&A.R&&A.P.length>1?`<button class="ov-bets" data-ov="doc"><span><b>${A.P.length}</b> productos</span><i>→</i><span><b>≈ ${fmtB(A.SC.bets.nb)}</b> apuesta${A.SC.bets.nb>=1.05?'s':''} independiente${A.SC.bets.nb>=1.05?'s':''}</span><em>Ver por qué</em></button>`:''}<p class="ov-lead">${esc(headline(A))}</p><ul class="ov-i">${ins.map(d=>`<li style="--c:${SEV[d.sev][2]}"><b>${esc(d.t)}</b><em>${esc(d.metric)}</em></li>`).join('')}</ul>
     <div class="ov-b"><button class="btn" data-ov="doc">Analizar cartera</button><div class="ov-x"><span>Exposición de tu cartera</span><button data-ov="geo">Países</button><button data-ov="comp">Empresas</button><button data-ov="sec">Sectores</button></div></div>`}`;bindOv(b,A);countUpEur(b)}
 function countUpEur(b){const el=b.querySelector('.ov-v b[data-count]');if(!el||RM()||el.dataset.done)return;el.dataset.done=1;const to=+el.dataset.count,t0=performance.now();const st=t=>{const k=Math.min(1,(t-t0)/800),e=1-Math.pow(1-k,3);el.textContent=num(to*e);if(k<1)requestAnimationFrame(st)};requestAnimationFrame(st)}
 function bindOv(b,A){b.querySelectorAll('[data-ov]').forEach(x=>x.onclick=()=>{const k=x.dataset.ov;
@@ -697,6 +735,6 @@ const EP1=/\p{Extended_Pictographic}/u,EPG=/\p{Extended_Pictographic}[️‍]*\s
 function stripEmoji(root){if(!root||!root.querySelectorAll)return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>{const p=n.parentElement;if(!p||p.closest('script,style,textarea,input,.tk,#svv,.kx-card,.mn-i'))return NodeFilter.FILTER_REJECT;return EP1.test(n.data)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT}});
   const L=[];while(w.nextNode())L.push(w.currentNode);L.forEach(n=>{const t=n.data.replace(EPG,'');if(t.trim()&&t!==n.data)n.data=t})}
 let _seq=0;const _eq=new Set();function watchEmoji(){stripEmoji(document.body);const mo=new MutationObserver(ms=>{ms.forEach(m=>{const t=m.target.nodeType===3?m.target.parentElement:m.target;if(t)_eq.add(t)});if(_seq)return;_seq=requestAnimationFrame(()=>{_seq=0;const q=[..._eq];_eq.clear();q.forEach(t=>{if(t.isConnected)stripEmoji(t)})})});mo.observe(document.body,{childList:true,subtree:true,characterData:true})}
-window.ATLASI={expOf,lookThrough,overlap,overlapDetail,riskOf,docPortfolio,analyze,analyzeSrc:s=>analyzeSrc(s),renderDoc,renderRadar,renderCompare,showExposureGlobe,hideExposure,openCompare,openRadar,openCountry,loadExpo,renderOverview,get DOC(){return DOC},set DOC(v){DOC=v;saveDoc()}};
+window.ATLASI={betsOf,betsRobust,lookThrough,overlap,overlapDetail,riskOf,docPortfolio,analyze,analyzeSrc:s=>analyzeSrc(s),renderDoc,renderRadar,renderCompare,showExposureGlobe,hideExposure,openCompare,openRadar,openCountry,loadExpo,renderOverview,get DOC(){return DOC},set DOC(v){DOC=v;saveDoc()}};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();

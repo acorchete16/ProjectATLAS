@@ -117,3 +117,13 @@ body.mapmode #app .right .pbody>[data-s]{flex-shrink:0;overflow:visible!importan
 .ov .ov-t{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.2}
 .ov-v .lnk{all:unset;cursor:pointer;color:var(--acc);font:600 12.5px var(--ui);margin-left:10px}
 .qp-c>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:14px;background:var(--s1);font-size:13px;color:var(--mid)}.qp-c>summary::-webkit-details-marker{display:none}.qp-c>summary b{color:var(--acc);font-weight:600}.qp-c[open]>summary{margin-bottom:8px}
+
+/* ---- robustez de la cifra estrella ---- */
+.wv-c{margin:0;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:12.5px;color:var(--mid)}
+.cf{font:700 11px var(--ui);letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:var(--s2)}
+.cf.high{color:var(--pos,#3ddc84)}.cf.medium{color:var(--amb,#f2c14e)}.cf.low{color:var(--neg,#ff6b7d)}
+.bt-sum,.bt-dup{margin:0;font-size:12.5px;line-height:1.5;color:var(--mid)}.bt-dup b{color:#fff}
+.bt-meth{border-radius:14px;background:var(--s1);padding:10px 12px}.bt-meth summary{cursor:pointer;font:600 13px var(--ui);color:var(--acc)}
+.bt-meth p,.bt-meth li{font-size:12.5px;line-height:1.5;color:var(--fg)}.bt-meth ul{margin:4px 0 8px;padding-left:18px}.bt-mh{margin:10px 0 0!important;font:700 11.5px var(--ui)!important;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)!important}
+.xr-rob table{width:100%;border-collapse:collapse;font-size:12.5px}.xr-rob th{text-align:left;font-weight:500;color:var(--mid);padding:6px 0;border-bottom:1px solid var(--ln)}.xr-rob td{text-align:right;font:700 12.5px var(--num);color:#fff;border-bottom:1px solid var(--ln)}.xr-rob tr.hl th,.xr-rob tr.hl td{color:var(--acc)}
+.wv>div span{max-width:9.5em;line-height:1.25}.wv{align-items:flex-end}
