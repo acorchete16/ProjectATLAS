@@ -32,16 +32,5 @@ crumb ok
   e:x:EUNH.DE: justETF IE00B4WXJJ64 · 12 países (completo) · 1 sectores
   e:x:IBGS.AS: justETF IE00B14X4Q57 · 5 países (4 + otros) · 1 sectores
   e:x:VGEA.DE: justETF IE00BH04GL39 · 12 países (completo) · 1 sectores
-  e:x:VHYL.AS: justETF IE00B8GKDB10 · 17 países (completo) · 8 sectores
-  e:x:VUAA.DE: justETF IE00BFMXXD54 · 3 países (4 + otros) · 8 sectores
-  e:x:WTAI.MI: justETF IE00BDVPNG13 · 4 países (4 + otros) · 5 sectores
-  e:x:XAIX.DE: justETF IE00BGV5VN51 · 6 países (completo) · 4 sectores
-  e:x:XDEM.DE: justETF IE00BL25JP72 · 12 países (completo) · 8 sectores
-  e:x:XDEW.DE: justETF IE00BLNMYC90 · 3 países (4 + otros) · 8 sectores
-  e:x:XDWD.DE: justETF IE00BJ0KDQ92 · 10 países (completo) · 8 sectores
   e:x:XEON.DE: justETF LU0290358497 falló: sin composición
-  e:x:XMME.DE: justETF IE00BTJRMP35 · 12 países (completo) · 8 sectores
-  e:x:ZPRV.DE: justETF IE00BSPLC413 · 3 países (4 + otros) · 8 sectores
-  e:x:ZPRX.DE: justETF IE00BSPLC298 · 15 países (completo) · 8 sectores
-  f:F_VEUZ: justETF IE00B53QG562 · 10 países (completo) · 8 sectores
 OK · 0 índices completos · 153 ETFs/fondos (0 por índice, 152 con datos de Yahoo)
