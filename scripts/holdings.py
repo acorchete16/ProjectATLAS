@@ -226,7 +226,8 @@ def yahoo_fund(sym):
     for h in th.get('holdings') or []:
         t = h.get('symbol') or ''; w = (h.get('holdingPercent') or {}).get('raw')
         if not w: continue
-        suf = t.rsplit('.', 1)[1] if '.' in t else ''; cc = SUFFIX_CC.get(suf, 'US' if t and not suf else 'XX')
+        suf = t.rsplit('.', 1)[1] if '.' in t else ''; cc = SUFFIX_CC.get(suf, 'US' if t and not suf and not t[:1].isdigit() else 'XX')
+        if not suf and t.isdigit(): cc = 'HK' if len(t) == 5 else 'CN' if len(t) == 6 else 'XX'
         top.append([(h.get('holdingName') or t).title()[:48], t, round(w * 100, 3), cc, None])
     eq = th.get('equityHoldings') or {}
     fees = (fp.get('feesExpensesInvestment') or {})
