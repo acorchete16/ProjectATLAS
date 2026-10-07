@@ -24,13 +24,8 @@ crumb ok
   e:GLD: justETF DE000A0S9GB0 falló: sin composición
   e:QLD: justETF FR0010342592 falló: sin composición
   e:SSO: justETF LU0411078552 falló: sin composición
-  e:TIP: justETF IE00B1FZSC47 · 2 países (4 + otros) · 1 sectores
   e:TQQQ: justETF IE00BLRPRL42 falló: sin composición
   e:URA: justETF IE000NDWFGA5 falló: sin composición
   e:x:EGLN.L: justETF IE00B4ND3602 falló: sin composición
-  e:x:EUNA.DE: justETF IE00B3F81409 · 15 países (completo) · 8 sectores
-  e:x:EUNH.DE: justETF IE00B4WXJJ64 · 12 países (completo) · 1 sectores
-  e:x:IBGS.AS: justETF IE00B14X4Q57 · 5 países (4 + otros) · 1 sectores
-  e:x:VGEA.DE: justETF IE00BH04GL39 · 12 países (completo) · 1 sectores
   e:x:XEON.DE: justETF LU0290358497 falló: sin composición
 OK · 0 índices completos · 153 ETFs/fondos (0 por índice, 152 con datos de Yahoo)
