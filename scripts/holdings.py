@@ -367,6 +367,7 @@ def isin_map():
     except Exception: pass
     return m
 
+JFRESH = 6; JMAX = 45; JST = {'n': 0, 'fails': 0, 'blocked': False}
 def main():
     now = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%MZ')
     E.init_crumb(); L('crumb', 'ok' if E.crumb else 'NO')
@@ -407,11 +408,27 @@ def main():
         isin = IM.get(k); jisin = isin if (isin and not k.startswith('f:')) else (IDX_ISIN.get(ix) if ix else None)
         if not jisin and isin and k.startswith('f:') and ix: jisin = IDX_ISIN.get(ix)
         if jisin:
+            o = old.get('fund', {}).get(k) or {}
+            fresh = o.get('jisin') == jisin and o.get('asof_j') and (datetime.date.today() - datetime.date.fromisoformat(o['asof_j'])).days < JFRESH
             if jisin in JC: jd = JC[jisin]
+            elif fresh: jd = None
+            elif JST['blocked'] or JST['n'] >= JMAX: jd = None
             else:
-                try: jd = justetf(jisin); L(f'  {k}: justETF {jisin} · {len(jd["country"])} países{" (completo)" if jd["full"]["countries"] else " (4 + otros)"} · {len(jd["sector"])} sectores')
-                except Exception as e: jd = None; L(f'  {k}: justETF {jisin} falló: {str(e)[:60]}')
-                JC[jisin] = jd; time.sleep(1.2)
+                jd = None
+                for att in range(2):
+                    try:
+                        jd = justetf(jisin); JST['n'] += 1; JST['fails'] = 0
+                        L(f'  {k}: justETF {jisin} · {len(jd["country"])} países{" (completo)" if jd["full"]["countries"] else " (4 + otros)"} · {len(jd["sector"])} sectores'); break
+                    except Exception as e:
+                        L(f'  {k}: justETF {jisin} falló: {str(e)[:60]}')
+                        if '403' in str(e) or '429' in str(e):
+                            JST['fails'] += 1
+                            if JST['fails'] >= 3: JST['blocked'] = True; L('  justETF limita peticiones: se para y se reintenta en la próxima ejecución'); break
+                            time.sleep(90)
+                        else: break
+                JC[jisin] = jd; time.sleep(4)
+            if not jd and o.get('asof_j') and o.get('jisin') == jisin:  # conserva el último dato bueno (con su fecha)
+                jd = {'country': o.get('country') or {}, 'sector': o.get('sector_j') or {}, 'top_j': o.get('top_j') or [], 'n': o.get('n'), 'src_j': o.get('src_j'), 'asof_j': o['asof_j'], 'full': o.get('full') or {}}
             if jd:
                 rec.update(country=jd['country'], sector_j=jd['sector'], top_j=jd['top_j'], n=jd['n'], src_j=jd['src_j'], asof_j=jd['asof_j'], full=jd['full'], jisin=jisin,
                            jproxy=(jisin != isin))

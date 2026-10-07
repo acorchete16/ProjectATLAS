@@ -1,7 +1,7 @@
 name: Composición de ETFs (exposición)
 on:
   schedule:
-    - cron: '40 5 * * 1,4'   # lunes y jueves
+    - cron: '40 5 * * *'   # diario: justETF limita peticiones, se completa por tandas (datos válidos 6 días)
   workflow_dispatch:
   push:
     branches: [main]
