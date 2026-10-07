@@ -300,6 +300,73 @@ def nport(ticker):
     return {'asof': asof, 'n': len(top), 'country': {c: round(v * k, 2) for c, v in sorted(country.items(), key=lambda x: -x[1]) if v * k >= .01},
             'top': top[:150], 'src': f'SEC N-PORT de {ticker} (cartera completa oficial, trimestral)'}
 
+
+# ---------- 4. justETF (por ISIN): reparto por países y sectores + 10 mayores posiciones con ISIN ----------
+import http.cookiejar
+_JCJ = http.cookiejar.CookieJar(); _JOP = E.urllib.request.build_opener(E.urllib.request.HTTPCookieProcessor(_JCJ))
+JUA = {'User-Agent': E.UA, 'Accept-Language': 'en-US,en;q=0.9'}
+JSECT = {'technology': 'Tecnología', 'finance': 'Finanzas', 'financials': 'Finanzas', 'industrials': 'Industria', 'healthcare': 'Salud', 'health care': 'Salud',
+         'consumer discretionary': 'Consumo discrecional', 'consumer staples': 'Consumo básico', 'telecommunication': 'Comunicaciones', 'communication services': 'Comunicaciones',
+         'energy': 'Energía', 'basic materials': 'Materiales', 'materials': 'Materiales', 'real estate': 'Inmobiliario', 'utilities': 'Servicios públicos', 'other': 'Otros'}
+def jget(url, ajax_base=None):
+    h = dict(JUA)
+    if ajax_base: h.update({'Wicket-Ajax': 'true', 'Wicket-Ajax-BaseURL': ajax_base, 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/xml, application/xml, */*'})
+    with _JOP.open(E.urllib.request.Request(url, headers=h), timeout=40) as r: return r.read().decode('utf-8', 'replace')
+def jrows(html, kind):
+    names = re.findall(rf'tl_etf-holdings_{kind}_value_name">([^<]+)<', html); vals = re.findall(rf'tl_etf-holdings_{kind}_value_percentage">([\d.,]+)%<', html)
+    return [(n.strip(), float(v.replace(',', ''))) for n, v in zip(names, vals)]
+def justetf(isin):
+    base = f'en/etf-profile.html?isin={isin}'
+    h = jget('https://www.justetf.com/' + base)
+    if 'etf-holdings_countries_table' not in h: raise ValueError('sin composición')
+    cty, sec = jrows(h, 'countries'), jrows(h, 'sectors'); full = {'countries': False, 'sectors': False}
+    for kind, comp in (('countries', 'countries-loadMoreCountries'), ('sectors', 'sectors-loadMoreSectors')):
+        m = re.search(r'"u":"(/en/etf-profile\.html\?[\d\-.]+holdingsSection-' + comp + r'[^"]*)"', h)
+        if not m: continue
+        try:
+            x = jget('https://www.justetf.com' + m.group(1).replace('\\/', '/'), base)
+            rows = jrows(x, kind)
+            if rows and len(rows) >= len(cty if kind == 'countries' else sec):
+                if kind == 'countries': cty = rows
+                else: sec = rows
+                full[kind] = True
+        except Exception as e: L(f'    justETF {isin} {kind} ampliado falló: {str(e)[:60]}')
+        time.sleep(.6)
+    top = []
+    for m in re.finditer(r'stock-profiles/([A-Z]{2}[A-Z0-9]{9}\d)" title="([^"]+)".*?top-holdings_value_percentage">([\d.,]+)%', h, re.S):
+        top.append([html_unescape(m.group(2))[:48], m.group(1), float(m.group(3).replace(',', '')), m.group(1)[:2], None])
+    n = re.search(r'top-holdings_count">out of ([\d,]+)<', h)
+    country = {}
+    for nm, v in cty:
+        c = 'XX' if nm.lower() == 'other' else COUNTRY.get(nm.lower(), 'XX'); country[c] = round(country.get(c, 0) + v, 2)
+    sector = {}
+    for nm, v in sec:
+        sc = JSECT.get(nm.lower(), 'Otros'); sector[sc] = round(sector.get(sc, 0) + v, 2)
+    return {'country': country, 'sector': sector, 'top_j': top[:10], 'n': int(n.group(1).replace(',', '')) if n else None, 'full': full,
+            'src_j': f'justETF ({isin})', 'asof_j': datetime.date.today().isoformat()}
+def html_unescape(x):
+    import html as H; return H.unescape(x)
+IDX_ISIN = {'world': 'IE00B4L5Y983', 'sp500': 'IE00B5BMR087', 'acwi': 'IE00B6R52259', 'em': 'IE00BKM4GZ66', 'europe': 'IE00B4K48X80', 'emu': 'IE00B53QG562',
+            'japan': 'IE00B4L5YX21', 'india': 'IE00BZCQB185', 'china': 'IE00BJ5JPG56', 'semis': 'IE000I8KRLL9', 'ndx': 'IE00B53SZB19', 'small': 'IE00BJZ2DC62',
+            'eafe': 'IE00B4L5YX21', 'wsmall': 'IE00BF4RFH31'}
+def isin_map():
+    s = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read(); m = {}
+    i = s.find('const UNIV='); j = s.find('\n];', i)
+    for t, isin in re.findall(r'\{t:"([^"]+)",[^\n]*?u:U\("[^"]*","[^"]*","([A-Z]{2}[A-Z0-9]{9}\d)"', s[i:j]): m['e:' + t] = isin
+    i = s.find('const FUNDS='); j = s.find('];', i)
+    try:
+        for f in json.loads(s[i + len('const FUNDS='):j + 1]):
+            if f.get('isin'): m['f:' + f['t']] = f['isin']
+    except Exception: pass
+    try:
+        U = json.load(open(os.path.join(ROOT, 'data', 'universe_x.json')))
+        for x in U.get('e', []):
+            if x.get('isin'): m['e:x:' + x['t']] = x['isin']
+        for x in U.get('f', []):
+            if x.get('isin'): m['f:x:' + x['t']] = x['isin']
+    except Exception: pass
+    return m
+
 def main():
     now = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%MZ')
     E.init_crumb(); L('crumb', 'ok' if E.crumb else 'NO')
@@ -308,7 +375,7 @@ def main():
     load_stock_meta(); idx = {}
     for k in INDEX:
         d = None
-        try: d = nport(INDEX[k][0]); d.update(name=INDEX[k][1], etf=INDEX[k][0]); L(f'  índice {k} ← N-PORT {INDEX[k][0]}: {d["n"]} empresas a {d["asof"]} · EE. UU. {d["country"].get("US", 0):.1f} %')
+        try: raise ValueError('omitido (SEC bloquea a GitHub)'); d = None; L(f'  índice {k} ← N-PORT {INDEX[k][0]}: {d["n"]} empresas a {d["asof"]} · EE. UU. {d["country"].get("US", 0):.1f} %')
         except Exception as e: L(f'  índice {k} N-PORT falló: {str(e)[:120]}')
         if d:
             try: yf = yahoo_fund(INDEX[k][0]); d['sector'] = yf['sector']; d['pe'] = round(1 / yf['pe'], 2) if yf.get('pe') and yf['pe'] < 1 else yf.get('pe')
@@ -316,14 +383,14 @@ def main():
         if d: idx[k] = d
         elif k in old.get('idx', {}): idx[k] = old['idx'][k]; L(f'  índice {k}: se conserva el anterior ({old["idx"][k].get("asof")})')
         time.sleep(.6)
-    try: d = nport('QQQM'); d.update(name='Nasdaq-100', etf='QQQM'); L(f'  índice ndx ← N-PORT QQQM: {d["n"]}')
+    try: raise ValueError('omitido'); d.update(name='Nasdaq-100', etf='QQQM'); L(f'  índice ndx ← N-PORT QQQM: {d["n"]}')
     except Exception as e: d = None; L('  ndx N-PORT falló:', str(e)[:100])
     if d:
         try: yf = yahoo_fund('QQQM'); d['sector'] = yf['sector']
         except Exception: pass
         idx['ndx'] = d
     elif 'ndx' in old.get('idx', {}): idx['ndx'] = old['idx']['ndx']
-    nm = names(); fund = {}; nok = 0
+    nm = names(); fund = {}; nok = 0; IM = isin_map(); JC = {}
     for p in sorted(glob.glob(os.path.join(ROOT, 'data', 'p', '*.json'))):
         b = os.path.basename(p)
         if not (b.startswith('e_') or b.startswith('f_')): continue
@@ -337,8 +404,19 @@ def main():
             try: rec.update(yahoo_fund(y)); rec['src'] = 'Yahoo Finance (10 mayores posiciones y sectores)'; nok += 1
             except Exception as e: L(f'  {k} {y}: Yahoo sin composición ({str(e)[:50]})')
             time.sleep(.35)
+        isin = IM.get(k); jisin = isin if (isin and not k.startswith('f:')) else (IDX_ISIN.get(ix) if ix else None)
+        if not jisin and isin and k.startswith('f:') and ix: jisin = IDX_ISIN.get(ix)
+        if jisin:
+            if jisin in JC: jd = JC[jisin]
+            else:
+                try: jd = justetf(jisin); L(f'  {k}: justETF {jisin} · {len(jd["country"])} países{" (completo)" if jd["full"]["countries"] else " (4 + otros)"} · {len(jd["sector"])} sectores')
+                except Exception as e: jd = None; L(f'  {k}: justETF {jisin} falló: {str(e)[:60]}')
+                JC[jisin] = jd; time.sleep(1.2)
+            if jd:
+                rec.update(country=jd['country'], sector_j=jd['sector'], top_j=jd['top_j'], n=jd['n'], src_j=jd['src_j'], asof_j=jd['asof_j'], full=jd['full'], jisin=jisin,
+                           jproxy=(jisin != isin))
         base = k.split(':')[-1]
-        if k.startswith('e:') and ':x:' not in k and not (rec.get('proxy') and INDEX.get(rec['proxy'], ('',))[0] == base):
+        if False and k.startswith('e:') and ':x:' not in k and not (rec.get('proxy') and INDEX.get(rec['proxy'], ('',))[0] == base):
             try:
                 dn = nport(base); rec.update(country=dn['country'], top_full=dn['top'], n=dn['n'], asof_h=dn['asof'], src_h=dn['src']); L(f'  {k}: N-PORT {dn["n"]} posiciones a {dn["asof"]}')
             except Exception as e: L(f'  {k}: N-PORT no ({str(e)[:60]})')
