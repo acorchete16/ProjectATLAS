@@ -89,6 +89,11 @@ async def main(update):
         contrib = await pg.evaluate("""async()=>{const E=searchEntities(),f=t=>E.find(x=>x.t===t);const A=await ATLASI.analyzePortfolio([['VT',36],['SPY',24],['QQQ',15],['NVDA',25]].map(([t,w])=>({e:f(t),w})));
           A.src={src:'pf',val:10000};const T=await ATLASI.getPortfolioContribution(A);if(!T)return null;
           return{R:T.R,sum:T.items.reduce((a,i)=>a+i.c,0),eurOk:Math.abs(T.eur.d-T.items.reduce((a,i)=>a+i.eur,0))<1e-6,ind:T.ind.length,indEst:T.ind.every(o=>o.quality==='est'),dirReal:T.items.every(i=>i.quality==='real'),status:T.status,session:T.session}}""")
+        optim = await pg.evaluate("""async()=>{const E=searchEntities(),f=t=>E.find(x=>x.t===t);const inc=E.find(x=>x.k!=='s'&&ATLASI.expOf(x).q.country==='none');
+          const P={A:[['SPY',100]],B:[['VT',50],['QQQ',25],['SMH',15],['NVDA',10]],C:[['VT',25],['EEM',25],['AGG',25],['GLD',25]],D:[['VT',100]],E:[[inc.t,60],['VT',40]],F:[['VT',55],['EEM',10],['IWM',10],['AGG',25]]};const out={};
+          for(const [k,L] of Object.entries(P)){const A=await ATLASI.analyzePortfolio(L.map(([t,w])=>({e:f(t)||E.find(x=>x.t===t),w})));A.src={src:'custom'};const O=await ATLASI.optimize(A);
+            out[k]={probs:O.probs.map(p=>p.id),top:O.top.length,bestNew:O.top[0]?O.top[0].mv.filter(x=>x.from===0).length:0,ineff:O.mg.filter(o=>o.ineff).map(o=>o.e.t),adds:O.adds.length,
+              conf:O.top[0]?O.top[0].conf:null,optsNew:(O.opts||[]).map(o=>o.mv.filter(x=>x.from===0).length)}}return out}""")
         await pg.wait_for_timeout(3000)
         await b.close()
     srv.shutdown()
@@ -103,6 +108,21 @@ async def main(update):
         if not ok: fails.append(name)
     print('== Pantallas', smoke, 'errores JS:', errs[:5])
     print('== Contribución diaria', contrib)
+    print('== Optimizador', optim)
+    OT=[('A 100 % S&P: detecta concentración / una sola apuesta', lambda o: {'single','cty'}&set(o['A']['probs'])),
+        ('A: no propone 7 ETFs (máx. 2 nuevos por opción)', lambda o: max([o['A']['bestNew']]+o['A']['optsNew'])<=2),
+        ('B: detecta concentración tecnológica', lambda o: 'sec' in o['B']['probs']),
+        ('B: Nasdaq/Semis/NVIDIA con baja eficiencia marginal', lambda o: bool(set(o['B']['ineff'])&{'QQQ','SMH','NVDA'})),
+        ('C Mundo+EM+Bonos+Oro: no cambiaría nada', lambda o: o['C']['top']==0),
+        ('D un solo ETF: propone complementos', lambda o: o['D']['adds']>0 or o['D']['top']>0),
+        ('E datos incompletos: confianza reducida', lambda o: o['E']['conf'] in ('low','medium')),
+        ('F ya optimizada: no cambiaría nada', lambda o: o['F']['top']==0)]
+    for name,fn in OT:
+        ok=False
+        try: ok=bool(fn(optim))
+        except Exception as e: name+=f' ({e})'
+        print(('  OK   ' if ok else '  FALLA ')+name)
+        if not ok: fails.append('optimizador: '+name)
     if not contrib or abs(contrib['R']-contrib['sum'])>1e-9 or not contrib['eurOk'] or not contrib['indEst'] or not contrib['dirReal']: fails.append('contribución diaria: no cuadra o etiquetas de calidad')
     if any(v != 'ok' for v in smoke.values()) or errs: fails.append('pantallas/errores JS')
     if update:

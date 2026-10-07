@@ -208,7 +208,7 @@ const tk=e=>esc(String(e.tk||e.t).slice(0,6));
 function matrix(items,cell,note){if(items.length<2)return '';return `<div class="ix-mat" style="--n:${items.length}"><span></span>${items.map(x=>`<b title="${esc(x.name)}">${tk(x)}</b>`).join('')}${items.map((a,i)=>`<b title="${esc(a.name)}">${tk(a)}</b>`+items.map((b,j)=>cell(a,b,i,j)).join('')).join('')}</div>${note?`<p class="mp-note">${note}</p>`:''}`}
 
 /* ------------------------------ PANEL «ANÁLISIS» (Portfolio) ------------------------------ */
-const TABS=[['doctor','Doctor'],['hold','Holdings'],['risk','Riesgo'],['geo','Países'],['comp','Empresas'],['sec','Sectores']];
+const TABS=[['doctor','Doctor'],['opt','Optimizar'],['hold','Holdings'],['risk','Riesgo'],['geo','Países'],['comp','Empresas'],['sec','Sectores']];
 function docTab(t){DOC.tab=t;saveDoc();if(typeof hubSec!=='undefined'&&hubSec==='doc')renderDoc();else openHub('doc')}
 async function renderDoc(){const el=$('#ixdoc');if(!el)return;
   el.innerHTML=`<div class="ix-top"><div class="ix-src"><button data-dsrc="pf" aria-pressed="${DOC.src==='pf'}">Mi cartera</button><button data-dsrc="custom" aria-pressed="${DOC.src==='custom'}">Cartera rápida</button></div>
@@ -221,9 +221,9 @@ async function renderDoc(){const el=$('#ixdoc');if(!el)return;
   const A=await analyze();if(A.empty){out.innerHTML='<p class="mp-note">Añade al menos un activo con su porcentaje.</p>';return}
   if($('#ixdocOut')!==out)return;drawTab()}
 function loadExample(){const pick=t=>{const e=ents().find(x=>x.t===t);return e?{k:e.k,t:e.t}:null};DOC.src='custom';DOC.paste='VT 40\nSPY 25\nQQQ 15\nSMH 10\nEEM 10';DOC.qpMsg='';DOC.rows=[['VT',40],['SPY',25],['QQQ',15],['SMH',10],['EEM',10]].map(([t,w])=>{const p=pick(t);return p?{...p,w}:null}).filter(Boolean);saveDoc()}
-function drawTab(){const out=$('#ixdocOut'),A=ANA;if(!out||!A||A.empty)return;out.innerHTML=({doctor:tabDoctor,hold:tabHold,risk:tabRisk,geo:tabGeo,comp:tabComp,sec:tabSec})[DOC.tab](A);
+function drawTab(){const out=$('#ixdocOut'),A=ANA;if(!out||!A||A.empty)return;out.innerHTML=({doctor:tabDoctor,opt:tabOpt,hold:tabHold,risk:tabRisk,geo:tabGeo,comp:tabComp,sec:tabSec})[DOC.tab](A);
   out.querySelectorAll('[data-dx]').forEach(b=>{const [i,j]=b.dataset.dx.split(':').map(Number);b.onclick=()=>A.D[i].acts[j][1]()});
-  out.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>({globe:()=>showExposureGlobe(A.P,A.name,'geo'),gcomp:()=>showExposureGlobe(A.P,A.name,'comp'),gsec:()=>showExposureGlobe(A.P,A.name,'sec'),comp:()=>docTab('comp'),why:()=>docTab('comp'),radar:()=>openRadar(),share:()=>shareXray(A)})[b.dataset.go]());
+  out.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>({globe:()=>showExposureGlobe(A.P,A.name,'geo'),gcomp:()=>showExposureGlobe(A.P,A.name,'comp'),gsec:()=>showExposureGlobe(A.P,A.name,'sec'),comp:()=>docTab('comp'),why:()=>docTab('comp'),radar:()=>openRadar(),share:()=>shareXray(A),opt:()=>docTab('opt')})[b.dataset.go]());
   out.querySelectorAll('[data-cty]').forEach(b=>b.onclick=()=>openCountry(b.dataset.cty,CNAME[b.dataset.cty]||b.dataset.cty));
   out.querySelectorAll('[data-secx]').forEach(b=>b.onclick=()=>{const d=b.nextElementSibling;if(d)d.hidden=!d.hidden});
   out.querySelectorAll('[data-pair]').forEach(s=>s.onchange=()=>{DOC.pair=[out.querySelector('[data-pair=a]').value,out.querySelector('[data-pair=b]').value];drawTab()});
@@ -232,7 +232,7 @@ function drawTab(){const out=$('#ixdocOut'),A=ANA;if(!out||!A||A.empty)return;ou
   out.querySelectorAll('[data-dim]').forEach(g=>g.onclick=()=>{const w=out.querySelector('.ix-why');if(w)w.open=true;const d=out.querySelector(`.ix-dg[data-dg="${g.dataset.dim}"]`);if(d){d.querySelectorAll('.ix-sc').forEach(x=>x.open=true);d.scrollIntoView({block:'start',behavior:'smooth'});d.classList.add('flash');setTimeout(()=>d.classList.remove('flash'),1200)}});
   out.querySelectorAll('[data-gk]').forEach(g=>g.onclick=()=>{const w=out.querySelector('.ix-why');if(w)w.open=true;const d=out.querySelector(`.ix-sc[data-sk="${g.dataset.gk}"]`);if(d){d.open=true;d.scrollIntoView({block:'center',behavior:'smooth'});d.classList.add('flash');setTimeout(()=>d.classList.remove('flash'),1200)}});
   out.querySelectorAll('[data-comp]').forEach(b=>b.onclick=()=>focusCompany(A,b.dataset.comp));
-  countUp(out);reveal(out);if(DOC.tab==='doctor')renderAlts(A)}
+  countUp(out);reveal(out);if(DOC.tab==='doctor')renderAlts(A);if(DOC.tab==='opt')renderOpt(A)}
 /* microinteracciones: números que cuentan una vez y secciones que aparecen al entrar en pantalla (respeta «reducir movimiento») */
 const RM=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
 function countUp(root){if(RM())return;root.querySelectorAll('[data-count]').forEach(el=>{const to=+el.dataset.count;if(!isFinite(to)||el.dataset.done)return;el.dataset.done=1;const t0=performance.now(),d=700;const step=t=>{const k=Math.min(1,(t-t0)/d),e=1-Math.pow(1-k,3);el.textContent=Math.round(to*e);if(k<1)requestAnimationFrame(step)};requestAnimationFrame(step)})}
@@ -350,7 +350,7 @@ function healthBlock(A){const {SC}=A,[lab,col]=hLabel(SC.health),H=SC.health==nu
 function dxBlock(A){const shown=A.D.filter(d=>d.sev!=='info'),info=A.D.filter(d=>d.sev==='info');
   const card=(d)=>{const i=A.D.indexOf(d),[ico,lab,c]=SEV[d.sev];return `<article class="ix-dx" style="--c:${c}"><div class="dx-l"><span class="dx-sev">${ico} ${lab}</span><h4>${esc(d.t)}</h4><p class="dx-big">${esc(d.metric)}</p><p>${esc(d.exp)}</p><p class="dx-why"><b>¿Por qué?</b> ${esc(d.evid)}</p>${srcl(d.src,d.date)}</div>${d.acts.length?`<div class="ix-btns">${d.acts.map((a,j)=>`<button class="lnk" data-dx="${i}:${j}">${a[0]} →</button>`).join('')}</div>`:''}</article>`};
   return `<section><div class="ix-k">Lo importante</div>${shown.map(card).join('')}${info.map(card).join('')}</section>`}
-function tabDoctor(A){return wowBlock(A)+flowBlock(A)+healthBlock(A)+dxBlock(A)+`<section><div class="ix-k">Escenarios para comparar</div><div id="ixAlt"><div class="sk"><i></i><i></i><i></i></div></div></section><p class="ix-src2">${SOURCES} Herramienta de análisis: no es una recomendación de inversión.</p>`}
+function tabDoctor(A){return wowBlock(A)+flowBlock(A)+healthBlock(A)+`<section class="op-teaser"><div><b>¿Qué cambiaría ATLAS?</b><span>Prueba cambios concretos sobre tu cartera y te enseña solo los que la mejoran de forma medible, con lo que ganas y lo que pierdes.</span></div><button class="btn sm" data-go="opt">Optimizar</button></section>`+dxBlock(A)+`<section><div class="ix-k">Escenarios para comparar</div><div id="ixAlt"><div class="sk"><i></i><i></i><i></i></div></div></section><p class="ix-src2">${SOURCES} Herramienta de análisis: no es una recomendación de inversión.</p>`}
 async function renderAlts(A){const box=$('#ixAlt');if(!box)return;const alts=await altPortfolios(),rows=await Promise.all(alts.map(async a=>{const L=lookThrough(a.P),R=await riskOf(a.P);return{...a,L,R,SC:docScores(L,R,a.P)}}));if(!$('#ixAlt'))return;
   const ts=L=>{const s=Object.entries(L.S).filter(([k])=>k!==UNK&&k!=='Otros').sort((a,b)=>b[1]-a[1])[0];return s?`${s[0]} ${pct(s[1],0)}`:'—'};const em=L=>Object.entries(L.C).filter(([c])=>EM.has(c)).reduce((a,[,v])=>a+v,0);
   const met=(o)=>[['Supuesto de rentabilidad',o.assume==null?'n/d':pct(o.assume,1)+'/año'],['Volatilidad',o.R?pct(o.R.vol,0):'—'],['Caída máx.',o.R?pct(o.R.dd,0):'—'],['EE. UU.',pct(o.L.C.US||0,0)],['Emergentes',pct(em(o.L),0)],['1er sector',ts(o.L)],['10 mayores empresas',o.SC.top10?'≥ '+pct(o.SC.top10,0):'—'],['Coste (TER)',o.L.ter==null?'—':pct(o.L.ter,2)]];
@@ -698,18 +698,18 @@ async function renderCountry(){const el=$('#ixcty');if(!el||!CTY)return;let X=XP
   const h=document.querySelector('.right .phead h2 .sp');if(h)h.textContent='◍ '+nm}
 
 /* ------------------------------ 5 · RESUMEN (Overview) sobre el globo ------------------------------ */
-let OV={collapsed:(()=>{try{const v=localStorage.getItem('atlas_ov');return v==null?innerWidth<=700:v==='0'}catch(_){return innerWidth<=700}})(),hidden:false};   // en móvil empieza recogida: el globo queda libre para moverlo
+let OV={collapsed:(()=>{try{const v=localStorage.getItem('atlas_ov2');return v==null?true:v==='0'}catch(_){return true}})(),hidden:false};   // empieza recogida (una línea): se amplía al tocarla
 function ovEl(){let b=$('#ovcard');if(!b){b=document.createElement('section');b.id='ovcard';document.body.appendChild(b)}return b}
 function ovHide(soft){OV.hidden=true;const b=$('#ovcard');if(b)b.hidden=true}
 function ovShow(){OV.hidden=false;if(!XP)renderOverview()}
 async function renderOverview(){if(OV.hidden||XP||typeof MAPMODE==='undefined'||!MAPMODE)return;const b=ovEl();b.hidden=false;
-  const brand=`<div class="ov-br"><b>ATLAS</b><span>Inteligencia de ETFs y carteras</span></div>`;
+  const brand=OV.collapsed?'':`<div class="ov-br"><b>ATLAS</b><span>Inteligencia de ETFs y carteras</span></div>`;
   const QK=!PF.length&&DOC.rows&&DOC.rows.some(r=>r.k&&+r.w>0);
-  if(!PF.length&&!QK){b.className='ov empty';b.innerHTML=`${brand}<div class="ov-h"><div><b class="ov-t">¿Cuántas apuestas reales hay en tu cartera?</b></div><button data-ov="col" aria-label="Plegar">${OV.collapsed?'▴':'▾'}</button></div>${OV.collapsed?'':`<p>Seis ETFs pueden ser una sola apuesta. Pega tu cartera y en 30 segundos verás:</p><ul class="ov-chk"><li>Cuántas apuestas independientes haces de verdad</li><li>Qué empresas, sectores y países tienes por debajo</li><li>Dónde se solapan tus ETFs</li><li>Qué riesgos no se ven a simple vista</li></ul><div class="ov-b"><button class="btn" data-ov="qp">Pegar mi cartera</button><button class="btn2" data-ov="ex">Ver un ejemplo</button></div><p class="ov-fine">Sin cuenta. Tus datos se quedan en este dispositivo.</p>`}`;bindOv(b);return}
-  b.className='ov';if(!b.querySelector('.ov-h'))b.innerHTML=`${brand}<div class="sk"><i></i><i></i><i></i></div>`;
+  if(!PF.length&&!QK){b.className='ov empty'+(OV.collapsed?' col':'');b.innerHTML=`${brand}<div class="ov-h"><div><b class="ov-t">¿Cuántas apuestas reales hay en tu cartera?</b></div><button data-ov="col" aria-label="Plegar">${OV.collapsed?'▴':'▾'}</button></div>${OV.collapsed?'':`<p>Seis ETFs pueden ser una sola apuesta. Pega tu cartera y en 30 segundos verás:</p><ul class="ov-chk"><li>Cuántas apuestas independientes haces de verdad</li><li>Qué empresas, sectores y países tienes por debajo</li><li>Dónde se solapan tus ETFs</li><li>Qué riesgos no se ven a simple vista</li></ul><div class="ov-b"><button class="btn" data-ov="qp">Pegar mi cartera</button><button class="btn2" data-ov="ex">Ver un ejemplo</button></div><p class="ov-fine">Sin cuenta. Tus datos se quedan en este dispositivo.</p>`}`;bindOv(b);return}
+  b.className='ov'+(OV.collapsed?' col':'');if(!b.querySelector('.ov-h'))b.innerHTML=`${brand}<div class="sk"><i></i><i></i><i></i></div>`;
   const SRC=PF.length?'pf':'custom',A=await analyzeSrc(SRC);if(OV.hidden||XP||!A||A.empty)return;
   const v=_pfV||{val:0,inv:0},ret=v.inv?(v.val/v.inv-1)*100:null,ins=A.D.filter(d=>d.sev!=='info').slice(0,mobile()?2:3);
-  b.innerHTML=`${brand}<div class="ov-h">${SRC==='pf'?`<div class="ov-v"><small>Tu cartera</small><b data-count="${Math.round(v.val)}">${num(v.val)}</b><span class="ov-eur">€</span><em class="${(ret||0)<0?'dn':'up'}">${ret==null?'—':(ret>0?'+':'')+pct(ret,1)}</em></div>`:`<div class="ov-v"><small>Cartera rápida · por pesos</small><b class="ov-q">Rayos X</b><button class="lnk" data-ov="qp">Editar</button></div>`}<button class="ov-g" data-ov="doc" title="Ver por qué">${gauge(A.SC,96)}</button><button data-ov="col" class="ov-c" aria-label="${OV.collapsed?'Desplegar':'Plegar'}">${OV.collapsed?'▴':'▾'}</button></div>
+  b.innerHTML=`${brand}<div class="ov-h">${SRC==='pf'?`<div class="ov-v"><small>Tu cartera</small><b data-count="${Math.round(v.val)}">${num(v.val)}</b><span class="ov-eur">€</span><em class="${(ret||0)<0?'dn':'up'}">${ret==null?'—':(ret>0?'+':'')+pct(ret,1)}</em></div>`:`<div class="ov-v"><small>Cartera rápida · por pesos</small><b class="ov-q">Rayos X</b><button class="lnk" data-ov="qp">Editar</button></div>`}<button class="ov-g" data-ov="doc" title="Ver por qué">${gauge(A.SC,OV.collapsed?58:96)}</button><button data-ov="col" class="ov-c" aria-label="${OV.collapsed?'Desplegar':'Plegar'}">${OV.collapsed?'▴':'▾'}</button></div>
     ${OV.collapsed?'':`${A.SC.bets&&A.R&&A.P.length>1?`<button class="ov-bets" data-ov="doc"><span><b>${A.P.length}</b> productos</span><i>→</i><span><b>≈ ${fmtB(A.SC.bets.nb)}</b> apuesta${A.SC.bets.nb>=1.05?'s':''} independiente${A.SC.bets.nb>=1.05?'s':''}</span><em>Ver por qué</em></button>`:''}<p class="ov-lead">${esc(headline(A))}</p><ul class="ov-i">${ins.map(d=>`<li style="--c:${SEV[d.sev][2]}"><b>${esc(d.t)}</b><em>${esc(d.metric)}</em></li>`).join('')}</ul>
     <div class="ov-b"><button class="btn" data-ov="doc">Analizar cartera</button><div class="ov-x"><span>Exposición de tu cartera</span><button data-ov="geo">Países</button><button data-ov="comp">Empresas</button><button data-ov="sec">Sectores</button></div></div>`}`;bindOv(b,A);countUpEur(b);todayInto(b,A)}
 /* ---------- Inicio · «Hoy / Lo que importa ahora» ---------- */
@@ -718,7 +718,7 @@ const hhmm=t=>new Date(t).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-d
 const dLong=d=>new Date(d+'T12:00:00Z').toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'});
 async function todayInto(b,A){const h=b.querySelector('.ov-h');if(!h)return;const ov=b.querySelector('.ov-v');
   let day=b.querySelector('.ov-day');if(!day&&ov){ov.insertAdjacentHTML('beforeend','<span class="ov-day" aria-live="polite">Hoy …</span>');day=b.querySelector('.ov-day')}
-  h.insertAdjacentHTML('afterend',`<section class="td${OV.collapsed?' mini':''}" aria-label="Lo que importa ahora"><div class="sk"><i></i></div></section>`);let box=b.querySelector('.td');
+  let box=null;if(!OV.collapsed){h.insertAdjacentHTML('afterend','<section class="td" aria-label="Lo que importa ahora"><div class="sk"><i></i></div></section>');box=b.querySelector('.td')}
   const T=await getPortfolioContribution(A);if(!b.isConnected)return;
   if(!T){if(day)day.textContent='Sin cotización de hoy';if(box)box.remove();return}
   const closed=T.status==='close',lbl=closed?`Última sesión (${dLong(T.session)})`:'Hoy',dn=T.R<0;
@@ -747,8 +747,8 @@ async function todayInto(b,A){const h=b.querySelector('.ov-h');if(!h)return;cons
   const bx=box.querySelector('[data-tdx]');if(bx)bx.onclick=()=>focusCompany(A,bx.dataset.tdx);
   if(box.classList.contains('mini')){box.style.cursor='pointer';box.title='Ver detalle';box.onclick=()=>{const c=b.querySelector('[data-ov=col]');if(c)c.click()}}}
 function countUpEur(b){const el=b.querySelector('.ov-v b[data-count]');if(!el||RM()||el.dataset.done)return;el.dataset.done=1;const to=+el.dataset.count,t0=performance.now();const st=t=>{const k=Math.min(1,(t-t0)/800),e=1-Math.pow(1-k,3);el.textContent=num(to*e);if(k<1)requestAnimationFrame(st)};requestAnimationFrame(st)}
-function bindOv(b,A){b.querySelectorAll('[data-ov]').forEach(x=>x.onclick=()=>{const k=x.dataset.ov;
-  if(k==='col'){OV.collapsed=!OV.collapsed;try{localStorage.setItem('atlas_ov',OV.collapsed?'0':'1')}catch(_){}renderOverview();return}
+function bindOv(b,A){b.onclick=e=>{if(!b.classList.contains('col')||e.target.closest('button,a,input,textarea'))return;const c=b.querySelector('[data-ov=col]');if(c)c.click()};b.querySelectorAll('[data-ov]').forEach(x=>x.onclick=()=>{const k=x.dataset.ov;
+  if(k==='col'){OV.collapsed=!OV.collapsed;try{localStorage.setItem('atlas_ov2',OV.collapsed?'0':'1')}catch(_){}renderOverview();return}
   if(k==='pf')openHub('pf');else if(k==='ex'){loadExample();DOC.tab='doctor';saveDoc();openHub('doc')}else if(k==='doc'){DOC.src=PF.length?'pf':'custom';DOC.tab='doctor';saveDoc();openHub('doc')}else if(k==='qp'){DOC.src='custom';DOC.tab='doctor';saveDoc();openHub('doc');setTimeout(()=>{const t=$('#qpT');if(t)t.focus()},400)}else if(A)showExposureGlobe(A.P,A.name,k)})}
 
 /* ------------------------------ integración ------------------------------ */
@@ -781,6 +781,164 @@ function stripEmoji(root){if(!root||!root.querySelectorAll)return;const w=docume
   const L=[];while(w.nextNode())L.push(w.currentNode);L.forEach(n=>{const t=n.data.replace(EPG,'');if(t.trim()&&t!==n.data)n.data=t})}
 let _seq=0;const _eq=new Set();function watchEmoji(){stripEmoji(document.body);const mo=new MutationObserver(ms=>{ms.forEach(m=>{const t=m.target.nodeType===3?m.target.parentElement:m.target;if(t)_eq.add(t)});if(_seq)return;_seq=requestAnimationFrame(()=>{_seq=0;const q=[..._eq];_eq.clear();q.forEach(t=>{if(t.isConnected)stripEmoji(t)})})});mo.observe(document.body,{childList:true,subtree:true,characterData:true})}
 window.ATLASI={expOf,betsOf,betsRobust,docScores,lookThrough,overlap,overlapDetail,riskOf,docPortfolio,analyze,analyzeSrc:s=>analyzeSrc(s),renderDoc,renderRadar,renderCompare,showExposureGlobe,hideExposure,openCompare,openRadar,openCountry,loadExpo,renderOverview,get DOC(){return DOC},set DOC(v){DOC=v;saveDoc()}};
+/* ======================= OPTIMIZAR · motor de cambios (P0) + propuestas (P1) =======================
+   Regla de oro: solo se propone un cambio si se puede demostrar, con los datos de ATLAS, que mejora algo importante de ESTA cartera.
+   · No hay «cartera ideal»: se parte de los problemas detectados y de lo que falta.
+   · Candidatos del universo de ATLAS elegidos por la CARENCIA que cubren (emergentes, pequeñas empresas, renta fija, regiones…),
+     no por rentabilidad. Entre candidatos de la misma carencia, el de menor coste (TER).
+   · Cada cambio se simula con el mismo motor (exposición, riesgo, apuestas efectivas, salud) y se puntúa:
+       puntuación = Δsalud + 12·Δapuestas (+ riesgo si la prioridad es preservar) − 20·rotación − 1,5·productos nuevos
+     Solo se muestra si Δsalud ≥ 2 o Δapuestas ≥ 0,15, y la puntuación ≥ 3. Si nada lo cumple: «No cambiaría nada».
+   · Todo es histórico/modelo, no previsión. */
+const OPT_PREF=()=>({prio:'bal',noSell:false,noBonds:false,noCommod:false,keepTop:false,...(DOC.opt||{})});
+const EU_C=['GB','FR','DE','CH','NL','ES','IT','SE','DK','FI','BE','IE','NO','AT','PT'];
+const LEV_RX=/2x|3x|ultra|leverag|apalanc|short|inverse|bear|daily/i;
+function tagsOf(e){if(e.k==='s')return['stock'];const x=expOf(e),ac=assetClass(e),n=(e.name+' '+(e.obj.n||'')+' '+(e.obj.full||'')).toLowerCase(),C=x.country||{};
+  const em=Object.entries(C).filter(([c])=>EM.has(c)).reduce((a,[,v])=>a+v,0),us=C.US||0,eu=EU_C.reduce((a,c)=>a+(C[c]||0),0),jp=C.JP||0,t=[];
+  if(ac==='Bonos')t.push('bond');else if(ac==='Oro')t.push('gold');
+  else{if(/small|russell 2000|smallcap|small-cap|pequeñ/.test(n))t.push('small');if(/\bvalue\b|valor\b/.test(n))t.push('value');
+    if(em>=70)t.push('em');else if(eu>=70)t.push('europe');else if(jp>=70)t.push('japan');else if(us<15&&x.ccCover>50)t.push('exus');else if(us>=40&&us<=75&&Object.keys(C).length>15&&!isNarrow(e))t.push('world')}
+  return t}
+const GAP_TXT={em:'emergentes',small:'pequeñas empresas',bond:'renta fija',gold:'oro',europe:'Europa',japan:'Japón',exus:'fuera de EE. UU.',value:'empresas «value»'};
+let _cands=null;function candidates(){if(_cands)return _cands;const E=ents().filter(e=>(e.k==='e'||e.k==='f')&&!e.obj.lev&&!LEV_RX.test(e.name+' '+(e.obj.n||'')));const by={};
+  E.forEach(e=>{const tg=tagsOf(e).filter(t=>t!=='world');if(!tg.length)return;const x=expOf(e),ac=assetClass(e);if(ac==='Acciones'&&(isNarrow(e)||x.q.country==='none'))return;const ter=terOf(e);if(ter!=null&&ter>.75)return;
+    tg.forEach(t=>{(by[t]=by[t]||[]).push({e,ter:ter??.5})})});
+  Object.keys(by).forEach(t=>by[t]=by[t].sort((a,b)=>a.ter-b.ter||String(a.e.tk).localeCompare(String(b.e.tk))).slice(0,3).map(x=>x.e));return _cands=by}
+function metOf(A){const {L,R,SC,P}=A,ss=Object.entries(L.S).filter(([s])=>s!==UNK&&s!=='Otros').sort((a,b)=>b[1]-a[1]),cs=Object.entries(L.C).filter(([c])=>c!=='XX').sort((a,b)=>b[1]-a[1]);
+  const em=Object.entries(L.C).filter(([c])=>EM.has(c)).reduce((a,[,v])=>a+v,0),bond=L.AC.Bonos||0,gold=L.AC.Oro||0;
+  return{health:SC.health,bets:SC.bets&&SC.bets.rob?SC.bets.rob.d5:SC.bets?SC.bets.nb:null,S:L.S,C:L.C,topSec:ss[0]||null,topCty:cs[0]||null,top10:SC.top10,top1:SC.top1,top1n:L.comps[0]?L.comps[0].name:null,
+    ovl:SC.ovAvg,vol:R?R.vol:null,dd:R?R.dd:null,cagr:R?R.cagr:null,sharpe:R&&R.vol?(R.cagr-(typeof RF==='number'?RF:2))/R.vol:null,ter:L.ter,n:P.length,em,bond,gold,us:L.C.US||0,corr:SC.avgCorr}}
+/* simulación rápida (sin la comprobación de 3 años) */
+async function simP(list){const P=list.filter(x=>x.e&&x.w>1e-4).map(x=>({e:x.e,w:x.w}));const t=P.reduce((a,x)=>a+x.w,0);P.forEach(x=>x.w/=t);const L=lookThrough(P),R=await riskOf(P);const SC=docScores(L,R,P);return{P,L,R,SC}}
+const wmap=P=>{const m=new Map();P.forEach(x=>m.set(x.e,(m.get(x.e)||0)+x.w));return m};
+function withMoves(P,fn){const m=wmap(P);fn(m);return[...m.entries()].map(([e,w])=>({e,w})).filter(x=>x.w>1e-4)}
+const shiftTo=(m,from,amt,to)=>{const a=Math.min(m.get(from)||0,amt);m.set(from,(m.get(from)||0)-a);if(to)m.set(to,(m.get(to)||0)+a);else{const rest=[...m.keys()].filter(k=>k!==from),tw=rest.reduce((s,k)=>s+m.get(k),0);rest.forEach(k=>m.set(k,m.get(k)+a*m.get(k)/tw))}};
+const addNew=(m,e,w)=>{for(const k of m.keys())m.set(k,m.get(k)*(1-w));m.set(e,(m.get(e)||0)+w)};
+function movesOf(P0,P1){const a=wmap(P0),b=wmap(P1),ks=new Set([...a.keys(),...b.keys()]);return[...ks].map(e=>({e,from:a.get(e)||0,to:b.get(e)||0})).filter(x=>Math.abs(x.to-x.from)>.004).sort((x,y)=>Math.abs(y.to-y.from)-Math.abs(x.to-x.from))}
+function scoreOf(m0,m1,P0,P1,pref){const dH=(m1.health??0)-(m0.health??0),dB=(m1.bets??0)-(m0.bets??0),mv=movesOf(P0,P1),turn=mv.reduce((s,x)=>s+Math.abs(x.to-x.from),0)/2,newP=mv.filter(x=>x.from===0).length,gone=mv.filter(x=>x.to===0).length;
+  let s=dH+12*dB-20*turn-1.5*newP+.5*gone;if(pref.prio==='preserve')s+=.6*((m0.vol??0)-(m1.vol??0))+.25*((m1.dd??0)-(m0.dd??0));if(pref.prio==='growth')s+=.25*((m1.cagr??0)-(m0.cagr??0));
+  return{s,dH,dB,turn,newP,gone,mv,ok:(dH>=2||dB>=.15)&&s>=3}}
+/* problemas de la cartera (solo con evidencia) */
+function problemsOf(A,m){const out=[],nm=e=>tk(e);
+  if(m.topSec&&m.topSec[1]>=35){const by=(A.L.byS[m.topSec[0]]||[]).sort((a,b)=>b.p-a.p).slice(0,3);out.push({id:'sec',sev:m.topSec[1],t:`Concentración en ${m.topSec[0].toLowerCase()}`,ev:`${pct(m.topSec[1],0)} de tu exposición. Viene sobre todo de ${by.map(b=>`${nm(b.e)} ${pct(b.p,0)}`).join(', ')}.`,key:m.topSec[0]})}
+  if(m.bets!=null&&A.P.length>=2&&(m.bets<1.3||m.bets<A.P.length*.4))out.push({id:'bets',sev:60-m.bets*10,t:`${A.P.length} productos, ≈ ${fmtB(m.bets)} apuestas independientes`,ev:'Tus productos se han movido casi a la vez: añadir más de lo mismo no diversifica.'});
+  if(A.P.length===1)out.push({id:'single',sev:50,t:'Una sola apuesta',ev:`Toda la cartera depende de ${nm(A.P[0].e)}.`});
+  if(m.ovl!=null&&m.ovl>=20)out.push({id:'ovl',sev:m.ovl,t:'Solapamiento entre tus ETFs',ev:`Comparten de media ≥ ${pct(m.ovl,0)} de sus empresas principales.`});
+  if(m.topCty&&m.topCty[1]>=70)out.push({id:'cty',sev:m.topCty[1]-30,t:`Dependencia de ${CNAME[m.topCty[0]]||m.topCty[0]}`,ev:`${pct(m.topCty[1],0)} de tu exposición (en el índice mundial EE. UU. pesa ~60–65 %).`,key:m.topCty[0]});
+  if(m.top1>=8)out.push({id:'comp',sev:m.top1*2,t:`Mucho peso en ${m.top1n}`,ev:`≥ ${pct(m.top1,1)} de tu cartera sumando lo directo y lo que va dentro de tus ETFs.`});
+  if(m.ter!=null&&m.ter>.4)out.push({id:'cost',sev:m.ter*60,t:'Costes altos',ev:`TER medio ponderado ${pct(m.ter,2)} al año.`});
+  return out.sort((a,b)=>b.sev-a.sev).slice(0,3)}
+function gapsOf(A,m,pref){const have=new Set(A.P.flatMap(x=>tagsOf(x.e))),g=[];
+  if(m.em<5)g.push({t:'em',why:`Emergentes: ${pct(m.em,0)} de tu cartera (≈ 10 % del índice mundial).`});
+  if(m.us>65&&!have.has('europe'))g.push({t:'europe',why:`EE. UU. ${pct(m.us,0)}; Europa apenas está representada.`});
+  if(!have.has('small'))g.push({t:'small',why:'Ningún producto de pequeñas empresas: todo son grandes compañías.'});
+  if(pref.prio!=='growth'&&!pref.noBonds&&m.bond<5)g.push({t:'bond',why:`Renta fija: ${pct(m.bond,0)} de tu cartera.`});
+  if(pref.prio==='preserve'&&!pref.noCommod&&m.gold<3)g.push({t:'gold',why:`Oro: ${pct(m.gold,0)} de tu cartera.`});
+  if(m.us>75&&!have.has('exus'))g.push({t:'exus',why:`EE. UU. ${pct(m.us,0)} de tu exposición.`});return g}
+/* contribución marginal: ¿qué aporta cada producto a ESTA cartera? (se quita y se reparte en el resto) */
+async function marginalOf(A,m0){if(A.P.length<2)return[];const out=[];for(const x of A.P){const P1=withMoves(A.P,mm=>shiftTo(mm,x.e,x.w,null)),S1=await simP(P1),m1=metOf(S1);
+    const mine=new Set(expOf(x.e).hold.map(h=>h.key)),others=new Set(A.P.filter(y=>y.e!==x.e).flatMap(y=>expOf(y.e).hold.map(h=>h.key)));const H=expOf(x.e).hold,hw=H.reduce((a,h)=>a+h.w,0),sh=hw?H.filter(h=>others.has(h.key)).reduce((a,h)=>a+h.w,0)/hw*100:null;
+    const sec=m0.topSec?m0.topSec[0]:null,ix=A.R?A.R.assets.indexOf(x.e):-1;let cr=null;if(ix>=0){const v=A.R.M[ix].filter((c,j)=>j!==ix&&c!=null);cr=v.length?v.reduce((a,c)=>a+c,0)/v.length:null}
+    out.push({e:x.e,w:x.w,bets:(m0.bets??0)-(m1.bets??0),sec:sec?(m0.S[sec]||0)-(m1.S[sec]||0):null,vol:(m0.vol??0)-(m1.vol??0),ter:(m0.ter??0)-(m1.ter??0),dH:(m1.health??0)-(m0.health??0),ovShare:sh,corr:cr,m1})}
+  out.forEach(o=>{o.ineff=o.dH>=3&&o.bets<=.05&&((o.ovShare!=null&&o.ovShare>=50)||(o.corr!=null&&o.corr>=.8));o.lbl=o.ineff?'POCO EFICIENTE EN TU CARTERA':o.bets>=.15?'APORTA DIVERSIFICACIÓN':o.ovShare!=null&&o.ovShare>=50?'MUCHO SOLAPAMIENTO':'NEUTRAL'});return out}
+let _OPT=new Map();
+async function optimize(A){const pref=OPT_PREF(),sig=sigOf(A.P)+JSON.stringify(pref);if(_OPT.has(sig))return _OPT.get(sig);
+  const pr=(async()=>{const m0=metOf(A),probs=problemsOf(A,m0),gaps=gapsOf(A,m0,pref),C=candidates();
+  const pool=[];gaps.forEach(g=>(C[g.t]||[]).forEach(e=>{if(!A.P.some(x=>x.e===e)&&!pool.some(p=>p.e===e))pool.push({e,gap:g})}));const cand=pool.slice(0,8);
+  const big=A.P.slice().sort((a,b)=>b.w-a.w).slice(0,2).map(x=>x.e),locked=e=>pref.keepTop&&big.includes(e);
+  const mg=await marginalOf(A,m0);const weak=mg.slice().sort((a,b)=>b.dH-a.dH).filter(o=>!locked(o.e)).slice(0,3).map(o=>o.e);
+  const tries=[];const T=(type,P1,meta)=>tries.push({type,P1,...meta});
+  cand.forEach(c=>{T('add',withMoves(A.P,m=>addNew(m,c.e,.1)),{to:c.e,gap:c.gap})});
+  if(!pref.noSell&&A.P.length>1)weak.forEach(e=>{const w=A.P.find(x=>x.e===e).w;
+    T('remove',withMoves(A.P,m=>shiftTo(m,e,w,null)),{from:e});T('reduce',withMoves(A.P,m=>shiftTo(m,e,w/2,null)),{from:e});
+    cand.slice(0,5).forEach(c=>{T('swap',withMoves(A.P,m=>shiftTo(m,e,w,c.e)),{from:e,to:c.e,gap:c.gap});T('shift',withMoves(A.P,m=>shiftTo(m,e,Math.min(w/2,.1),c.e)),{from:e,to:c.e,gap:c.gap})})});
+  if(!pref.noSell&&A.P.length===1&&cand.length)cand.slice(0,4).forEach(c=>T('shift',withMoves(A.P,m=>shiftTo(m,A.P[0].e,.2,c.e)),{from:A.P[0].e,to:c.e,gap:c.gap}));
+  for(const t of tries){const S1=await simP(t.P1);t.S=S1;t.m=metOf(S1);Object.assign(t,scoreOf(m0,t.m,A.P,S1.P,pref))}
+  const ranked=tries.filter(t=>t.ok).sort((a,b)=>b.s-a.s);const seen=new Set(),top=[];ranked.forEach(t=>{const k=t.type+(t.from?t.from.t:'')+(t.to?t.to.t:'');const k2=(t.from?t.from.t:'')+'>'+(t.gap?t.gap.t:t.to?t.to.t:'');if(seen.has(k2))return;seen.add(k2);top.push(t)});
+  /* opciones A/B/C sobre la mejor dirección */
+  let opts=null;const best=top[0];if(best){const f=best.from,to=best.to,w=f?A.P.find(x=>x.e===f).w:0,c2=cand.find(c=>c.e!==to&&(!best.gap||c.gap.t!==best.gap.t));
+    const mk=async(lbl,desc,P1)=>{const S1=await simP(P1),m=metOf(S1);return{lbl,desc,S:S1,m,...scoreOf(m0,m,A.P,S1.P,pref)}};
+    const v=[],big=Math.min(w,.4);if(f&&to){v.push(await mk('A','Cambio mínimo',withMoves(A.P,m=>shiftTo(m,f,Math.min(w,.1)*.5,to))));v.push(await mk('B','Equilibrada',withMoves(A.P,m=>shiftTo(m,f,Math.min(w,.2,Math.max(.1,w/2)),to))));
+        v.push(await mk('C','Transformación',withMoves(A.P,m=>{shiftTo(m,f,big*(c2?.5:1),to);if(c2)shiftTo(m,f,big*.5,c2.e)})))}
+    else if(f){v.push(await mk('A','Cambio mínimo',withMoves(A.P,m=>shiftTo(m,f,w*.33,null))));v.push(await mk('B','Equilibrada',withMoves(A.P,m=>shiftTo(m,f,w*.66,null))));v.push(await mk('C','Transformación',withMoves(A.P,m=>{shiftTo(m,f,w,null);if(c2&&!pref.noSell)addNew(m,c2.e,.1)})))}
+    else if(to){v.push(await mk('A','Cambio mínimo',withMoves(A.P,m=>addNew(m,to,.05))));v.push(await mk('B','Equilibrada',withMoves(A.P,m=>addNew(m,to,.1))));v.push(await mk('C','Transformación',withMoves(A.P,m=>{addNew(m,to,.1);if(c2)addNew(m,c2.e,.1)})))}
+    opts=v.filter((o,i,a)=>a.findIndex(z=>JSON.stringify(z.mv.map(q=>[q.e.t,Math.round(q.to*100)]))===JSON.stringify(o.mv.map(q=>[q.e.t,Math.round(q.to*100)])))===i)}
+  const adds=tries.filter(t=>t.type==='add').sort((a,b)=>b.s-a.s).slice(0,3);
+  const conf=t=>{const inv=[...new Set([...(t.mv||[]).map(x=>x.e),...A.P.map(x=>x.e)])];const q=inv.map(e=>expOf(e).q);const noPx=inv.some(e=>t.S&&t.S.R&&t.S.R.assets.indexOf(e)<0);
+    return noPx||q.some(x=>x.country==='none')?'low':q.some(x=>x.companies!=='real'||x.country==='proxy')?'medium':'high'};
+  [...top,...(opts||[]),...adds].forEach(t=>{t.conf=conf(t)});
+  return{m0,probs,gaps,cand,mg,top:top.slice(0,10),opts,adds,pref,n:tries.length}})();
+  _OPT.set(sig,pr);if(_OPT.size>6)_OPT.delete(_OPT.keys().next().value);return pr}
+/* ---------- UI ---------- */
+const arrow=(d,good)=>Math.abs(d)<1e-9?'→':(d>0)===good?'↑':'↓';
+function cmpRows(m0,m1){const r=(l,a,b,f,better,unit)=>{const d=(b??0)-(a??0),flat=a==null||b==null||Math.abs(d)<(unit||.05);return`<tr><th>${l}</th><td>${a==null?'n/d':f(a)}</td><td>${b==null?'n/d':f(b)}</td><td class="${flat?'eq':better==null?'eq':((d>0)===better?'bt':'wr')}">${flat?'→ igual':better==null?(d>0?'↑':'↓'):((d>0)===better?'↑ mejora':'↓ empeora')}</td></tr>`};
+  const sec=m0.topSec?m0.topSec[0]:null,cc=m0.topCty?m0.topCty[0]:null;
+  return [r('Salud',m0.health,m1.health,v=>Math.round(v),true,1),r('Apuestas independientes',m0.bets,m1.bets,v=>fmtB(v),true,.05),r('Volatilidad (hist.)',m0.vol,m1.vol,v=>pct(v,1),false,.2),r('Caída máxima (hist.)',m0.dd,m1.dd,v=>pct(v,0),true,.5),r('Sharpe (hist.)',m0.sharpe,m1.sharpe,v=>num(v,2),true,.02),
+    sec?r(sec,m0.S[sec]||0,m1.S[sec]||0,v=>pct(v,0),false,.5):'',cc?r(CNAME[cc]||cc,m0.C[cc]||0,m1.C[cc]||0,v=>pct(v,0),false,.5):'',r('Emergentes',m0.em,m1.em,v=>pct(v,0),null,.5),r('Mayor empresa',m0.top1,m1.top1,v=>'≥ '+pct(v,1),false,.2),r('10 mayores empresas',m0.top10,m1.top10,v=>'≥ '+pct(v,0),false,.5),
+    r('Solapamiento medio',m0.ovl,m1.ovl,v=>'≥ '+pct(v,0),false,.5),r('Coste (TER)',m0.ter,m1.ter,v=>pct(v,2),false,.005),r('Productos',m0.n,m1.n,v=>String(v),null,.5)].join('')}
+function gainsLosses(m0,m1,t){const g=[],l=[],sec=m0.topSec?m0.topSec[0]:null,cc=m0.topCty?m0.topCty[0]:null;
+  if((m1.bets??0)-(m0.bets??0)>=.05)g.push(`Más diversificación real: ${fmtB(m0.bets)} → ${fmtB(m1.bets)} apuestas independientes`);else if((m0.bets??0)-(m1.bets??0)>=.05)l.push(`Algo menos de diversificación real (${fmtB(m0.bets)} → ${fmtB(m1.bets)})`);
+  if(sec){const d=(m1.S[sec]||0)-(m0.S[sec]||0);if(d<=-2){g.push(`Menos concentración en ${sec.toLowerCase()} (${pct(m0.S[sec],0)} → ${pct(m1.S[sec],0)})`);l.push(`Menos exposición a ${sec.toLowerCase()}: si sigue haciéndolo mejor que el mercado, la cartera lo aprovechará menos`)}}
+  if(cc){const d=(m1.C[cc]||0)-(m0.C[cc]||0);if(d<=-2)g.push(`Menos dependencia de ${CNAME[cc]||cc} (${pct(m0.C[cc],0)} → ${pct(m1.C[cc],0)})`)}
+  if(m0.vol!=null&&m1.vol!=null){if(m1.vol<m0.vol-.3)g.push(`Menor volatilidad histórica (${pct(m0.vol,1)} → ${pct(m1.vol,1)})`);else if(m1.vol>m0.vol+.3)l.push(`Más volatilidad histórica (${pct(m0.vol,1)} → ${pct(m1.vol,1)})`)}
+  if(m0.dd!=null&&m1.dd!=null&&m1.dd>m0.dd+1)g.push(`Caída máxima histórica más suave (${pct(m0.dd,0)} → ${pct(m1.dd,0)})`);
+  if(m0.cagr!=null&&m1.cagr!=null&&m1.cagr<m0.cagr-.3)l.push(`Rentabilidad histórica de 5 años algo menor (${pct(m0.cagr,1)} → ${pct(m1.cagr,1)}/año). Es pasado, no previsión`);
+  if(m0.ter!=null&&m1.ter!=null){if(m1.ter<m0.ter-.005)g.push(`Coste menor (TER ${pct(m0.ter,2)} → ${pct(m1.ter,2)})`);else if(m1.ter>m0.ter+.005)l.push(`Coste algo mayor (TER ${pct(m0.ter,2)} → ${pct(m1.ter,2)})`)}
+  const RISK={em:'Riesgo político y de divisa de los mercados emergentes',small:'Las pequeñas empresas oscilan más y sufren más en recesiones',bond:'Riesgo de tipos de interés: la renta fija cae cuando suben los tipos',gold:'El oro no genera rentas y puede pasar años sin subir',europe:'Más exposición al euro y a la economía europea',japan:'Riesgo de divisa (yen)',exus:'Más riesgo de divisa',value:'Puede quedarse atrás en mercados dominados por el crecimiento'};
+  const nw=(t.mv||[]).filter(x=>x.from===0).map(x=>tagsOf(x.e).map(q=>RISK[q]).filter(Boolean)[0]).filter(Boolean);
+  return{g,l,risk:nw}}
+const CONF_O={high:['ALTA','Precios reales de 5 años y composición publicada completa por países y sectores.'],medium:['MEDIA','Algún producto solo publica sus 10 mayores posiciones o usa un índice equivalente: la exposición indirecta es parcial.'],low:['BAJA','Falta composición o historial de precios de algún producto.']};
+function moveTxt(mv){return mv.map(x=>`<li><span class="om-tk">${tk(x.e)}</span><span class="om-nm">${esc(x.e.name)}</span><b>${x.from?pct(x.from*100,0):'—'} → ${x.to?pct(x.to*100,0):'fuera'}</b></li>`).join('')}
+function propTitle(t){const f=t.from,to=t.to;return t.type==='add'?`Añadir ${tk(to)} (${GAP_TXT[t.gap.t]||''})`:t.type==='remove'?`Quitar ${tk(f)}`:t.type==='reduce'?`Reducir ${tk(f)}`:t.type==='swap'?`Sustituir ${tk(f)} por ${tk(to)}`:`Pasar parte de ${tk(f)} a ${tk(to)}`}
+function whyOf(t,R,mg){const out=[],f=t.from?mg.find(o=>o.e===t.from):null;
+  if(f){if(f.ovShare!=null)out.push(`<b>Solapamiento:</b> ${pct(f.ovShare,0)} de las principales posiciones de ${tk(f.e)} ya están en tus otros productos.`);
+    if(f.corr!=null)out.push(`<b>Se mueve como el resto:</b> correlación semanal media ${f.corr.toFixed(2).replace('.',',')} con tus otros productos (5 años).`);
+    out.push(`<b>Aporta poca diversificación:</b> quitándolo, tus apuestas independientes ${f.bets>=0?'bajarían':'subirían'} solo ${fmtB(Math.abs(f.bets))}.`);
+    if(f.sec!=null&&f.sec>=1)out.push(`<b>Concentración:</b> sube ${pct(f.sec,0)} el peso de tu sector principal.`)}
+  if(t.gap)out.push(`<b>Carencia que cubre ${tk(t.to)}:</b> ${esc(t.gap.why)}`);
+  return out}
+function propCard(t,A,i,mg,head){const m0=A?metOf(A):null;const gl=gainsLosses(m0,t.m,t),[cl,cd]=CONF_O[t.conf||'medium'];
+  return `<article class="op-c" data-pi="${i}"><header><span class="op-n">${head||'PROPUESTA '+String(i+1).padStart(2,'0')}</span><h4>${esc(propTitle(t))}</h4><ul class="op-mv">${moveTxt(t.mv)}</ul></header>
+    <div class="op-k"><div><span>Salud</span><b>${Math.round(m0.health)} → ${Math.round(t.m.health)}</b></div><div><span>Apuestas</span><b>${fmtB(m0.bets)} → ${fmtB(t.m.bets)}</b></div>${m0.topSec?`<div><span>${esc(m0.topSec[0])}</span><b>${pct(m0.S[m0.topSec[0]]||0,0)} → ${pct(t.m.S[m0.topSec[0]]||0,0)}</b></div>`:''}</div>
+    <details class="op-d"><summary>Por qué, qué ganas y qué pierdes</summary>
+      <p class="op-h">Por qué</p><ul>${whyOf(t,A.R,mg).map(x=>`<li>${x}</li>`).join('')||'<li>Mejora la salud y la diversificación de la cartera con el modelo actual.</li>'}</ul>
+      <p class="op-h">Qué ganas</p><ul>${gl.g.map(x=>`<li>${esc(x)}</li>`).join('')||'<li>Mejoras pequeñas en varios factores.</li>'}</ul>
+      <p class="op-h">Qué pierdes</p><ul>${gl.l.map(x=>`<li>${esc(x)}</li>`).join('')||'<li>Nada relevante según los datos.</li>'}</ul>
+      ${gl.risk.length?`<p class="op-h">Riesgo nuevo</p><ul>${gl.risk.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
+      <p class="op-h">Confianza: ${cl}</p><p class="op-cf">${cd} Precios: dato · correlaciones e impacto: estimación histórica (5 años) · no es una previsión.</p></details>
+    <div class="ix-btns"><button class="btn sm" data-sim="${i}">Simular cambio</button><button class="btn2 sm" data-dec="${i}:later">Lo estudiaré</button><button class="lnk" data-dec="${i}:ignore">Ignorar</button></div><div class="op-sim" hidden></div></article>`}
+function logDecision(t,action){try{const L=JSON.parse(localStorage.getItem('atlas_decisions')||'[]');L.push({d:new Date().toISOString().slice(0,10),t:propTitle(t),mv:t.mv.map(x=>[x.e.k+':'+x.e.t,+x.from.toFixed(3),+x.to.toFixed(3)]),action});localStorage.setItem('atlas_decisions',JSON.stringify(L.slice(-50)))}catch(_){}}
+function prefBar(p){const c=(k,l)=>`<button data-pf="${k}" aria-pressed="${!!p[k]}">${l}</button>`;
+  return `<details class="op-pref"><summary>Preferencias · ${({growth:'Crecimiento',bal:'Equilibrio',preserve:'Preservación'})[p.prio]}${['noSell','noBonds','noCommod','keepTop'].filter(k=>p[k]).length?' · con restricciones':''}</summary>
+    <div class="ix-seg2">${[['growth','Crecimiento'],['bal','Equilibrio'],['preserve','Preservación']].map(([k,l])=>`<button data-prio="${k}" aria-selected="${p.prio===k}">${l}</button>`).join('')}</div>
+    <div class="op-tg">${c('noSell','No vender')}${c('noBonds','Sin bonos')}${c('noCommod','Sin materias primas')}${c('keepTop','Mantener mis 2 mayores posiciones')}</div>
+    <p class="mp-note">Se guardan en este dispositivo. No hay campo de «horizonte»: el modelo no hace previsiones, así que no cambiaría ningún resultado.</p></details>`}
+function tabOpt(){return `<div id="ixOpt"><div class="sk"><p>ATLAS está probando cambios sobre tu cartera…</p><i></i><i></i><i></i></div></div>`}
+async function renderOpt(A){const box=$('#ixOpt');if(!box)return;const O=await optimize(A);if(!$('#ixOpt'))return;const m0=O.m0,pref=O.pref;
+  const main=O.probs[0],N=O.top.length;
+  let h=prefBar(pref);
+  h+=`<section class="op-s"><div class="ix-k">Diagnóstico</div>${O.probs.length?`<p class="op-lead">El principal problema de tu cartera ${main.id==='bets'||main.id==='sec'?'no es el número de productos: es':'es'} <b>${esc(main.t.toLowerCase())}</b>. ${esc(main.ev)}</p><ul class="op-pr">${O.probs.slice(1).map(p=>`<li><b>${esc(p.t)}</b> · ${esc(p.ev)}</li>`).join('')}</ul>`:'<p class="op-lead">ATLAS no detecta problemas importantes con los umbrales actuales.</p>'}</section>`;
+  if(!N){h+=`<section class="op-none"><p class="op-n">ATLAS NO RECOMIENDA CAMBIOS</p><ul>${[['bets',m0.bets>=1.5||A.P.length===1?null:'Diversificación real razonable'],['ovl',m0.ovl==null||m0.ovl<20?'Solapamiento razonable':null],['ter',m0.ter!=null&&m0.ter<=.4?'Costes bajos':null],['cty',m0.topCty&&m0.topCty[1]<70?'Exposición geográfica amplia':null],['sec',m0.topSec&&m0.topSec[1]<35?'Sin un sector dominante':null]].filter(x=>x[1]).map(x=>`<li>✓ ${x[1]}</li>`).join('')}</ul><p>Se han probado ${O.n} cambios (reducir, quitar, sustituir y añadir productos que cubren lo que falta). Ninguno mejora lo suficiente como para justificar cambiar tu cartera.</p><p class="op-best">Mejor acción: <b>mantener</b>.</p></section>`}
+  else{h+=`<section class="op-s"><div class="ix-k">ATLAS ha encontrado ${N} cambio${N>1?'s':''} que mejoran tu cartera</div>`;
+    if(O.opts&&O.opts.length>1)h+=`<p class="op-sub">Tres formas de resolver lo principal, de menos a más cambio:</p><div class="op-abc">${O.opts.map((o,i)=>`<button class="op-o${i===1?' on':''}" data-opt="${i}"><b>${o.lbl} · ${esc(o.desc)}</b><ul>${o.mv.slice(0,3).map(x=>`<li>${tk(x.e)} ${x.from?pct(x.from*100,0):'—'} → ${x.to?pct(x.to*100,0):'fuera'}</li>`).join('')}</ul><span>Salud ${Math.round(m0.health)} → <b>${Math.round(o.m.health)}</b> · apuestas ${fmtB(m0.bets)} → <b>${fmtB(o.m.bets)}</b></span></button>`).join('')}</div><div id="opOptSim" class="op-sim"></div>`;
+    h+=O.top.slice(0,3).map((t,i)=>propCard(t,A,i,O.mg,i===0?'MEJOR OPORTUNIDAD':i===1?'ALTERNATIVA':'OTRA OPCIÓN')).join('');
+    if(N>3)h+=`<details class="op-more"><summary>Mostrar ${N-3} cambio${N-3>1?'s':''} adicional${N-3>1?'es':''}</summary>${O.top.slice(3).map((t,i)=>propCard(t,A,i+3,O.mg)).join('')}</details>`;h+='</section>'}
+  /* ¿qué quitaría? */
+  if(O.mg.length){const w=O.mg.filter(o=>o.ineff).sort((a,b)=>b.dH-a.dH)[0];
+    h+=`<section class="op-s"><div class="ix-k">¿Qué quitaría ATLAS?</div>${w?`<div class="op-q"><p><b>${tk(w.e)} · ${esc(w.e.name)}</b> es tu posición menos eficiente ahora mismo.</p><p class="op-quote">No es un mal producto. Es un producto poco eficiente dentro de esta cartera.</p><ul>${w.ovShare!=null?`<li>${pct(w.ovShare,0)} de sus principales posiciones ya están en tus otros productos.</li>`:''}<li>Aporta ${fmtB(Math.max(0,w.bets))} apuestas independientes.</li>${w.sec!=null&&w.sec>=1?`<li>Sube ${pct(w.sec,0)} el peso de ${esc(m0.topSec[0].toLowerCase())}.</li>`:''}</ul><p>Si lo quitas (y repartes en el resto): salud ${Math.round(m0.health)} → <b>${Math.round(w.m1.health)}</b> · apuestas ${fmtB(m0.bets)} → <b>${fmtB(w.m1.bets)}</b>.</p></div>`:'<p class="op-sub">Ninguna posición resta claramente: no quitaría nada.</p>'}
+      <details class="op-mg"><summary>Qué aporta cada producto (contribución marginal)</summary><div class="alt-tw"><table class="alt-t"><thead><tr><th>Producto</th><th>Peso</th><th>Apuestas</th><th>${m0.topSec?esc(m0.topSec[0]):'Sector'}</th><th>Volat.</th><th>Solapa</th></tr></thead><tbody>${O.mg.map(o=>`<tr><th>${tk(o.e)}<small class="mg-l ${o.ineff?'bad':''}">${o.lbl}</small></th><td>${pct(o.w*100,0)}</td><td>${o.bets>=0?'+':'−'}${num(Math.abs(o.bets),2)}</td><td>${o.sec==null?'—':(o.sec>=0?'+':'−')+pct(Math.abs(o.sec),0)}</td><td>${o.vol>=0?'+':'−'}${pct(Math.abs(o.vol),1)}</td><td>${o.ovShare==null?'n/d':pct(o.ovShare,0)}</td></tr>`).join('')}</tbody></table></div><p class="mp-note">Cuánto cambia la cartera por tener cada producto (se compara con quitarlo y repartir su peso en el resto). «Solapa» = parte de sus principales posiciones que ya está en tus otros productos.</p></details></section>`}
+  /* ¿qué añadir? */
+  if(O.adds.length){h+=`<section class="op-s"><div class="ix-k">Si añadieras un 10 % nuevo, ¿qué aportaría más?</div><ol class="op-add">${O.adds.map(t=>`<li><b>${tk(t.to)} · ${esc(t.to.name)}</b><span>Cubre: ${esc(GAP_TXT[t.gap.t]||'')} · apuestas ${fmtB(m0.bets)} → ${fmtB(t.m.bets)} · salud ${Math.round(m0.health)} → ${Math.round(t.m.health)}${m0.topCty?` · ${esc(CNAME[m0.topCty[0]]||m0.topCty[0])} ${pct(m0.C[m0.topCty[0]],0)} → ${pct(t.m.C[m0.topCty[0]]||0,0)}`:''}</span></li>`).join('')}</ol><p class="mp-note">Ordenados por el problema que resuelven en tu cartera, no por rentabilidad. Dentro de cada carencia, el de menor coste.</p></section>`}
+  h+=`<p class="ix-src2">Cómo funciona: ATLAS prueba ${O.n} cambios concretos sobre tu cartera con su propio motor (exposición, riesgo, apuestas efectivas y salud) y solo muestra los que mejoran algo importante de forma demostrable. Los impactos son estimaciones con datos históricos, no previsiones. Es un análisis, no una recomendación de inversión personalizada.</p>`;
+  box.innerHTML=h;
+  const sims=[...O.top];box.querySelectorAll('[data-sim]').forEach(b=>b.onclick=()=>{const t=sims[+b.dataset.sim],d=b.closest('.op-c').querySelector('.op-sim');d.hidden=!d.hidden;if(!d.hidden)d.innerHTML=simTable(m0,t.m)});
+  box.querySelectorAll('[data-dec]').forEach(b=>b.onclick=()=>{const [i,a]=b.dataset.dec.split(':');logDecision(sims[+i],a);b.closest('.op-c').classList.add('op-dim');toast(a==='ignore'?'Propuesta ignorada':'Guardada para estudiarla')});
+  const os=box.querySelector('#opOptSim');const showO=i=>{box.querySelectorAll('[data-opt]').forEach(x=>x.classList.toggle('on',+x.dataset.opt===i));if(os&&O.opts[i])os.innerHTML=simTable(m0,O.opts[i].m)};box.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>showO(+b.dataset.opt));if(O.opts&&O.opts.length>1)showO(1);
+  box.querySelectorAll('[data-prio]').forEach(b=>b.onclick=()=>{DOC.opt={...OPT_PREF(),prio:b.dataset.prio};saveDoc();renderOptAgain(A)});
+  box.querySelectorAll('[data-pf]').forEach(b=>b.onclick=()=>{const p=OPT_PREF();p[b.dataset.pf]=!p[b.dataset.pf];DOC.opt=p;saveDoc();renderOptAgain(A)})}
+function renderOptAgain(A){const b=$('#ixOpt');if(b)b.innerHTML='<div class="sk"><p>Recalculando con tus preferencias…</p><i></i><i></i></div>';renderOpt(A).then(()=>{const d=$('#ixOpt .op-pref');if(d)d.open=true})}
+function simTable(m0,m1){return `<div class="alt-tw"><table class="alt-t op-t"><thead><tr><th></th><th>Actual</th><th>Propuesta</th><th></th></tr></thead><tbody>${cmpRows(m0,m1)}</tbody></table></div><p class="mp-note">Estimación con datos históricos de 5 años y la composición publicada. No es una previsión de rentabilidad.</p>`}
+
 /* ======================= CAPA COMPARTIDA · ATLASI.* =======================
    Nombres estables sobre los cálculos que ya existen (no los cambia). Todas las pantallas nuevas deben usar esto.
    Cada resultado lleva su estado de dato: 'real' (dato publicado/precio), 'est' (estimación), 'model' (supuesto), 'inc' (incompleto). */
@@ -824,6 +982,6 @@ async function getPortfolioContribution(A){const sig=(A.src&&A.src.src)+sigOf(A.
   return{session,today,status,ts,R,eur,items:items.slice().sort((a,b)=>Math.abs(b.c)-Math.abs(a.c)),ind,covered,missing,quality:'real',
     src:'Yahoo Finance (cotización cada 15 min con mercado abierto) · divisas incluidas',method:'Rentabilidad en euros desde el cierre anterior × peso de ayer'}})();
   _CT.set(sig,pr);if(_CT.size>8)_CT.delete(_CT.keys().next().value);return pr}
-Object.assign(window.ATLASI,{QUALITY,getPortfolio,analyzePortfolio,getPortfolioExposure:A=>A.L,getCompanyExposure,getSectorExposure,getCountryExposure,getEffectiveBets,getPortfolioHealth,getAssetOverlap:(a,b)=>overlapDetail(a,b),getPortfolioContribution,dayMove});
+Object.assign(window.ATLASI,{optimize,marginalOf:A=>marginalOf(A,metOf(A)),metOf,QUALITY,getPortfolio,analyzePortfolio,getPortfolioExposure:A=>A.L,getCompanyExposure,getSectorExposure,getCountryExposure,getEffectiveBets,getPortfolioHealth,getAssetOverlap:(a,b)=>overlapDetail(a,b),getPortfolioContribution,dayMove});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();

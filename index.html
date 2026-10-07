@@ -765,6 +765,7 @@ body.mapmode #app .right[data-sec=term] .pbody>[data-s=term]{display:flex!import
     <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn2" id="testBtn">Probar</button><button class="btn" id="saveUp">Guardar</button></div>
     </div></details>
     <button class="btn" id="setDone" style="align-self:stretch">Listo</button>
+    <button class="set-ver" id="setVer" type="button">ATLAS · datos de justETF, Yahoo Finance y Natural Earth</button>
   </div>
 </div>
 
@@ -2430,9 +2431,11 @@ function updateMap(first){if(!mapReady)return;const list=mapEntities(),gj=mapGeo
 function renderMapBar(nPts,nEnt){const b=$('#mapBar');if(!b)return;const chip=(g,v,l,on)=>`<button class="mb-chip${on?' on':''}" data-g="${g}" data-v="${v}">${l}</button>`,a=filterActive();
   const bs=$('#bbarQ');if(bs)bs.textContent=sq.q||'Buscar empresa, ETF o fondo';
   b.innerHTML=`<div class="tick" id="tick">${tickHTML()}</div>
+   <div class="mb-ft"><button class="mb-flt${a?' on':''}" data-g="flt" aria-expanded="${b.classList.contains('flt-open')}">${a?esc([{etf:'ETFs',fnd:'Fondos',stk:'Acciones',all:'Todo'}[sq.type],sq.mine?'Mi cartera':'',sq.fit?'Para mí':'',sq.sec!=='all'?sq.sec:''].filter(Boolean).join(' · ')):'Mostrar en el mapa'} ▾</button></div>
    <div class="mb-row">${chip('type','etf','ETFs',a&&sq.type==='etf')}${chip('type','fnd','Fondos',a&&sq.type==='fnd')}${chip('type','stk','Acciones',a&&sq.type==='stk')}${chip('type','all','Todo',a&&sq.type==='all')}${PF.length?chip('mine','1','★ Mi cartera',a&&sq.mine):''}${chip('fit','1','✓ Para mí',a&&sq.fit)}${chip('sec','pick',sq.sec!=='all'&&a?`${SEC_ICON[sq.sec]||''} ${esc(sq.sec)} ▾`:'Sector ▾',a&&sq.sec!=='all')}</div>
-   ${a?`<div class="mb-leg"><span><i class="lg e"></i>ETF</span><span><i class="lg f"></i>Fondo</span><span><i class="lg s"></i>Acción</span></div>`:''}${a?`<div class="mb-res"><span><b>${nEnt}</b> resultado${nEnt===1?'':'s'} encendido${nEnt===1?'':'s'}</span><button data-g="list">Ver lista</button><button data-g="clear" aria-label="Quitar filtros">✕</button></div>`:`<div class="mb-hint">Elige qué quieres ver y se encenderán en el mapa</div>`}`}
+   ${a?`<div class="mb-leg"><span><i class="lg e"></i>ETF</span><span><i class="lg f"></i>Fondo</span><span><i class="lg s"></i>Acción</span></div>`:''}${a?`<div class="mb-res"><span><b>${nEnt}</b> resultado${nEnt===1?'':'s'} encendido${nEnt===1?'':'s'}</span><button data-g="list">Ver lista</button><button data-g="clear" aria-label="Quitar filtros">✕</button></div>`:''}`}
 function mapBarClick(e){const b=e.target.closest('button[data-g]');if(!b)return;const g=b.dataset.g,v=b.dataset.v;
+  const MB=$('#mapBar');if(g==='flt'){const on=MB.classList.toggle('flt-open');b.setAttribute('aria-expanded',String(on));return}if(MB&&g!=='sec')MB.classList.remove('flt-open');
   if(g==='open'||g==='list'){openSearch();return}
   if(g==='set'){$('#settings').hidden=false;return}
   if(g==='ref'){refreshMarket(b);return}
@@ -3210,7 +3213,7 @@ $('#clearLog').addEventListener('click',()=>{$('#stream').innerHTML=''});
 $('#zIn').addEventListener('click',()=>flyTo({...cam,dist:Math.max(30,cam.dist/1.7)},500));$('#zOut').addEventListener('click',()=>flyTo({...cam,dist:Math.min(700,cam.dist*1.7)},500));
 $('#zHome').addEventListener('click',()=>{closeCard();flyTo(HOME,1400)});
 $('#uplinkBtn').addEventListener('click',()=>{$('#settings').hidden=false;$('#apiKey').focus()});
-$('#settings').addEventListener('click',e=>{if(e.target.id==='settings')$('#settings').hidden=true});['#setClose','#setDone'].forEach(q=>$(q).addEventListener('click',()=>{$('#settings').hidden=true}));
+$('#settings').addEventListener('click',e=>{if(e.target.id==='settings')$('#settings').hidden=true});$('#setVer').addEventListener('click',()=>{$('#settings').hidden=true;if(window.__kxGo)window.__kxGo()});['#setClose','#setDone'].forEach(q=>$(q).addEventListener('click',()=>{$('#settings').hidden=true}));
 $('#saveUp').addEventListener('click',()=>{syncMode();$('#settings').hidden=true;renderSources();stream('sys',apiKey?'Clave Gemini cargada: la próxima misión usará datos LIVE.':'Sin clave: misión en simulación.',apiKey?'lv':'')});
 $('#testBtn').addEventListener('click',async()=>{syncMode();if(!apiKey){$('#upMsg').textContent='Pega primero tu API key.';return}setUp('run','Probando');$('#upMsg').textContent='Probando conexión…';
   try{const r=await gemini('Responde solo con el JSON {"ok":true}');setUp('done','Online');$('#upMsg').textContent='Conexión correcta: '+r.text.slice(0,80)}catch(e){setUp('err',e.blocked?'Bloqueado':'Fallo');$('#upMsg').textContent=e.message}});
@@ -3243,11 +3246,11 @@ stream('sys',apiKey?'Uplink Gemini configurado: misión LIVE.':'Sin clave Gemini
 setTimeout(()=>{if(EXPERT())run()},3600);
 </script>
 <link rel="stylesheet" href="css/intel.css?v=11">
-<script src="js/intel.js?v=13"></script>
+<script src="js/intel.js?v=14"></script>
 <link rel="stylesheet" href="css/vault.css?v=1">
-<link rel="stylesheet" href="css/ui.css?v=5">
+<link rel="stylesheet" href="css/ui.css?v=6">
 <script src="js/vault.js?v=1"></script>
-<script src="js/kauai.js?v=2"></script>
+<script src="js/kauai.js?v=3"></script>
 <script>if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
 </body>
 </html>

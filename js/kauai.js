@@ -6,13 +6,13 @@
      sombra proyectada sobre el terreno local y luz de día coherente con la imagen satélite. */
 (function(){
 'use strict';
-const O={lng:-159.65395,lat:22.16905};                 // valle bajo de Kalalau
+const O={lng:-159.6538,lat:22.1712};                   // fondo del valle de Kalalau (se afina con el relieve real al cargar: zona baja y llana, lejos de la playa)
 const BB=[-159.83,21.84,-159.27,22.26];                 // isla de Kauaʻi
 const ZMIN=15.3;
 let M=null,THR=null,layer=null,state={sat:false,ter:false,lay:false},card=null;
 const inKauai=c=>c.lng>BB[0]&&c.lng<BB[2]&&c.lat>BB[1]&&c.lat<BB[3];
 function waitMap(){if(typeof map!=='undefined'&&map&&typeof mapReady!=='undefined'&&mapReady){M=map;M.on('moveend',check);M.on('click',onClick);
-    const go=()=>{if(/^#kalalau$/i.test(location.hash)){M.flyTo({center:[O.lng+.00012,O.lat-.00005],zoom:18.2,pitch:68,bearing:20,duration:5000,essential:true});history.replaceState(null,'',location.pathname+location.search)}};go();addEventListener('hashchange',go);return}setTimeout(waitMap,1500)}
+    window.__kxGo=()=>{location.hash='#kalalau'};const go=()=>{if(/^#kalalau$/i.test(location.hash)){M.flyTo({center:[O.lng+.00015,O.lat-.0002],zoom:17.6,pitch:66,bearing:20,duration:5000,essential:true});history.replaceState(null,'',location.pathname+location.search)}};go();addEventListener('hashchange',go);return}setTimeout(waitMap,1500)}
 async function check(){const c=M.getCenter(),z=M.getZoom(),k=inKauai(c);
   if(k&&z>=11){if(typeof MBX!=='undefined'&&MBX){ensureSat();ensureTer(true)}}else if(state.ter&&(!k||z<9.5))ensureTer(false);
   if(k&&z>=ZMIN-1&&!state.lay){state.lay=true;try{await ensureThree();addLayer()}catch(e){state.lay=false}}
@@ -65,12 +65,16 @@ const SP={
     neckFrom:6,legs:[{x:1.6,z:.95,y:6.1,l1:2.9,l2:2.8,r:[.82,.62,.5],bend:1,front:1},{x:-3.6,z:1.1,y:5.2,l1:2.7,l2:2.3,r:[1.05,.72,.55],bend:-1}],head:10},
   hadro:{len:9.5,speed:1.15,stride:1.7,lift:.28,col:[[92,74,50],[168,146,108],[0,0,0]],stripe:9,
     spine:[[-5.6,2.05,0,.08,.08],[-4.2,2.35,0,.22,.26],[-2.4,2.75,0,.48,.56],[-.6,2.95,0,.72,.86],[.9,2.75,0,.7,.78],[2.0,2.55,0,.48,.5],[2.75,2.75,0,.27,.3],[3.3,3.05,0,.22,.27],[3.75,3.0,0,.19,.24],[4.25,2.82,0,.12,.17]],
-    neckFrom:5,crest:true,legs:[{x:1.55,z:.42,y:2.2,l1:.95,l2:.95,r:[.24,.16,.11],bend:1,front:1},{x:-.6,z:.52,y:2.55,l1:1.25,l2:1.15,r:[.58,.34,.17],bend:-1}],head:8}};
+    neckFrom:5,crest:true,legs:[{x:1.55,z:.42,y:2.2,l1:.95,l2:.95,r:[.24,.16,.11],bend:1,front:1},{x:-.6,z:.52,y:2.55,l1:1.25,l2:1.15,r:[.58,.34,.17],bend:-1}],head:8},
+  /* terópodo bípedo (~12 m): cabeza grande, cuello corto en S, brazos diminutos, cola horizontal de contrapeso */
+  trex:{len:12,speed:1.0,stride:2.3,lift:.38,col:[[66,58,44],[134,116,86],[0,0,0]],stripe:6,
+    spine:[[-6.6,2.55,0,.07,.07],[-5.2,2.9,0,.24,.3],[-3.6,3.2,0,.45,.56],[-2.0,3.42,0,.7,.86],[-.5,3.55,0,.9,1.1],[.9,3.5,0,.86,1.05],[1.9,3.55,0,.62,.78],[2.6,3.85,0,.46,.58],[3.15,4.05,0,.5,.62],[3.75,4.02,0,.6,.7],[4.45,3.82,0,.48,.56],[5.05,3.6,0,.3,.36],[5.4,3.5,0,.14,.18]],
+    neckFrom:7,arms:true,legs:[{x:-.4,z:.72,y:3.25,l1:1.8,l2:1.72,r:[.66,.4,.22],bend:-1}],head:11}};
 
 function Dino(kind,x,z,heading,path){const S=SP[kind],grp=new THREE.Group(),sk=skin(...S.col,S.stripe);
   const mat=new THREE.MeshStandardMaterial({map:sk.t,bumpMap:sk.b,bumpScale:.035,roughness:.86,metalness:0});
   const body=Tube(42),parts=[body];const legs=S.legs.flatMap(L=>[1,-1].map(sd=>({...L,sd,T:Tube(10),ph:0})));legs.forEach(l=>parts.push(l.T));
-  let crest=null;if(S.crest){crest=Tube(8);parts.push(crest)}
+  let crest=null;if(S.crest){crest=Tube(8);parts.push(crest)}const arms=S.arms?[Tube(6),Tube(6)]:[];arms.forEach(a=>parts.push(a));
   const meshes=parts.map(p=>{const m=new THREE.Mesh(p.g,mat);m.frustumCulled=false;grp.add(m);return m});
   const shM=new THREE.MeshBasicMaterial({color:0x0b0d08,transparent:true,opacity:.3,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-4});const sh=new THREE.Group();parts.forEach(p=>{const m=new THREE.Mesh(p.g,shM);m.frustumCulled=false;sh.add(m)});
   const blob=new THREE.Mesh(new THREE.CircleGeometry(1,24),new THREE.MeshBasicMaterial({color:0,transparent:true,opacity:.28,depthWrite:false}));blob.rotation.x=-Math.PI/2;blob.scale.set(S.len*.32,S.len*.12,1);
@@ -88,6 +92,7 @@ function Dino(kind,x,z,heading,path){const S=SP[kind],grp=new THREE.Group(),sk=s
         if(kind==='sauro')y+=Math.sin(D.t*.35)*.35*(i-S.neckFrom)/6;else y+=(D.idle>0?-.35:0)*(i-S.neckFrom)/4*(Math.sin(D.t*.5)+1)/2}
       return[x,y+bob+(i>2&&i<6?br*rh*10:0),z,rw*(1+br),rh*(1+br)]});
     const sp=sample(ctrl,42);setTube(D.body,sp.pts,sp.rad);
+    if(arms.length){const p=sp.pts[Math.round(41*.55)];arms.forEach((A,k)=>{const z=k?-.52:.52,c=[[p[0]+.05,p[1]-.35,z*.9,.17,.17],[p[0]+.4,p[1]-.8,z,.11,.11],[p[0]+.62,p[1]-.92+Math.sin(D.t*.8+k)*.03,z*.95,.07,.07]];const a=sample(c,6);setTube(A,a.pts,a.rad)})}
     if(D.crest){const h=sp.pts[Math.round(41*.86)],t=sp.pts[Math.round(41*.8)];const c=[[h[0]+.05,h[1]+.18,h[2],.07,.08],[h[0]-.35,h[1]+.45,h[2],.08,.09],[h[0]-.95,h[1]+.72,h[2],.07,.08],[h[0]-1.35,h[1]+.8,h[2],.04,.05]];const cs=sample(c,8);setTube(D.crest,cs.pts,cs.rad)}
     // patas: secuencia lateral de cuadrúpedo (TI 0, DI .25, TD .5, DD .75), pie plantado en apoyo
     legs.forEach((L,i)=>{const off=(L.front?.25:0)+(L.sd<0?.5:0),ph=D.ph+off*Math.PI*2,mv=Math.min(1,D.v/S.speed*1.4);
@@ -106,7 +111,7 @@ function addLayer(){if(layer)return;const isMbx=typeof MBX!=='undefined'&&MBX;le
       sunDir=new THREE.Vector3(-.45,.78,.42).normalize();                                     // sol de tarde, desde el suroeste: como la imagen satélite
       const sun=new THREE.DirectionalLight(0xfff1dc,1.55);sun.position.copy(sunDir);S.add(sun);S.add(new THREE.HemisphereLight(0xbcd3ee,0x3d4a2a,.55));
       // ejemplares: un saurópodo entre los árboles y dos hadrosaurios que cruzan despacio
-      dinos=[Dino('sauro',-18,-6,.9,[[-14,-4],[-8,-14],[-20,-12],[-24,-2]]),Dino('hadro',22,12,-2.2,[[14,20],[6,10],[16,2],[30,8]]),Dino('hadro',27,16,-2.0,[[18,24],[9,14],[20,6],[34,12]])];
+      dinos=[Dino('sauro',-18,-6,.9,[[-14,-4],[-8,-14],[-20,-12],[-24,-2]]),Dino('hadro',22,12,-2.2,[[14,20],[6,10],[16,2],[30,8]]),Dino('hadro',27,16,-2.0,[[18,24],[9,14],[20,6],[34,12]]),Dino('trex',-42,34,2.4,[[-36,40],[-24,46],[-30,30],[-46,28]])];
       dinos[2].ph+=1.7;dinos.forEach(d=>{S.add(d.grp);S.add(d.blob);d.sh.renderOrder=-1});
       // sombras proyectadas (matriz de proyección plana por especie)
       dinos.forEach(d=>{const L=sunDir,mat=new THREE.Matrix4().set(1,-L.x/L.y,0,0, 0,0,0,.04, 0,-L.z/L.y,1,0, 0,0,0,1);d.sh.children.forEach(c=>{c.matrixAutoUpdate=false});d.shMat=mat;S.add(d.sh);d.sh.matrixAutoUpdate=false});
@@ -123,6 +128,7 @@ function addLayer(){if(layer)return;const isMbx=typeof MBX!=='undefined'&&MBX;le
       layer.dinos=dinos;layer.S=S;window.__kx=layer},
     render(gl,a,b,c){const z=M.getZoom();if(z<ZMIN||!inKauai(M.getCenter()))return;
       const now=performance.now(),dt=Math.min(.1,(now-last)/1000);last=now;
+      if(!layer.sited&&M.queryTerrainElevation&&now-elevT>700)siteValley();
       if(now-elevT>700){elevT=now;try{const e0=M.queryTerrainElevation?M.queryTerrainElevation([O.lng,O.lat]):null;O_alt=e0||0;
         dinos.forEach(d=>{const ll=toLL(d.x,d.z),e=M.queryTerrainElevation?M.queryTerrainElevation(ll):null;d.gy=e!=null&&e0!=null?e-e0:0});if(e0!=null&&!layer.treesPlaced)placeTrees(layer.trees,e0)}catch(_){}}
       dinos.forEach(d=>{d.update(dt);const g=d.grp;g.updateMatrix();d.sh.matrix.multiplyMatrices(new THREE.Matrix4().makeTranslation(0,d.gy,0),d.shMat).multiply(new THREE.Matrix4().makeTranslation(0,-d.gy,0)).multiply(g.matrix);d.sh.children.forEach(ch=>ch.matrix.identity())});
@@ -137,6 +143,12 @@ function addLayer(){if(layer)return;const isMbx=typeof MBX!=='undefined'&&MBX;le
   function placeTrees(tr,e0){const mm=new THREE.Matrix4(),q=new THREE.Quaternion(),tk=tr.userData.trunks;let k=0;tr.userData.pos.forEach(([x,z,h,s],i)=>{const e=M.queryTerrainElevation(toLL(x,z));const gy=e!=null?e-e0:0,a=h2(i,1)*6.28;
       [[0,h,1],[1.6,h-1.6,.8],[1.3,h-2.6,.7]].forEach(([o,y,sc],kk)=>{q.setFromEuler(new THREE.Euler(0,h2(i,5+kk)*6,0));mm.compose(new THREE.Vector3(x+o*Math.cos(a),gy+y,z+o*Math.sin(a)),q,new THREE.Vector3(s*sc,s*sc*.95,s*sc));tr.setMatrixAt(k++,mm)});
       mm.compose(new THREE.Vector3(x,gy+h/2,z),new THREE.Quaternion(),new THREE.Vector3(1,h,1));tk.setMatrixAt(i,mm)});tr.instanceMatrix.needsUpdate=tk.instanceMatrix.needsUpdate=true;layer.treesPlaced=true}
+  /* busca, con el relieve real, el punto más bajo y llano del fondo del valle cerca del origen (20–250 m de altitud: ni playa ni ladera) */
+  function siteValley(){const pts=[],N=14,st=32;for(let i=-N;i<=N;i++)for(let j=-N;j<=N;j++){const ll=toLL(i*st,j*st),e=M.queryTerrainElevation(ll);pts.push({i,j,ll,e})}
+    const ok=pts.filter(p=>p.e!=null);if(ok.length<pts.length*.7)return;const at=(i,j)=>{const p=pts[(i+N)*(2*N+1)+(j+N)];return p?p.e:null};
+    let best=null;ok.forEach(p=>{if(Math.abs(p.i)>=N||Math.abs(p.j)>=N||p.e<20||p.e>250)return;const nb=[at(p.i+1,p.j),at(p.i-1,p.j),at(p.i,p.j+1),at(p.i,p.j-1),at(p.i+2,p.j),at(p.i-2,p.j),at(p.i,p.j+2),at(p.i,p.j-2)].filter(v=>v!=null);
+      const slope=Math.max(...nb.map(v=>Math.abs(v-p.e)))/st,score=slope*400+p.e*.15+Math.hypot(p.i,p.j)*.4;if(!best||score<best.score)best={...p,score,slope}});
+    layer.sited=true;if(!best||best.slope>.35)return;const c=M.getCenter(),near=Math.hypot((c.lng-O.lng)*103000,(c.lat-O.lat)*110574)<700;O.lng=best.ll[0];O.lat=best.ll[1];layer.treesPlaced=false;layer.site={e:best.e,slope:best.slope};if(near)M.easeTo({center:[O.lng+.00015,O.lat-.0002],duration:1600})}
   function toLL(x,z){const k=111320;return[O.lng+x/(k*Math.cos(O.lat*Math.PI/180)),O.lat-z/110574]}
   M.addLayer(layer)}
 

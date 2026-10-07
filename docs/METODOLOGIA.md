@@ -123,3 +123,16 @@ Nunca incluye importes. Muestra productos, apuestas reales, primer sector, prime
 
 ## Tests
 `python tests/regression.py` recalcula 8 carteras de control y comprueba invariantes (100 % S&P = 1 apuesta, Mundo+EM+Bonos > Mundo+S&P+Nasdaq…), que las pantallas principales no fallan y que la contribución diaria cuadra. Las referencias (`tests/golden.json`) llevan tolerancia porque los precios cambian a diario.
+
+## Optimizar (Doctor → Optimizar)
+
+ATLAS no busca una "cartera ideal". Propone cambios pequeños y explicables sobre la cartera real.
+
+- **Problemas detectados:** sector ≥ 35 %, país ≥ 70 %, empresa ≥ 8 %, solapamiento ≥ 20 %, TER medio > 0,40 %, un solo producto, apuestas efectivas bajas (< 1,3 o < 40 % del nº de productos).
+- **Candidatos:** solo ETFs amplios y baratos (los 3 más baratos por hueco: emergentes, Europa, Japón, ex-EE. UU., small caps, value, bonos, oro, mundo). Nunca apalancados ni temáticos estrechos.
+- **Contribución marginal:** se quita cada producto (redistribuyendo pro-rata) y se mide el efecto en apuestas, sector, volatilidad, coste y salud. "Poco eficiente" = quitarlo mejora la salud ≥ 3, apenas resta apuestas (≤ 0,05) y solapa ≥ 50 % o correla ≥ 0,8 con el resto.
+- **Puntuación interna:** `ΔSalud + 12·ΔApuestas − 20·rotación − 1,5·productos nuevos + 0,5·productos eliminados` (+ ajuste según prioridad). Solo se propone si mejora salud ≥ 2 o apuestas ≥ 0,15 y la puntuación ≥ 3. Si nada lo cumple: "No cambiaría nada".
+- **Opciones A/B/C:** A mínima (10 %), B equilibrada (≤ 20 %), C transformación (≤ 40 %, máx. 2 productos nuevos).
+- **Confianza:** baja si faltan desgloses o precios de algún producto relevante.
+- La rentabilidad pasada nunca es criterio de optimización. Preferencias y decisiones se guardan solo en el dispositivo.
+- Tests obligatorios A–F en `tests/regression.py`.
