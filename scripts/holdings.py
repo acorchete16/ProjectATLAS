@@ -241,7 +241,7 @@ def yahoo_fund(sym):
 
 # ---------- 3. SEC N-PORT: cartera completa oficial de cada ETF registrado en EE. UU. (con país ISO) ----------
 import xml.etree.ElementTree as ET
-SEC_UA = {'User-Agent': 'ProjectATLAS research tool (github.com/acorchete16/ProjectATLAS)', 'Accept-Encoding': 'identity'}
+SEC_UA = {'User-Agent': 'ProjectATLAS atlas-bot@users.noreply.github.com', 'Accept-Encoding': 'identity', 'Host': 'www.sec.gov'}
 def sec_get(url, t=60):
     req = E.urllib.request.Request(url, headers=SEC_UA)
     with E.urllib.request.urlopen(req, timeout=t) as r: return r.read()
