@@ -15,23 +15,37 @@ Todas las cifras se calculan en el navegador (`js/intel.js`) con ficheros que ge
 
 Los ETFs de EE. UU. sin ficha en justETF usan, cuando existe, el ETF UCITS que replica el mismo índice (se indica en la interfaz como «tomado del ETF UCITS…»).
 
+## Calidad del dato (se muestra en cada activo)
+| Etiqueta | Significado |
+|---|---|
+| DATO REAL | Desglose completo publicado (p. ej. todos los países de justETF, todos los sectores de Yahoo) |
+| APROXIMACIÓN | Tomado del ETF UCITS que replica el mismo índice (ETFs de EE. UU. sin ficha en justETF) |
+| PARCIAL | Solo una parte (4 países + «otros», o las 10 mayores posiciones). El resto se muestra como «No desglosado / datos insuficientes» y **nunca se reparte** |
+| SIN DATOS | La fuente no publica ese desglose |
+
+## Histórico de composición
+`data/holdings/<clave>/<AAAA-MM-DD>.json` + `latest.json`, e `data/holdings/index.json` con las fechas disponibles. Solo se guarda una foto nueva cuando la composición cambia. Cada foto incluye empresa, peso, país, sector, identificador (ISIN o ticker), fuente, fecha, calidad por dimensión, nº total de posiciones y peso no desglosado.
+
 ## Look-through (exposición real)
 - **País y sector de la cartera** = Σ peso del activo × % del activo en ese país/sector. Acciones: 100 % en su país y sector.
 - **Empresas**: se suman las 10 mayores posiciones de cada ETF + acciones directas. Clases de acciones de una misma empresa se agrupan (Alphabet A/C).
 - **Solapamiento entre dos ETFs** = Σ mín(peso en A, peso en B) de las empresas comunes. Es un **mínimo** (solo mayores posiciones conocidas).
-- **Empresas efectivas** = 1 / Σ w². Las posiciones no conocidas de cada ETF se reparten a partes iguales entre sus demás posiciones (nº total de justETF; si no se conoce se asume 20, mínimo aproximado de la regla UCITS 5/10/40). **Aproximación.**
+- **Exposición por empresa** se da como rango: mínimo = suma de lo publicado; máximo = mínimo + Σ (peso del ETF × su posición publicada más pequeña) en los ETFs donde la empresa no aparece entre las mayores (no puede pesar más que esa posición). Si un ETF de acciones no publica posiciones, el máximo queda abierto («≥»).
+- **Empresas distintas**: entre el mayor nº de posiciones de un ETF y la suma de todas (solapamiento desconocido).
+- **Empresas equivalentes** = 1 / Σ w² con las posiciones conocidas: cota **optimista** (la real es igual o menor).
+- **Sedes vs exposición**: la vista «Exposición de cartera» usa el país que asigna el proveedor del índice; la vista «Sedes» usa la dirección real de la sede (base de datos de ATLAS) y solo cubre empresas localizadas. La exposición por **ingresos** por país no está disponible (sin fuente).
 
 ## Portfolio Health (0–100, media simple de los componentes disponibles)
 | Componente | Fórmula |
 |---|---|
 | Diversificación real | 100 · ln(N efectivo) / ln(200) |
-| Concentración | 100 − 6·(mayor empresa − 3 pp) − 1,2·(10 mayores − 25 pp) |
+| Concentración por producto | 100 − 1,5·(acciones sueltas + ETFs con >60 % en un sector − 10 pp) |
+| Concentración por empresa | 100 − 6·(mayor empresa − 3 pp) − 1,2·(10 mayores − 25 pp) |
 | Geografía | 100 − 2·(1er país − 60 pp) si >60 %; −15 si <5 países con >1 % |
 | Sectores | 100 − 2,5·(1er sector − 25 pp) si >25 % |
 | Correlación | (1 − correlación media ponderada) × 130 |
 | Volatilidad | 100 − 4·(vol. anual − 8) |
 | Caída máxima | 100 − 2,5·(|caída máx.| − 10) |
-| Riesgo a la baja | 100 + 2 · peor rentabilidad en 52 semanas |
 | Coste | 100 − 50 · TER medio |
 
 Riesgo y correlaciones: rentabilidades **semanales en euros**, 5 años, con los pesos actuales aplicados hacia atrás. Es historia, no previsión.

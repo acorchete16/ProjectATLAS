@@ -612,6 +612,10 @@ body.mapmode #app.simple .mapbar .mb-row,body.mapmode #app.simple .mapbar .mb-hi
 .mn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.mn-grid button{display:grid;grid-template-columns:42px 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center;text-align:left;padding:11px;border-radius:16px;border:1px solid color-mix(in srgb,var(--c) 30%,transparent);background:linear-gradient(135deg,color-mix(in srgb,var(--c) 16%,transparent),rgba(255,255,255,.02));color:#fff;cursor:pointer;font:inherit}
 .mn-i{grid-row:1/3;width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;background:color-mix(in srgb,var(--c) 22%,transparent)}.mn-grid b{font-size:13.5px}.mn-grid small{font-size:11px;color:var(--mid)}
 .mn-grid button:last-child:nth-child(odd){grid-column:1/-1}
+.mn-sec{margin:12px 4px 6px;font:600 10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}.mn-sec:first-of-type{margin-top:0}
+.mn-main button{border-color:rgba(255,255,255,.08)!important;background:rgba(255,255,255,.035)!important}.mn-main .mn-i{background:rgba(127,246,255,.08)!important;font-size:19px}
+.mn-list{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 8px}.mn-list button{display:flex;align-items:center;gap:10px;padding:8px 6px;border:0;border-radius:10px;background:none;color:var(--fg);font:inherit;text-align:left;cursor:pointer}
+.mn-list button:hover{background:rgba(255,255,255,.04)}.mn-list .mn-i{width:30px;height:30px;border-radius:9px;font-size:15px;background:rgba(255,255,255,.05);flex:none}.mn-list b{font-size:13px;font-weight:500}.mn-list small{display:none}
 body.ov-open #bbar,body.dt-open #bbar{display:none!important}@media (max-width:899px){body.hub-open #bbar{display:none}}@media (min-width:900px){body.hub-open #bbar{left:calc((100% - 460px)/2)}}
 body.mapmode #mcard{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
 .watch .wt{border:1px solid var(--edge);border-left:3px solid var(--c);border-radius:14px;background:rgba(255,255,255,.03);padding:10px;display:flex;flex-direction:column;gap:7px}
@@ -2759,10 +2763,11 @@ function initHub(){if(!MAPMODE||$('#dock'))return;const R=$('.right');if(!R)retu
   ph.querySelector('.hub-x').addEventListener('click',()=>closeHub());ph.querySelector('.hub-ref').addEventListener('click',e=>refreshMarket(e.currentTarget));
   const bb=document.createElement('nav');bb.id='bbar';bb.setAttribute('aria-label','Menú');
   bb.innerHTML=`<button class="bb-menu" aria-label="Menú" aria-expanded="false"><i></i><i></i><i></i></button><button class="bb-search"><span>⌕</span><b id="bbarQ">Buscar empresa, ETF o fondo</b></button><button class="bb-ref" data-g="ref" aria-label="Actualizar mercado">↻</button>`;
-  const MENU=[['pf','★','Mi cartera','Lo que tienes y cómo va'],['plan','💡','Ideas de cartera','8 carteras para tu perfil'],['watch','👀','Ones to watch','Noticias que pueden moverlas'],['calc','🧮','Calculadora','¿Cuánto tendrías hoy?'],
-    ['rank','🏆','Rankings','Lo que más sube hoy'],['db','🗄','Base de datos','Explorar la ciudad 3D'],['set','⚙','Ajustes','Vista experta y conexiones']];
+  const MENU=[['Tu cartera',[['ov','◎','Resumen','Qué pasa con tu cartera'],['pf','★','Mi cartera','Posiciones y rentabilidad'],['doc','🩺','Análisis','Salud, riesgos y solapamientos'],['xp','🌍','Explorar','Dónde está tu dinero'],['cmp','⚖️','Comparar','Tu cartera frente a alternativas']]],
+    ['Descubrir',[['radar','🎯','Opportunity Radar','Qué merece investigarse'],['plan','💡','Ideas de cartera','Carteras para tu perfil'],['watch','👀','Ones to watch','Noticias que pueden moverlas'],['rank','🏆','Rankings','Lo que más sube']]],
+    ['Herramientas',[['calc','🧮','Calculadora','¿Cuánto tendrías hoy?'],['db','🗄','Base de datos','La ciudad 3D'],['set','⚙','Ajustes','Modo experto y conexiones']]]];
   const mn=document.createElement('div');mn.id='menu';mn.hidden=true;
-  mn.innerHTML=`<div class="mn-box"><div class="mn-h"><b>ATLAS</b><span>${new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})}</span></div><div class="mn-grid">${MENU.map(([k,i,l,sub])=>`<button data-hub="${k}" style="--c:${({pf:'#c084fc',plan:'#ffb35a',watch:'#35e0ff',calc:'#4cd8a0',rank:'#ffd24a',db:'#7aa2ff',set:'#b9c6e8'})[k]}"><span class="mn-i">${i}</span><b>${l}</b><small>${sub}</small></button>`).join('')}</div></div>`;
+  mn.innerHTML=`<div class="mn-box"><div class="mn-h"><b>ATLAS</b><span>${new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})}</span></div>${MENU.map(([g,items],gi)=>`<div class="mn-sec">${g}</div><div class="${gi?'mn-list':'mn-grid mn-main'}">${items.map(([k,i,l,sub])=>`<button data-hub="${k}" style="--c:#7aa2ff"><span class="mn-i">${i}</span><b>${l}</b><small>${sub}</small></button>`).join('')}</div>`).join('')}</div>`;
   document.body.appendChild(mn);document.body.appendChild(bb);
   const menu=on=>{mn.hidden=!on;bb.querySelector('.bb-menu').setAttribute('aria-expanded',String(on));document.body.classList.toggle('menu-open',on)};
   bb.querySelector('.bb-menu').addEventListener('click',()=>menu(mn.hidden));mn.addEventListener('click',e=>{if(e.target===mn)menu(false)});
@@ -3228,8 +3233,8 @@ stream('sys','ATLAS 3D en línea · globo WebGL · 5 skylines · modelo calibrad
 stream('sys',apiKey?'Uplink Gemini configurado: misión LIVE.':'Sin clave Gemini: misión en simulación. Configúrala en «Uplink Gemini».',apiKey?'lv':'wn');
 setTimeout(()=>{if(EXPERT())run()},3600);
 </script>
-<link rel="stylesheet" href="css/intel.css?v=3">
-<script src="js/intel.js?v=3"></script>
+<link rel="stylesheet" href="css/intel.css?v=5">
+<script src="js/intel.js?v=5"></script>
 <script>if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
 </body>
 </html>

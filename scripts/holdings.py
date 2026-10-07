@@ -368,6 +368,33 @@ def isin_map():
     except Exception: pass
     return m
 
+def quality(r):
+    """Calidad del dato por dimensión: real (desglose completo publicado), proxy (aproximación por índice: ETF UCITS
+    que replica el mismo índice), partial (solo una parte: p. ej. 4 países + «otros», o 10 mayores posiciones), none."""
+    full = r.get('full') or {}
+    cty = 'none' if not r.get('country') else ('proxy' if r.get('jproxy') else 'real' if full.get('countries') else 'partial')
+    sec = 'real' if r.get('sector') and sum(r['sector'].values()) > 95 else ('proxy' if r.get('jproxy') and r.get('sector_j') else 'real' if r.get('sector_j') and full.get('sectors') else 'partial' if (r.get('sector') or r.get('sector_j')) else 'none')
+    top = r.get('top') or r.get('top_j') or []
+    comp = 'none' if not top else ('real' if r.get('n') and len(top) >= r['n'] else ('proxy' if r.get('jproxy') and not r.get('top') else 'partial'))
+    return {'country': cty, 'sector': sec, 'companies': comp}
+def snapshots(fund):
+    """data/holdings/<clave>/<AAAA-MM-DD>.json (+ latest.json). Solo se guarda una foto nueva si la composición cambia."""
+    base = os.path.join(ROOT, 'data', 'holdings'); os.makedirs(base, exist_ok=True); idx = {}
+    for k, r in fund.items():
+        d = os.path.join(base, re.sub(r'[^A-Za-z0-9_.-]', '_', k)); os.makedirs(d, exist_ok=True)
+        top = r.get('top') or r.get('top_j') or []
+        snap = {'key': k, 'date': r.get('asof_j') or r.get('asof'), 'source': ' + '.join(x for x in (r.get('src_j'), r.get('src')) if x),
+                'quality': r.get('q'), 'n_holdings': r.get('n'), 'index_proxy_isin': r.get('jisin') if r.get('jproxy') else None,
+                'holdings': [{'company': h[0], 'id': h[1], 'weight': h[2], 'country': h[3], 'sector': h[4]} for h in top],
+                'countries': r.get('country') or {}, 'sectors': r.get('sector') or r.get('sector_j') or {},
+                'undisclosed_weight': round(max(0.0, 100 - sum(h[2] for h in top)), 2) if top else None}
+        body = json.dumps(snap, ensure_ascii=False, sort_keys=True)
+        lp = os.path.join(d, 'latest.json'); prev = open(lp).read() if os.path.exists(lp) else ''
+        strip = lambda t: re.sub(r'"date": "[^"]*"', '', t)
+        if strip(prev) != strip(body):
+            open(os.path.join(d, f'{snap["date"]}.json'), 'w').write(body); open(lp, 'w').write(body)
+        idx[k] = {'dir': os.path.basename(d), 'date': snap['date'], 'quality': snap['quality'], 'snapshots': sorted(f[:-5] for f in os.listdir(d) if f[0].isdigit())}
+    json.dump(idx, open(os.path.join(base, 'index.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
 JFRESH = 6; JMAX = 45; JST = {'n': 0, 'fails': 0, 'blocked': False}
 def main():
     now = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%MZ')
@@ -448,7 +475,9 @@ def main():
         rec['asof'] = now[:10]
         if not rec.get('proxy') and not rec.get('top') and not rec.get('sector') and not rec.get('country') and k in old.get('fund', {}): rec = old['fund'][k]
         fund[k] = rec
+    for k, rec in fund.items(): rec['q'] = quality(rec)
     json.dump({'u': now, 'idx': idx, 'fund': fund}, open(os.path.join(ROOT, 'data', 'expo.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
+    snapshots(fund)
     np = sum(1 for f in fund.values() if f.get('proxy'))
     L(f'OK · {len(idx)} índices completos · {len(fund)} ETFs/fondos ({np} por índice, {nok} con datos de Yahoo)')
     open(os.path.join(ROOT, 'data', 'expo_log.txt'), 'w').write('\n'.join(LOG) + '\n')
