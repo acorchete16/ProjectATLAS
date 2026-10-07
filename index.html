@@ -297,7 +297,7 @@ details.tech>.tin{padding:0 12px 12px;display:flex;flex-direction:column;gap:12p
 /* ===== vista simple ===== */
 #app .sp{display:none}#app.simple .sp{display:inline}#app.simple .xp{display:none!important}
 #app.simple .mission,#app.simple .sep,#app.simple #modeTag,#app.simple .clocks,#app.simple #runBtn,#app.simple .left,#app.simple .dock,#app.simple .hint,#app.simple #techToggle,#app.simple .bub,#app.simple #caoPill,#app.simple #card .ch .pill{display:none!important}
-#app.simple .right{bottom:16px}
+#app .right{bottom:16px}
 #app.simple .clab .t,#app.simple .clab .v{display:none}#app.simple .clab .chip{font-family:Inter,system-ui,sans-serif;font-size:11px;letter-spacing:.02em;padding:4px 9px;background:rgba(14,12,30,.7)}#app.simple .clab .chip b{font-weight:600}
 #app.simple .mapctl{bottom:24px}
 #app.simple .top{gap:12px}
@@ -307,12 +307,12 @@ details.tech>.tin{padding:0 12px 12px;display:flex;flex-direction:column;gap:12p
 .hbtn.ico{width:38px;height:38px;padding:0;font-size:16px;display:grid;place-items:center}
 .hbtn:hover{color:var(--fg);border-color:var(--cyan)}
 #app:not(.simple) .sbtn{margin-left:0}
-#app.simple .right .phead{padding:16px 18px 10px;border-bottom:0}
-#app.simple .right .phead h2{font-family:Inter,system-ui,sans-serif;font-size:20px;letter-spacing:0;text-transform:none;font-weight:700}
-#app.simple .right .pbody{padding:4px 18px 18px;gap:16px}
-#app.simple .right .lbl{font-family:Inter,system-ui,sans-serif;font-size:12.5px;letter-spacing:0;text-transform:none;color:var(--mid)}
-#app.simple .seg button{font-family:Inter,system-ui,sans-serif;font-size:12px;letter-spacing:0;text-transform:none;padding:8px 4px}
-#app.simple .seg button small{font-size:10.5px}
+#app .right .phead{padding:16px 18px 10px;border-bottom:0}
+#app .right .phead h2{font-family:Inter,system-ui,sans-serif;font-size:20px;letter-spacing:0;text-transform:none;font-weight:700}
+#app .right .pbody{padding:4px 18px 18px;gap:16px}
+#app .right .lbl{font-family:Inter,system-ui,sans-serif;font-size:12.5px;letter-spacing:0;text-transform:none;color:var(--mid)}
+#app .seg button{font-family:Inter,system-ui,sans-serif;font-size:12px;letter-spacing:0;text-transform:none;padding:8px 4px}
+#app .seg button small{font-size:10.5px}
 #app.simple #flag .flag:not(.bad){display:none}
 #app.simple #flag .flag.bad{font-size:12px}
 .pl-hero{display:grid;grid-template-columns:1.1fr 1fr;gap:10px}
@@ -452,10 +452,10 @@ body.mapmode #searchFab{display:none!important}
 @media (prefers-reduced-motion:reduce){.pg-ring,.pg-beam{animation:none}}
 
 /* sin cabecera en el modo mapa: más espacio */
-body.mapmode #app.simple header.top{display:none}
-body.mapmode #app.simple .mapbar{top:18px}
-body.mapmode #app.simple .right{top:18px}
-@media (max-width:1100px){body.mapmode #app.simple .mapbar{top:10px}}
+body.mapmode #app header.top{display:none}
+body.mapmode #app .mapbar{top:18px}
+body.mapmode #app .right{top:18px}
+@media (max-width:1100px){body.mapmode #app .mapbar{top:10px}}
 .mb-top{display:flex;gap:8px}.mb-top .mb-search{flex:1}
 .mb-ico{flex:none;width:48px;border-radius:14px;border:1px solid var(--edge2);background:rgba(16,14,36,.86);color:var(--fg);font-size:18px;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 #settings .xprow{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--mid)}
@@ -562,19 +562,19 @@ body.dt-open{overflow:hidden}
 
 /* ===== globo a pantalla completa + menú ===== */
 body.mapmode{overflow:hidden;padding:0!important}
-body.mapmode #app.simple{position:fixed!important;inset:0!important;height:auto!important;min-height:0!important;border:0!important;border-radius:0!important;display:block!important;overflow:hidden!important;background:#020710}
-body.mapmode #app.simple #stage{position:absolute!important;inset:0!important;height:auto!important;min-height:0!important;border:0!important;border-radius:0!important}
-body.mapmode #app.simple .mapbar{width:min(560px,calc(100% - 36px))}
-body.mapmode #app.simple .right{position:fixed!important;z-index:70;top:0!important;right:0;bottom:0!important;left:auto;width:min(460px,100%);height:auto;max-height:none;order:0;border-radius:0;transform:translateX(105%);transition:transform .3s cubic-bezier(.2,.8,.2,1);display:flex;background:rgba(7,9,22,.97);border-left:1px solid var(--edge);box-shadow:-20px 0 60px rgba(0,0,0,.5)}
-body.mapmode #app.simple .right.open{transform:none}
-body.mapmode #app.simple .right .pbody{overflow-y:auto!important;padding-bottom:calc(90px + env(safe-area-inset-bottom,0px))}
-body.mapmode #app.simple .right .phead{display:flex;align-items:center;gap:8px;padding-top:calc(14px + env(safe-area-inset-top,0px))}
-body.mapmode #app.simple .right .phead h2{flex:1}
-body.mapmode #app.simple .right[data-sec] .pbody>[data-s]{display:none!important}
-body.mapmode #app.simple .right[data-sec=watch] .pbody>[data-s=watch],body.mapmode #app.simple .right[data-sec=pf] .pbody>[data-s=pf],body.mapmode #app.simple .right[data-sec=calc] .pbody>[data-s=calc],body.mapmode #app.simple .right[data-sec=plan] .pbody>[data-s=plan]{display:flex!important}
-body.mapmode #app.simple .right[data-sec=plan] .pbody>[data-s=plan]:not(.pf):not(#myPlan){display:block!important}
-body.mapmode #app.simple .right .pf{border-bottom:0}
-body.mapmode #app.simple .mapctl{bottom:calc(92px + env(safe-area-inset-bottom,0px))!important;right:12px!important}
+body.mapmode #app{position:fixed!important;inset:0!important;height:auto!important;min-height:0!important;border:0!important;border-radius:0!important;display:block!important;overflow:hidden!important;background:#020710}
+body.mapmode #app #stage{position:absolute!important;inset:0!important;height:auto!important;min-height:0!important;border:0!important;border-radius:0!important}
+body.mapmode #app .mapbar{width:min(560px,calc(100% - 36px))}
+body.mapmode #app .right{position:fixed!important;z-index:70;top:0!important;right:0;bottom:0!important;left:auto;width:min(460px,100%);height:auto;max-height:none;order:0;border-radius:0;transform:translateX(105%);transition:transform .3s cubic-bezier(.2,.8,.2,1);display:flex;background:rgba(7,9,22,.97);border-left:1px solid var(--edge);box-shadow:-20px 0 60px rgba(0,0,0,.5)}
+body.mapmode #app .right.open{transform:none}
+body.mapmode #app .right .pbody{overflow-y:auto!important;padding-bottom:calc(90px + env(safe-area-inset-bottom,0px))}
+body.mapmode #app .right .phead{display:flex;align-items:center;gap:8px;padding-top:calc(14px + env(safe-area-inset-top,0px))}
+body.mapmode #app .right .phead h2{flex:1}
+body.mapmode #app .right[data-sec] .pbody>[data-s]{display:none!important}
+body.mapmode #app .right[data-sec=watch] .pbody>[data-s=watch],body.mapmode #app .right[data-sec=pf] .pbody>[data-s=pf],body.mapmode #app .right[data-sec=calc] .pbody>[data-s=calc],body.mapmode #app .right[data-sec=plan] .pbody>[data-s=plan]{display:flex!important}
+body.mapmode #app .right[data-sec=plan] .pbody>[data-s=plan]:not(.pf):not(#myPlan){display:block!important}
+body.mapmode #app .right .pf{border-bottom:0}
+body.mapmode #app .mapctl{bottom:calc(92px + env(safe-area-inset-bottom,0px))!important;right:12px!important}
 body.mapmode .mapboxgl-ctrl-bottom-left,body.mapmode .mapboxgl-ctrl-bottom-right,body.mapmode .maplibregl-ctrl-bottom-left,body.mapmode .maplibregl-ctrl-bottom-right{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 #dock{position:fixed;z-index:65;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;gap:2px;padding:6px;border-radius:22px;background:rgba(10,10,28,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.12);box-shadow:0 12px 40px rgba(0,0,0,.55);max-width:calc(100% - 16px)}
 #dock button{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:58px;padding:7px 6px;border:0;border-radius:16px;background:none;color:#aeb8d6;font:600 10.5px Inter,system-ui,sans-serif;cursor:pointer}
@@ -593,8 +593,8 @@ body.mapmode .right[data-sec=pf] #myPf .pf-head h3,body.mapmode .right[data-sec=
 .bt-cards{display:flex!important;overflow-x:auto;scrollbar-width:none}.bt-cards::-webkit-scrollbar{display:none}.bt-c{flex:0 0 112px}
 
 /* ===== barra inferior con menú ☰ + franja de mercado ===== */
-body.mapmode #app.simple .mapbar{top:calc(8px + env(safe-area-inset-top,0px))!important;left:0!important;right:0!important;width:auto!important;padding:0 10px}
-body.mapmode #app.simple .mapbar .mb-row,body.mapmode #app.simple .mapbar .mb-hint,body.mapmode #app.simple .mapbar .mb-res,body.mapmode #app.simple .mapbar .mb-leg{max-width:600px}
+body.mapmode #app .mapbar{top:calc(8px + env(safe-area-inset-top,0px))!important;left:0!important;right:0!important;width:auto!important;padding:0 10px}
+body.mapmode #app .mapbar .mb-row,body.mapmode #app .mapbar .mb-hint,body.mapmode #app .mapbar .mb-res,body.mapmode #app .mapbar .mb-leg{max-width:600px}
 .tick{pointer-events:auto;overflow:hidden;margin:0 -10px 2px;padding:2px 0;-webkit-mask:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);mask:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
 .tk-run{display:flex;gap:6px;width:max-content;animation:tkrun 60s linear infinite}.tick:hover .tk-run,.tick:active .tk-run{animation-play-state:paused}@keyframes tkrun{to{transform:translateX(-50%)}}
 .tk{flex:none;display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(12,12,30,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#dfe6ff;font:600 12px Inter,system-ui,sans-serif;cursor:pointer;white-space:nowrap}
@@ -624,6 +624,18 @@ body.mapmode #mcard{bottom:calc(84px + env(safe-area-inset-bottom,0px))!importan
 .wt-r{display:flex;flex-direction:column;align-items:flex-end;gap:5px}.wt-sig{display:flex;gap:2px}.wt-sig i{width:5px;height:12px;border-radius:2px;background:rgba(255,255,255,.12)}.wt-sig i.on{background:linear-gradient(#35e0ff,#4cd8a0)}
 .wt-h{display:grid;grid-template-columns:16px 1fr;column-gap:6px;font-size:12px;line-height:1.35;color:#cfd8f5;text-decoration:none;padding:7px 9px;border-radius:10px;background:rgba(255,255,255,.04)}.wt-h small{grid-column:2;color:var(--dim);font-size:10.5px;margin-top:2px}
 .wt-f{font-size:11px;color:var(--dim)}.wt-meta{font-size:11.5px;color:var(--mid);margin:-4px 0 4px}.watch{gap:9px}
+
+/* ===== modo experto: misma arquitectura que la vista simple + sección «Terminal experto» ===== */
+body.mapmode #app header.top,body.mapmode #app>.hint,body.mapmode #app #techToggle,body.mapmode #app .bub,body.mapmode #app #caoPill{display:none!important}
+body.mapmode #app .right .phead h2 .xp{display:none!important}body.mapmode #app .right .phead h2 .sp{display:inline!important}
+#app.simple~#menu [data-hub=term]{display:none}
+@media (min-width:900px){body.mapmode.hub-open #app .mapbar{right:460px!important}}
+body.mapmode #app .right[data-sec=term] .pbody>[data-s=term]{display:flex!important;flex-direction:column;gap:14px}
+.term .term-intro{margin:0;font-size:13px;line-height:1.5;color:var(--mid)}
+.term section.dock,.term aside.left{position:static!important;inset:auto!important;width:auto!important;height:auto!important;max-height:none!important;display:flex!important;flex-direction:column;border-radius:16px;transform:none!important;order:0!important}
+.term section.dock .tabs{display:flex;flex-wrap:wrap;gap:4px;padding:8px}.term section.dock .tsp{margin-left:auto;display:flex;gap:6px;align-items:center}
+.term section.dock .pane{max-height:340px;overflow:auto}.term section.dock table{min-width:520px}
+.term aside.left .pbody{max-height:none!important;overflow:visible!important}
 </style>
 </head>
 <body>
@@ -716,7 +728,7 @@ body.mapmode #mcard{bottom:calc(84px + env(safe-area-inset-bottom,0px))!importan
       <button role="tab" aria-selected="false" data-tab="stocks">Acciones</button>
       <button role="tab" aria-selected="false" data-tab="model">Planes y supuestos</button>
       <button role="tab" aria-selected="false" data-tab="src">Fuentes</button>
-      <div class="sp"><span class="lbl" id="qps">0 consultas</span><button class="btn2" id="clearLog" style="padding:5px 9px">Limpiar</button></div>
+      <div class="tsp"><span class="lbl" id="qps">0 consultas</span><button class="btn2" id="clearLog" style="padding:5px 9px">Limpiar</button></div>
     </div>
     <div class="pane" id="p-stream"><div id="stream" aria-live="polite"></div></div>
     <div class="pane" id="p-matrix" hidden><table id="matrix"></table></div>
@@ -2428,7 +2440,8 @@ function mapBarClick(e){const b=e.target.closest('button[data-g]');if(!b)return;
   if(g==='fit'){sq.fit=!sq.fit;sq.active=true}
   if(g==='mine'){sq.mine=!sq.mine;sq.active=true}
   closePlace();updateMap()}
-function showPlace(coord,items,exact){const p=$('#mcard');if(!items.length)return;const first=items[0];
+let camBack=null;const camNow=()=>({center:map.getCenter(),zoom:map.getZoom(),pitch:map.getPitch(),bearing:map.getBearing()});
+function showPlace(coord,items,exact){const p=$('#mcard');if(!items.length)return;const first=items[0];if(!camBack&&p.hidden&&map)camBack=camNow();
   const ent=searchEntities().find(x=>x.k===first.k&&x.t===first.t);const g=ent&&entGeo(ent);const ck=g&&geoCached(g[4]);
   const prec=ck?'edificio':g?g[3]:'ciudad',addr=g?g[2]:'';const who=g?g[5]:'';
   mapFocus=g?g[4]:null;
@@ -2454,7 +2467,8 @@ async function refineGeo(g,coord){ // geocodifica la dirección en el móvil (Op
     try{localStorage.setItem('atlas_geo_'+g[4],JSON.stringify([lat,lon]))}catch(_){}
     if(mapFocus===g[4]){hqMarker&&hqMarker.setLngLat([lon,lat]);litCity([lon,lat]);map.easeTo({center:[lon,lat],duration:800,padding:map.getPadding()});const pe=$('#mcard .mc-prec');if(pe){pe.className='mc-prec edificio';pe.textContent='Ubicación afinada con OpenStreetMap'}}
     updateMap(true)}catch(_){}}
-function closePlace(){const p=$('#mcard');if(!p||p.hidden)return;litCity(null);p.classList.remove('on');p.hidden=true;mapFocus=null;if(hqMarker){hqMarker.remove();hqMarker=null}}
+function closePlace(){const p=$('#mcard');if(!p||p.hidden)return;litCity(null);p.classList.remove('on');p.hidden=true;mapFocus=null;if(hqMarker){hqMarker.remove();hqMarker=null}
+  if(camBack){const c=camBack;camBack=null;fxOrbit=false;map.flyTo({...c,duration:1300,essential:true})}} // al cerrar la ficha, vuelve a la vista anterior
 function focusEntOnMap(k,t){const x=searchEntities().find(y=>y.k===k&&y.t===t);if(!x||!mapReady)return false;const g=entGeo(x);if(!g)return false;
   showPlace([g[1],g[0]],[{k:x.k,t:x.t}]);return true}
 
@@ -2598,7 +2612,7 @@ async function renderPf(){const el=$('#myPf');if(!el)return;const _pfKeep=el.que
     const sub=r.pos.mode==='m'?`${fmtN(r.pos.amt)} € al mes desde ${fd(r.pos.from+'-01').slice(3)}`:r.pos.mode==='v'?`valía ${eur(r.pos.amt)} el ${fd(r.pos.date)}`:`compra de ${eur(r.pos.amt)} el ${fd(r.pos.date)}`;
     const right=r.err?`<small>⚠️</small>`:r.pending?`<b>${eur(r.val)}</b><small>pendiente</small>`:r.pos.mode==='m'&&!r.inv?`<small>empieza el 01/${fd(r.pos.from+'-01').slice(3)}</small>`:
       `<b>${eur(r.val)}</b><small class="pf-chip ${r.gain<0?'dn':'up'}">${r.gain<0?'▼':'▲'} ${eur(Math.abs(r.gain))}</small>`;
-    return `<div class="pf-row" style="--c:${gc}" data-id="${r.pos.id}"><button class="pf-main" data-ed="${r.pos.id}"><i class="pf-ico">${e?(SEC_ICON[e.sec]||'◆'):'⏳'}</i><span class="pf-nm"><b>${esc(e?e.name:r.pos.t)}</b><small>${esc(sub)}${plan!=null?` · plan ${Math.round(plan*100)} %, tienes ${Math.round(w*100)} %`:''}</small>${r.err?`<small style="color:var(--warn)">${esc(r.err)}</small>`:''}${r.pending?`<a class="pf-act" href="${isinIssue(r.pos.t)}" target="_blank" rel="noopener">Activar precios diarios ↗</a>`:''}</span>
+    return `<div class="pf-row" style="--c:${gc}" data-id="${r.pos.id}"><button class="pf-main" data-ed="${r.pos.id}"><i class="pf-ico">${e?esc(String(e.tk||e.t).replace(/\..*$/,'').slice(0,4)):'…'}</i><span class="pf-nm"><b>${esc(e?e.name:r.pos.t)}</b><small>${esc(sub)}${plan!=null?` · plan ${Math.round(plan*100)} %, tienes ${Math.round(w*100)} %`:''}</small>${r.err?`<small style="color:var(--warn)">${esc(r.err)}</small>`:''}${r.pending?`<a class="pf-act" href="${isinIssue(r.pos.t)}" target="_blank" rel="noopener">Activar precios diarios ↗</a>`:''}</span>
       <span class="pf-v">${right}</span><span class="pf-pen" aria-hidden="true">✎</span></button><div class="pf-ed" hidden></div></div>`}).join('');
   const early=ok.some(r=>r.early),asOf=ok.map(r=>r.asOf).filter(Boolean).sort().pop();
   const TABS=[['res','📊','Resumen'],['evo','📈','Evolución'],['opt','🧭','Opciones'],['bt','⏳','5 años'],['buy','🛒','Este mes']];if(!TABS.some(t=>t[0]===pfTab))pfTab='res';
@@ -2706,12 +2720,12 @@ let _calcSeq=0;async function calcRun(){const tok=++_calcSeq;if(!$('#calcOut'))r
     <div class="calc-k"><div><span>Al año</span><b style="color:${col}">${p1(r.cagr,1)}</b></div><div><span>Peor caída</span><b style="color:var(--bad)">${p1(r.dd,0)}</b></div>${b?`<div><span>MSCI World</span><b>${eur(b.fin)}</b></div>`:''}</div></div>
     <div class="calc-ch"><canvas id="calcCv"></canvas></div>
     ${b?`<p class="pf-vs">${r.fin>=b.fin?`🏆 Le habría ganado al MSCI World por <b style="color:var(--good)">${eur(r.fin-b.fin)}</b>.`:`📉 Solo con el MSCI World habrías tenido <b style="color:var(--bad)">${eur(b.fin-r.fin)}</b> más.`}</p>`:''}
-    ${items.length>1?`<ul class="op-list" style="--c:#c084fc">${items.slice().sort((a,c)=>c.w-a.w).map(x=>`<li><i style="width:${(x.w*100).toFixed(1)}%"></i><span>${esc(x.name)}</span><b>${Math.round(x.w*100)} %</b></li>`).join('')}</ul>`:''}
+    ${items.length>1?`<ul class="op-list" style="--c:#5ee7ff">${items.slice().sort((a,c)=>c.w-a.w).map(x=>`<li><i style="width:${(x.w*100).toFixed(1)}%"></i><span>${esc(x.name)}</span><b>${Math.round(x.w*100)} %</b></li>`).join('')}</ul>`:''}
     <p class="mp-note">Precios reales en euros, aportación el día 1 de cada mes${CALC.what==='me'||PVAR[CALC.what]?', con el reparto de hoy aplicado hacia atrás (favorece a lo que ya ha subido)':''}. Sin comisiones ni impuestos.${r.early?' Algún valor tiene menos historia: hasta entonces se usa su primer precio.':''}</p>`;
   if(_calcCh){_calcCh.destroy();_calcCh=null}
-  const lbl=months.map(d=>d.slice(5,7)+'/'+d.slice(2,4)).concat(['hoy']),cv=$('#calcCv');if(!cv)return;const ctx=cv.getContext('2d'),gr=ctx.createLinearGradient(0,0,0,200);gr.addColorStop(0,'rgba(255,179,90,.45)');gr.addColorStop(1,'rgba(255,179,90,0)');
-  _calcCh=new Chart(cv,{type:'line',data:{labels:lbl,datasets:[{label:'Tendrías',data:r.val,borderColor:'#ffb35a',backgroundColor:gr,fill:true,tension:.25,pointRadius:0,borderWidth:2.6},
-    {label:'Habrías puesto',data:r.inv,borderColor:'rgba(180,195,220,.65)',borderDash:[5,4],pointRadius:0,borderWidth:1.4,stepped:true}].concat(b?[{label:'MSCI World',data:b.val,borderColor:'#35e0ff',pointRadius:0,borderWidth:1.5,tension:.25}]:[])},
+  const lbl=months.map(d=>d.slice(5,7)+'/'+d.slice(2,4)).concat(['hoy']),cv=$('#calcCv');if(!cv)return;const ctx=cv.getContext('2d'),gr=ctx.createLinearGradient(0,0,0,200);gr.addColorStop(0,'rgba(94,231,255,.30)');gr.addColorStop(1,'rgba(94,231,255,0)');
+  _calcCh=new Chart(cv,{type:'line',data:{labels:lbl,datasets:[{label:'Tendrías',data:r.val,borderColor:'#5ee7ff',backgroundColor:gr,fill:true,tension:.25,pointRadius:0,borderWidth:2.6},
+    {label:'Habrías puesto',data:r.inv,borderColor:'rgba(180,195,220,.65)',borderDash:[5,4],pointRadius:0,borderWidth:1.4,stepped:true}].concat(b?[{label:'MSCI World',data:b.val,borderColor:'rgba(233,240,255,.75)',pointRadius:0,borderWidth:1.5,tension:.25}]:[])},
     options:{responsive:true,maintainAspectRatio:false,animation:{duration:400},interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#b9c6e8',boxWidth:12,font:{size:11}}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${eur(c.raw)}`}}},
       scales:{x:{ticks:{color:'#7f8bab',maxTicksLimit:5,font:{size:10}},grid:{display:false}},y:{ticks:{color:'#7f8bab',font:{size:10},maxTicksLimit:4,callback:v=>fmtN(v)+' €'},grid:{color:'rgba(255,255,255,.05)'}}}}})}
 
@@ -2746,17 +2760,19 @@ async function renderWatch(){const el=$('#watch');if(!el)return;if(!WATCH||Date.
     <details class="mp-why"><summary>ℹ️ Cómo se elige</summary><p>Se leen los titulares de Yahoo Finance de cada valor de los últimos 5 días y se puntúan por su tono (mejora de recomendación, supera previsiones, nuevo contrato, aprobación… suman; rebajas, demandas, previsiones a la baja… restan), dando más peso a lo más reciente. Se suma un poco si el mes va bien y se resta si ya ha subido más de un 35 %. Es una señal automática, no una recomendación: muchas noticias ya están en el precio cuando las lees.</p></details>`;
   el.querySelectorAll('.wt-top').forEach(b=>b.addEventListener('click',()=>openDetail(b.dataset.k,b.dataset.t,b.dataset.n)))}
 /* ================= MENÚ: el globo a pantalla completa y cada sección en su panel ================= */
-let hubSec=null;const HUB={pf:['★','Mi cartera'],plan:['💡','Ideas y plan'],calc:['🧮','Calculadora'],watch:['👀','Ones to watch']};
+let hubSec=null;const HUB={pf:['','Mi cartera'],plan:['','Ideas de cartera'],calc:['','Calculadora'],watch:['','Ones to watch'],term:['','Terminal experto']};
 function initHub(){if(!MAPMODE||$('#dock'))return;const R=$('.right');if(!R)return;
   R.querySelector('.pbody').insertAdjacentHTML('afterbegin','<div id="watch" class="pf watch"></div>');
   R.querySelectorAll('.pbody>*').forEach(c=>c.dataset.s=c.id==='myPf'?'pf':c.id==='calc'?'calc':c.id==='watch'?'watch':'plan');
+  {const t=document.createElement('div');t.id='termSec';t.className='pf term';t.dataset.s='term';t.innerHTML='<p class="term-intro">Lo que ATLAS calcula por debajo: registro de cada consulta, tablas completas y supuestos de los modelos. Solo visible en modo experto.</p>';
+   const dk=document.querySelector('section.dock'),nd=document.querySelector('aside.left');if(dk)t.appendChild(dk);if(nd){nd.classList.add('term-nodes');t.appendChild(nd)}R.querySelector('.pbody').appendChild(t)}
   const ph=R.querySelector('.phead');ph.insertAdjacentHTML('beforeend','<button class="mb-ico hub-ref" aria-label="Actualizar mercado">↻</button><button class="x-close hub-x" aria-label="Cerrar">✕</button>');
   ph.querySelector('.hub-x').addEventListener('click',()=>closeHub());ph.querySelector('.hub-ref').addEventListener('click',e=>refreshMarket(e.currentTarget));
   const bb=document.createElement('nav');bb.id='bbar';bb.setAttribute('aria-label','Menú');
   bb.innerHTML=`<button class="bb-menu" aria-label="Menú" aria-expanded="false"><i></i><i></i><i></i></button><button class="bb-search"><span>⌕</span><b id="bbarQ">Buscar empresa, ETF o fondo</b></button><button class="bb-ref" data-g="ref" aria-label="Actualizar mercado">↻</button>`;
   const MENU=[['Tu cartera',[['ov','◎','Resumen','Cómo va tu cartera'],['pf','★','Mi cartera','Tus posiciones'],['doc','◐','Análisis','Salud, riesgos y solapamientos'],['xp','◍','Globo','Dónde está tu dinero'],['radar','◇','Radar','Qué merece investigarse'],['cmp','⇄','Comparar','Escenarios y ETFs lado a lado']]],
     ['Explorar',[['srch','⌕','Buscar mercados','ETFs, fondos y acciones'],['rank','↑','Rankings','Lo que más sube'],['plan','◈','Ideas de cartera','Carteras modelo'],['watch','◉','Ones to watch','Noticias que pueden moverlas']]],
-    ['Herramientas',[['calc','∑','Calculadora','¿Cuánto tendrías hoy?'],['db','▦','Base de datos','La ciudad 3D'],['set','⚙','Ajustes','Modo experto y conexiones']]]];
+    ['Herramientas',[['calc','∑','Calculadora','¿Cuánto tendrías hoy?'],['db','▦','Base de datos','La ciudad 3D'],['set','⚙','Ajustes','Modo experto y conexiones'],['term','⌗','Terminal experto','Registro, tablas y supuestos']]]];
   const mn=document.createElement('div');mn.id='menu';mn.hidden=true;
   mn.innerHTML=`<div class="mn-box"><div class="mn-h"><b>ATLAS</b><span>${new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})}</span></div>${MENU.map(([g,items],gi)=>`<div class="mn-sec">${g}</div><div class="${gi?'mn-list':'mn-grid mn-main'}">${items.map(([k,i,l,sub])=>`<button data-hub="${k}" style="--c:#7aa2ff"><span class="mn-i">${i}</span><b>${l}</b><small>${sub}</small></button>`).join('')}</div>`).join('')}</div>`;
   document.body.appendChild(mn);document.body.appendChild(bb);
@@ -2770,8 +2786,8 @@ function initHub(){if(!MAPMODE||$('#dock'))return;const R=$('.right');if(!R)retu
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!mn.hidden)menu(false)});
   $('#tick')&&($('#tick').innerHTML=tickHTML())}
 function openHub(sec){const R=$('.right');if(!R)return;if(!hubSec)sheetPush();hubSec=sec;R.dataset.sec=sec;R.classList.add('open');document.body.classList.add('hub-open');
-  const h=R.querySelector('.phead h2 .sp');if(h)h.textContent=HUB[sec][0]+' '+HUB[sec][1];R.querySelector('.pbody').scrollTop=0;
-  if(sec==='calc'&&!$('#calcOut'))renderCalc();if(sec==='pf')renderPf();if(sec==='watch')renderWatch()}
+  const h=R.querySelector('.phead h2 .sp');if(h)h.textContent=HUB[sec][1];R.querySelector('.pbody').scrollTop=0;
+  if(sec==='calc'&&!$('#calcOut'))renderCalc();if(sec==='term'){renderNodes();renderMatrix();renderStocksTable();renderModel();renderSources()}if(sec==='pf')renderPf();if(sec==='watch')renderWatch()}
 function closeHub(fromPop){if(!hubSec)return;if(fromPop!==true&&sheetPop())return;hubSec=null;const R=$('.right');R.classList.remove('open');document.body.classList.remove('hub-open');
 }
 let _pfCh=null;
@@ -3203,7 +3219,7 @@ $('#searchBtn').addEventListener('click',openSearch);
    try{const r=await eodFetch('AAPL.US',k);eodCount();$('#eodMsg').style.color='var(--good)';$('#eodMsg').textContent=`Funciona: Apple cerró a $${r[r.length-1][1].toFixed(2)} el ${r[r.length-1][0].split('-').reverse().join('/')}. Pulsa Guardar.`}
    catch(e){$('#eodMsg').style.color='var(--bad)';$('#eodMsg').textContent=/^auth/.test(e.message)?'Clave no válida ('+e.message+').':e.message==='limit'?'Límite diario alcanzado.':'No se pudo conectar ('+e.message+'). Si persiste, puede ser un bloqueo CORS del navegador.'}})}$('#sheetX').addEventListener('click',()=>{if(!$('#detail').hidden)closeDetail();else closeSearch()});
 $('#setBtn').addEventListener('click',()=>{$('#settings').hidden=false});
-$('#xpSlot').appendChild($('#expertBtn'));$('#expertBtn').addEventListener('click',()=>{const app=$('#app'),on=app.classList.toggle('simple');$('#expertBtn').setAttribute('aria-pressed',String(!on));$('#expertBtn').textContent=on?'Vista experta':'Vista simple';try{localStorage.setItem('atlas_view',on?'simple':'expert')}catch(_){}setTimeout(resize3d,60);refreshAll()});
+$('#xpSlot').appendChild($('#expertBtn'));$('#expertBtn').addEventListener('click',()=>{const app=$('#app'),on=app.classList.toggle('simple');$('#expertBtn').setAttribute('aria-pressed',String(!on));$('#expertBtn').textContent=on?'Vista experta':'Vista simple';if(on&&hubSec==='term')closeHub();try{localStorage.setItem('atlas_view',on?'simple':'expert')}catch(_){}setTimeout(resize3d,60);refreshAll()});
 try{if(localStorage.getItem('atlas_view')==='expert'){$('#app').classList.remove('simple');$('#expertBtn').textContent='Vista simple';$('#expertBtn').setAttribute('aria-pressed','true')}}catch(_){}$('#searchFab').addEventListener('click',openSearch);
 document.addEventListener('keydown',e=>{if((e.key==='/'||(e.key==='k'&&(e.ctrlKey||e.metaKey)))&&document.activeElement.tagName!=='INPUT'){e.preventDefault();openSearch();return}if(e.key==='Escape'){if(!$('#settings').hidden){$('#settings').hidden=true;return}if(!$('#detail').hidden){closeDetail();return}if(!$('#search').hidden){closeSearch();return}closeCard();$('#settings').hidden=true}});
 let rsT;window.addEventListener('resize',()=>{clearTimeout(rsT);rsT=setTimeout(resize3d,80)});
@@ -3224,9 +3240,10 @@ stream('sys','ATLAS 3D en línea · globo WebGL · 5 skylines · modelo calibrad
 stream('sys',apiKey?'Uplink Gemini configurado: misión LIVE.':'Sin clave Gemini: misión en simulación. Configúrala en «Uplink Gemini».',apiKey?'lv':'wn');
 setTimeout(()=>{if(EXPERT())run()},3600);
 </script>
-<link rel="stylesheet" href="css/intel.css?v=10">
-<script src="js/intel.js?v=8"></script>
+<link rel="stylesheet" href="css/intel.css?v=11">
+<script src="js/intel.js?v=9"></script>
 <link rel="stylesheet" href="css/vault.css?v=1">
+<link rel="stylesheet" href="css/ui.css?v=1">
 <script src="js/vault.js?v=1"></script>
 <script src="js/kauai.js?v=1"></script>
 <script>if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>

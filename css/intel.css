@@ -233,8 +233,6 @@ body{font-variant-numeric:tabular-nums;letter-spacing:-.005em}
 .ix-wow .w1{margin:0;font:700 24px/1.2 var(--ui);letter-spacing:-.02em}.ix-wow .w1 b{color:var(--acc)}
 .ix-wow .w2{margin:0;font:500 16px var(--ui);color:var(--mid)}
 .ix-wow .w3{margin:0;font:500 15px/1.5 var(--ui);color:var(--fg);text-wrap:pretty}.ix-wow .w3 b{color:#fff;font-weight:800}
-.ix-wow[data-reveal] .w2,.ix-wow[data-reveal] .ix-seg2,.ix-wow[data-reveal] .ix-flowbox,.ix-wow[data-reveal] .w3{opacity:0;transform:translateY(8px);transition:opacity .6s ease,transform .6s ease}
-.ix-wow.in .w2{opacity:1;transform:none;transition-delay:.35s}.ix-wow.in .ix-seg2,.ix-wow.in .ix-flowbox{opacity:1;transform:none;transition-delay:.7s}.ix-wow.in .w3{opacity:1;transform:none;transition-delay:1.3s}
 .ix-seg2{display:flex;gap:4px;padding:3px;border-radius:999px;background:var(--s2);align-self:flex-start}
 .ix-seg2 button{border:0;background:none;color:var(--mid);font:600 12.5px var(--ui);padding:6px 14px;border-radius:999px;cursor:pointer}.ix-seg2 button[aria-selected=true]{background:var(--acc-d);color:var(--acc)}
 .ix-flowbox{min-height:200px}
@@ -293,3 +291,47 @@ body{font-variant-numeric:tabular-nums;letter-spacing:-.005em}
 .ov-g{display:block!important;width:108px!important;flex:none}.ov-g .ix-gauge{width:108px}
 @media(max-width:700px){.ov-g,.ov-g .ix-gauge{width:92px!important}}
 .ov-h button.ov-g{height:auto!important;background:none!important;border-radius:0!important;align-self:center}
+
+/* ===== WOW v2: conclusión primero ===== */
+.ix-wow{display:flex;flex-direction:column}
+.wv{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.wv>div{display:flex;flex-direction:column;gap:2px}
+.wv b{font:800 44px/1 var(--num);letter-spacing:-.04em;color:var(--mid)}
+.wv span{font:700 12px var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.wv>i{font-style:normal;font-size:26px;color:var(--dim);padding-bottom:16px}
+.wv .hot b{font-size:64px;color:#fff}.wv .hot span{color:var(--acc)}
+.wv-t{margin:4px 0 6px;font:600 17px/1.4 var(--ui);color:var(--fg);text-wrap:pretty}
+.bt-chips{display:flex;flex-wrap:wrap;gap:6px}
+.bt-chip{font:600 11.5px var(--tick);padding:5px 9px;border-radius:8px;background:var(--s2);color:#dfe9ff}
+.bt-arrow{color:var(--dim);font-size:16px;line-height:1;padding-left:4px}
+.bt-gs{display:flex;flex-direction:column;gap:6px}
+.bt-plus{font-style:normal;text-align:center;color:var(--dim);font-size:14px;line-height:1}
+.bt-g{border-radius:16px;padding:12px 14px;background:var(--s1);box-shadow:inset 0 0 0 1px var(--ln)}
+.bt-g.many{box-shadow:inset 0 0 0 1px rgba(94,231,255,.35);background:rgba(94,231,255,.05)}
+.bt-gh{display:flex;align-items:baseline;gap:8px}.bt-gh b{font:800 12px var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--acc);flex:none}
+.bt-gh span{flex:1;min-width:0;font:600 13.5px var(--ui);color:#fff}.bt-gh em{font:800 15px var(--num);font-style:normal;color:#fff}
+.bt-g ul{list-style:none;margin:8px 0 0;padding:0 0 0 10px;border-left:2px solid rgba(94,231,255,.4);display:flex;flex-direction:column;gap:4px}
+.bt-g:not(.many) ul{border-left-color:var(--ln)}
+.bt-g li{display:grid;grid-template-columns:54px 1fr auto;gap:8px;align-items:baseline;font-size:12.5px}
+.bt-tk{font:600 11.5px var(--tick);color:#dfe9ff}.bt-nm{color:var(--mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bt-g li em{font-style:normal;color:var(--mid);font-weight:600}
+.bt-n{margin:8px 0 0;font-size:12px;color:var(--mid);line-height:1.45}
+.ix-flowsec{display:flex;flex-direction:column;gap:var(--sp3)}
+.ix-flowsec .w3{margin:0;font:500 14px/1.5 var(--ui);color:var(--fg)}.ix-flowsec .w3 b{color:#fff;font-weight:800}
+@media(max-width:420px){.wv b{font-size:36px}.wv .hot b{font-size:52px}}
+.ov-bets{all:unset;cursor:pointer;display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 10px;padding:10px 12px;border-radius:14px;background:rgba(94,231,255,.07);box-shadow:inset 0 0 0 1px rgba(94,231,255,.25);margin:2px 0 4px}
+.ov-bets span{font:600 13px var(--ui);color:var(--mid)}.ov-bets b{font:800 22px var(--num);color:#fff;letter-spacing:-.02em}.ov-bets span:nth-of-type(2) b{color:var(--acc)}
+.ov-bets i{font-style:normal;color:var(--dim)}.ov-bets em{margin-left:auto;font-style:normal;font-size:12px;font-weight:600;color:var(--acc)}.ov-bets:hover{background:rgba(94,231,255,.12)}
+/* ===== Salud en 4 dimensiones ===== */
+.ix-hero.hx{text-align:left;display:flex;flex-direction:column;gap:var(--sp4);padding:var(--sp5);border-radius:24px;background:var(--s1)}
+.hx-top{display:flex;gap:16px;align-items:center}
+.hx-n{display:flex;flex-direction:column;align-items:center;flex:none;min-width:84px}.hx-n b{font:800 56px/1 var(--num);letter-spacing:-.04em;color:#fff}.hx-n span{font:800 11.5px var(--ui);letter-spacing:.12em}
+.hx-top .ix-lead{margin:0;font:600 15px/1.45 var(--ui);text-align:left}
+.hx-dims{display:flex;flex-direction:column;gap:4px}
+.hx-d{all:unset;box-sizing:border-box;width:100%;text-align:left;cursor:pointer;display:grid;grid-template-columns:118px 1fr 30px;gap:10px;align-items:center;padding:7px 8px;border-radius:10px}.hx-d:hover{background:var(--s2)}
+.hx-d span{font:600 13.5px var(--ui);color:var(--fg)}.hx-d em{font:800 14px var(--num);font-style:normal;text-align:right;color:#fff}
+.hx-d i{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.hx-d i b{height:10px;border-radius:3px;background:rgba(255,255,255,.08)}
+.ix-dg{display:flex;flex-direction:column;gap:2px;padding:10px 0 6px;border-top:1px solid var(--ln)}.ix-dg:first-child{border-top:0}
+.ix-dg h5{margin:0;display:flex;justify-content:space-between;font:800 12px var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--acc)}.ix-dg h5 em{font-style:normal;color:#fff}
+.ix-dg>.q{margin:0 0 4px;font-size:12px;color:var(--dim)}.ix-dg.flash{background:var(--acc-d);border-radius:10px}
+@media(max-width:420px){.hx-top{flex-direction:column;align-items:flex-start}.hx-n{flex-direction:row;gap:10px;align-items:baseline}.hx-d{grid-template-columns:104px 1fr 28px}}
+.ix-flowsec+.ix-k,.ix-wow+.ix-k{margin-top:var(--sp4)}

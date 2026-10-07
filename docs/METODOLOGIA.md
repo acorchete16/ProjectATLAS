@@ -36,6 +36,12 @@ Los ETFs de EE. UU. sin ficha en justETF usan, cuando existe, el ETF UCITS que r
 - **Sedes vs exposición**: la vista «Exposición de cartera» usa el país que asigna el proveedor del índice; la vista «Sedes» usa la dirección real de la sede (base de datos de ATLAS) y solo cubre empresas localizadas. La exposición por **ingresos** por país no está disponible (sin fuente).
 
 ## Portfolio Health (0–100, media simple de los componentes disponibles)
+La vista principal agrupa los 11 componentes en 4 dimensiones (media simple de los disponibles en cada una; la salud total sigue siendo la media de los 11):
+- **Diversificación**: diversificación real, apuestas independientes, solapamiento entre ETFs.
+- **Concentración**: empresa, sectores, geografía, concentración por producto.
+- **Riesgo**: volatilidad, caída máxima, correlación.
+- **Coste**: TER medio ponderado. (No hay métrica de valoración en la salud: no se inventa.)
+
 | Componente | Fórmula |
 |---|---|
 | Diversificación real | 100 · ln(N efectivo) / ln(200) |
@@ -81,3 +87,9 @@ Comparaciones relativas con datos reales (rankings diarios de ATLAS + composici�
 
 ## Comparar · «¿cuál diversifica mejor mi cartera?»
 Se añade un 10 % de cada ETF a tu cartera (el resto se reduce en proporción) y se recalcula la salud. Gana el que más la mejora, penalizando 5 puntos por cada 1,0 de correlación con tu cartera actual. Sharpe = (rentabilidad anual histórica − tipo sin riesgo de Ajustes) / volatilidad.
+
+## «N productos → ≈ X apuestas reales»
+Grupos = activos unidos por correlación semanal ≥ 0,85 (5 años, en euros; enlace simple: basta con parecerse mucho a otro del grupo). Apuestas = 1 / Σ(peso de cada grupo)². La etiqueta de cada grupo sale de su propia exposición: país si uno supera el 50 % («Emergentes» si los emergentes suman ≥ 50 %, «Global» si no), y sector si uno supera el 30 %. Se muestra la correlación media y la mínima entre pares del grupo; un activo suelto muestra su correlación máxima con el resto. Activos sin 40 semanas de precios cuentan como grupo propio y se indica.
+
+## Comparar · estado inicial
+Sin A y B elegidos se proponen puntos de partida calculados con tu cartera (no son recomendaciones): tus dos fondos de más peso entre sí, tu cartera frente al MSCI World de referencia y tu cartera + 10 % del ETF amplio de ATLAS con menor correlación semanal con ella (se excluyen apalancados y temáticos).
