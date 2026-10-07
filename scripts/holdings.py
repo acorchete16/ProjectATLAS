@@ -95,7 +95,7 @@ def parse_ishares(txt, tk):
         m = re.match(r'"?Fund Holdings as of"?,\s*"?([^"]+)"?', ln)
         if m: asof = m.group(1).strip()
     hi = next((i for i, ln in enumerate(lines) if ln.startswith('Ticker,') or ln.startswith('"Ticker"')), None)
-    if hi is None: raise ValueError('sin cabecera')
+    if hi is None: raise ValueError('sin cabecera: ' + repr(txt[:260]))
     rows = list(csv.DictReader(io.StringIO('\n'.join(lines[hi:]))))
     hold, country, sector, tot = [], {}, {}, 0.0
     for r in rows:
@@ -124,7 +124,7 @@ def get_index(key, urls):
         try:
             d = parse_ishares(raw(u), tk); d.update(name=name, src=f'iShares {tk} (cartera completa publicada)', etf=tk)
             L(f'  índice {key} ← {tk}: {d["n"]} empresas a {d["asof"]} · EE. UU. {d["country"].get("US", 0):.1f} %'); return d
-        except Exception as e: L(f'  índice {key} ← {tk} falló: {str(e)[:90]}')
+        except Exception as e: L(f'  índice {key} ← {tk} falló: {str(e)[:400]} · {u[:160]}')
     return None
 
 def get_ndx():
@@ -132,6 +132,7 @@ def get_ndx():
     try:
         txt = raw('https://www.invesco.com/us/financial-products/etfs/holdings/main/holdings/0?audienceType=Investor&action=download&ticker=QQQ')
         rows = list(csv.DictReader(io.StringIO(txt)))
+        L('  invesco cabecera:', repr(txt[:300]))
         hold = []; sector = {}; asof = None
         for r in rows:
             try: w = float(str(r.get('Weight', '0')).replace('%', ''))
