@@ -65,7 +65,7 @@ function lookThrough(P){const C={},S={},comp=new Map(),byC={},dir={},ind={},AC={
   return{C,S,comps,byC,dir,ind,AC,resid2,nAssumed,cover,ccCover,ter:terW?ter/terW:null,terW}}
 
 /* Solapamiento entre dos activos (% común como mínimo, con las posiciones conocidas) */
-function overlap(a,b){const A=expOf(a).hold,B=expOf(b).hold;if(!A.length||!B.length)return null;const m=new Map(A.map(h=>[h.key,h.w]));let o=0;B.forEach(h=>{if(m.has(h.key))o+=Math.min(m.get(h.key),h.w)});return o}
+function overlap(a,b){const A=expOf(a).hold,B=expOf(b).hold;if(!A.length||!B.length)return null;const agg=H=>{const m=new Map();H.forEach(h=>m.set(h.key,(m.get(h.key)||0)+h.w));return m};const ma=agg(A),mb=agg(B);let o=0;ma.forEach((w,k)=>{if(mb.has(k))o+=Math.min(w,mb.get(k))});return o}
 
 /* ------------------------------ precios: riesgo y correlaciones ------------------------------ */
 function weeklyGrid(years){const out=[],end=new Date();const d=new Date(end);d.setFullYear(d.getFullYear()-years);while(d.getDay()!==5)d.setDate(d.getDate()+1);while(d<=end){out.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+7)}return out}
