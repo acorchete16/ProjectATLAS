@@ -106,7 +106,7 @@ const saveDoc=()=>{try{localStorage.setItem('atlas_doc',JSON.stringify(DOC))}cat
 let _pfV=null;
 async function docPortfolio(src){src=src||DOC.src;if(src==='pf'&&PF.length){const rs=await Promise.all(PF.map(pfValue)),g=new Map();let inv=0,val=0;rs.forEach(r=>{if(!r.ent||r.err||r.pending||!(r.val>0))return;inv+=r.inv;val+=r.val;const k=r.ent.k+'|'+r.ent.t;g.set(k,(g.get(k)||0)+r.val)});
     const tot=[...g.values()].reduce((a,v)=>a+v,0);_pfV={inv,val};return{name:'Mi cartera',src:'pf',val,inv,P:[...g.entries()].map(([k,v])=>{const [kk,t]=k.split('|');return{e:entBy(kk,t),w:v/tot}}).filter(x=>x.e)}}
-  const rows=(DOC.rows||[]).map(r=>({e:entBy(r.k,r.t),w:+r.w||0})).filter(x=>x.e&&x.w>0),tot=rows.reduce((a,x)=>a+x.w,0);return{name:'Cartera de prueba',src:'custom',P:tot?rows.map(x=>({e:x.e,w:x.w/tot})):[]}}
+  const rows=(DOC.rows||[]).map(r=>({e:entBy(r.k,r.t),w:+r.w||0})).filter(x=>x.e&&x.w>0),tot=rows.reduce((a,x)=>a+x.w,0);return{name:'Cartera rápida',src:'custom',P:tot?rows.map(x=>({e:x.e,w:x.w/tot})):[]}}
 const isNarrow=e=>{if(e.k==='s')return true;const x=expOf(e);const s=Object.entries(x.sector).filter(([k])=>k!==UNK).sort((a,b)=>b[1]-a[1])[0];return !!(s&&s[1]>=60&&x.ac==='Acciones')};
 const SCORE_DOC={
   div:['Diversificación','¿Entre cuántas empresas se reparte de verdad tu dinero?','Empresas equivalentes = 1 / Σ(peso de cada empresa)², usando solo las posiciones conocidas. Como el resto no se conoce y no se rellena, es una cota OPTIMISTA (la real puede ser menor). 200 o más → 100; 10 → 43; 1 → 0 (escala logarítmica).','Composición'],
@@ -193,19 +193,19 @@ function matrix(items,cell,note){if(items.length<2)return '';return `<div class=
 const TABS=[['doctor','Doctor'],['hold','Holdings'],['risk','Riesgo'],['geo','Países'],['comp','Empresas'],['sec','Sectores']];
 function docTab(t){DOC.tab=t;saveDoc();if(typeof hubSec!=='undefined'&&hubSec==='doc')renderDoc();else openHub('doc')}
 async function renderDoc(){const el=$('#ixdoc');if(!el)return;
-  el.innerHTML=`<div class="ix-top"><div class="ix-src"><button data-dsrc="pf" aria-pressed="${DOC.src==='pf'}">★ Mi cartera</button><button data-dsrc="custom" aria-pressed="${DOC.src==='custom'}">✎ Cartera de prueba</button></div>
-    ${DOC.src==='custom'?docEditor():''}<nav class="ix-tabs" role="tablist">${TABS.map(([k,l])=>`<button role="tab" data-tab="${k}" aria-selected="${DOC.tab===k}">${l}</button>`).join('')}</nav></div><div id="ixdocOut"><div class="sk"><p>Analizando lo que hay dentro de cada ETF…</p><i></i><i></i><i></i><i></i></div></div>`;
+  el.innerHTML=`<div class="ix-top"><div class="ix-src"><button data-dsrc="pf" aria-pressed="${DOC.src==='pf'}">Mi cartera</button><button data-dsrc="custom" aria-pressed="${DOC.src==='custom'}">Cartera rápida</button></div>
+    ${DOC.src==='custom'?pasteBox()+`<details class="qp-ed"><summary>Editar fila a fila</summary>${docEditor()}</details>`:''}<nav class="ix-tabs" role="tablist">${TABS.map(([k,l])=>`<button role="tab" data-tab="${k}" aria-selected="${DOC.tab===k}">${l}</button>`).join('')}</nav></div><div id="ixdocOut"><div class="sk"><p>Analizando lo que hay dentro de cada ETF…</p><i></i><i></i><i></i><i></i></div></div>`;
   el.querySelectorAll('[data-dsrc]').forEach(b=>b.onclick=()=>{DOC.src=b.dataset.dsrc;saveDoc();renderDoc()});
   el.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{DOC.tab=b.dataset.tab;saveDoc();el.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',x===b));drawTab()});
-  if(DOC.src==='custom')bindEditor(el);
-  const out=$('#ixdocOut');if(DOC.src==='pf'&&!PF.length){out.innerHTML=`<div class="ix-empty"><h4>Aún no tienes cartera</h4><p>Añade tus inversiones en «Mi cartera» o prueba el análisis con una cartera de ejemplo.</p><div class="ix-btns"><button class="btn" data-go="pf">★ Crear mi cartera</button><button class="btn2" data-go="ex">Probar con un ejemplo</button></div></div>`;
-    out.querySelector('[data-go=pf]').onclick=()=>openHub('pf');out.querySelector('[data-go=ex]').onclick=()=>{loadExample();renderDoc()};return}
+  if(DOC.src==='custom'){bindEditor(el);bindPaste(el)}
+  const out=$('#ixdocOut');if(DOC.src==='pf'&&!PF.length){out.innerHTML=`<div class="ix-empty"><h4>¿Cuántas apuestas reales hay en tu cartera?</h4><p>Pega tus ETFs y acciones con su peso: en 30 segundos verás qué tienes de verdad. No hace falta cuenta ni importes.</p><div class="ix-btns"><button class="btn" data-go="qp">Pegar mi cartera</button><button class="btn2" data-go="pf">Registrar con importes y fechas</button></div></div>`;
+    out.querySelector('[data-go=pf]').onclick=()=>openHub('pf');out.querySelector('[data-go=qp]').onclick=()=>{DOC.src='custom';saveDoc();renderDoc().then(()=>{const t=$('#qpT');if(t)t.focus()})};return}
   const A=await analyze();if(A.empty){out.innerHTML='<p class="mp-note">Añade al menos un activo con su porcentaje.</p>';return}
   if($('#ixdocOut')!==out)return;drawTab()}
-function loadExample(){const pick=t=>{const e=ents().find(x=>x.t===t);return e?{k:e.k,t:e.t}:null};DOC.src='custom';DOC.rows=[['VT',40],['SPY',25],['QQQ',15],['SMH',10],['EEM',10]].map(([t,w])=>{const p=pick(t);return p?{...p,w}:null}).filter(Boolean);saveDoc()}
+function loadExample(){const pick=t=>{const e=ents().find(x=>x.t===t);return e?{k:e.k,t:e.t}:null};DOC.src='custom';DOC.paste='VT 40\nSPY 25\nQQQ 15\nSMH 10\nEEM 10';DOC.qpMsg='';DOC.rows=[['VT',40],['SPY',25],['QQQ',15],['SMH',10],['EEM',10]].map(([t,w])=>{const p=pick(t);return p?{...p,w}:null}).filter(Boolean);saveDoc()}
 function drawTab(){const out=$('#ixdocOut'),A=ANA;if(!out||!A||A.empty)return;out.innerHTML=({doctor:tabDoctor,hold:tabHold,risk:tabRisk,geo:tabGeo,comp:tabComp,sec:tabSec})[DOC.tab](A);
   out.querySelectorAll('[data-dx]').forEach(b=>{const [i,j]=b.dataset.dx.split(':').map(Number);b.onclick=()=>A.D[i].acts[j][1]()});
-  out.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>({globe:()=>showExposureGlobe(A.P,A.name,'geo'),gcomp:()=>showExposureGlobe(A.P,A.name,'comp'),gsec:()=>showExposureGlobe(A.P,A.name,'sec'),comp:()=>docTab('comp'),why:()=>docTab('comp'),radar:()=>openRadar()})[b.dataset.go]());
+  out.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>({globe:()=>showExposureGlobe(A.P,A.name,'geo'),gcomp:()=>showExposureGlobe(A.P,A.name,'comp'),gsec:()=>showExposureGlobe(A.P,A.name,'sec'),comp:()=>docTab('comp'),why:()=>docTab('comp'),radar:()=>openRadar(),share:()=>shareXray(A)})[b.dataset.go]());
   out.querySelectorAll('[data-cty]').forEach(b=>b.onclick=()=>openCountry(b.dataset.cty,CNAME[b.dataset.cty]||b.dataset.cty));
   out.querySelectorAll('[data-secx]').forEach(b=>b.onclick=()=>{const d=b.nextElementSibling;if(d)d.hidden=!d.hidden});
   out.querySelectorAll('[data-pair]').forEach(s=>s.onchange=()=>{DOC.pair=[out.querySelector('[data-pair=a]').value,out.querySelector('[data-pair=b]').value];drawTab()});
@@ -268,11 +268,33 @@ function wowBlock(A){const {L,SC,P,R}=A,n=P.length,nb=SC.bets&&R?SC.bets.nb:null
   return `<section class="ix-wow" data-reveal>
     <div class="wv"><div><b data-count="${n}">${n}</b><span>productos</span></div><i>→</i><div class="hot"><b>≈ ${num(nb,1)}</b><span>apuesta${nb>=1.05?'s':''} real${nb>=1.05?'es':''}</span></div></div>
     <p class="wv-t">${few?`Tienes ${n} productos. Pero ${multi.length===1&&multi[0].m.length>=n-1?'casi todos':'varios'} se comportan como una misma apuesta.`:`Tienes ${n} productos y se mueven de forma bastante independiente.`}</p>
+    <div class="ix-btns"><button class="btn2 sm" data-go="share">Compartir mis rayos X</button></div>
     <div class="ix-k">¿Por qué?</div>
     <div class="bt-chips">${chips}</div><div class="bt-arrow">↓</div>
     <div class="bt-gs">${grp}</div>
     <p class="mp-note">Dos productos cuentan como la misma apuesta si su correlación semanal (5 años, en euros) es ≥ 0,85: suben y bajan casi a la vez. Apuestas = 1 / Σ(peso de cada grupo)². ${srcl('Yahoo Finance (precios)',R.grid?R.grid[R.grid.length-1]:null)}</p>
   </section>`}
+/* ---------- Tarjeta compartible «Rayos X» (sin importes; los productos solo si el usuario lo elige) ---------- */
+function xrayFacts(A){const {L,SC,P}=A,ss=Object.entries(L.S).filter(([s])=>s!==UNK&&s!=='Otros').sort((a,b)=>b[1]-a[1])[0],cs=Object.entries(L.C).filter(([c])=>c!=='XX').sort((a,b)=>b[1]-a[1])[0],c1=L.comps[0];
+  return [ss&&[`${ss[0]}`,`${pct(ss[1],0)} de la exposición`],cs&&[CNAME[cs[0]]||cs[0],`${pct(cs[1],0)} de la exposición`],SC.top10&&['10 mayores empresas',`≥ ${pct(SC.top10,0)}`],c1&&[c1.name.replace(/ (Corp|Inc|Ltd|Co|Corporation|Class [A-C])\b.*$/,''),`≥ ${pct(c1.w,1)}`]].filter(Boolean)}
+function drawXray(A,withP){const W=1080,H=1350,cv=document.createElement('canvas');cv.width=W;cv.height=H;const g=cv.getContext('2d'),F='"Plus Jakarta Sans",Inter,system-ui,sans-serif';
+  g.fillStyle='#05070c';g.fillRect(0,0,W,H);const rg=g.createRadialGradient(160,120,0,160,120,900);rg.addColorStop(0,'rgba(94,231,255,.13)');rg.addColorStop(1,'rgba(94,231,255,0)');g.fillStyle=rg;g.fillRect(0,0,W,H);
+  const T=(t,x,y,sz,w,c,al)=>{g.font=`${w} ${sz}px ${F}`;g.fillStyle=c;g.textAlign=al||'left';g.fillText(t,x,y)};const n=A.P.length,nb=A.SC.bets?A.SC.bets.nb:null;
+  T('ATLAS',90,140,34,800,'#5ee7ff');T('RAYOS X DE CARTERA',250,140,26,700,'#6b7a90');
+  T(String(n),90,380,150,800,'#8a97ab');T(n===1?'PRODUCTO':'PRODUCTOS',95,440,30,700,'#6b7a90');
+  if(nb!=null){T('→',330,350,80,500,'#3a4558');T('≈ '+num(nb,1),450,380,190,800,'#ffffff');T(nb>=1.05?'APUESTAS REALES':'APUESTA REAL',462,440,30,800,'#5ee7ff')}
+  let y=560;g.fillStyle='rgba(255,255,255,.07)';g.fillRect(90,y-50,W-180,2);
+  y+=30;xrayFacts(A).forEach(([k,v])=>{T(k.length>24?k.slice(0,23)+'…':k,90,y+20,44,600,'#cfd8e6');T(v,W-90,y+20,48,800,'#ffffff','right');y+=118});
+  if(withP){y+=10;T('Productos: '+A.P.slice().sort((a,b)=>b.w-a.w).map(x=>String(x.e.tk)).join(' · ').slice(0,60),90,y+10,30,600,'#8a97ab')}
+  T('Correlación semanal (5 años, en euros) y composición publicada',90,H-188,24,500,'#55627a');T('por justETF y Yahoo Finance · '+fdate(A.asof),90,H-152,24,500,'#55627a');
+  T('Análisis, no una recomendación de inversión.',90,H-116,24,500,'#55627a');T('acorchete16.github.io/ProjectATLAS',90,H-60,30,700,'#5ee7ff');return cv}
+async function shareXray(A){let m=$('#xrs');if(m)m.remove();m=document.createElement('div');m.id='xrs';m.className='xrs';document.body.appendChild(m);let withP=false;
+  const draw=()=>{const cv=drawXray(A,withP);const url=cv.toDataURL('image/png');m.innerHTML=`<div class="xrs-b" role="dialog" aria-label="Compartir rayos X"><div class="xrs-h"><b>Comparte tus rayos X</b><button class="x-close" data-x aria-label="Cerrar">✕</button></div><img src="${url}" alt="Tarjeta de rayos X de la cartera"><label class="xrs-c"><input type="checkbox" data-p${withP?' checked':''}> Mostrar mis productos</label><p class="xrs-n">Nunca incluye importes. Solo lo que ves en la imagen.</p><div class="xrs-a"><button class="btn" data-s>Compartir</button><button class="btn2" data-d>Descargar</button></div></div>`;
+    m.querySelector('[data-x]').onclick=()=>m.remove();m.onclick=e=>{if(e.target===m)m.remove()};m.querySelector('[data-p]').onchange=e=>{withP=e.target.checked;draw()};
+    const blob=()=>new Promise(r=>cv.toBlob(r,'image/png'));const dl=async()=>{const a=document.createElement('a');a.href=url;a.download='atlas-rayos-x.png';a.click()};
+    m.querySelector('[data-d]').onclick=dl;m.querySelector('[data-s]').onclick=async()=>{try{const f=new File([await blob()],'atlas-rayos-x.png',{type:'image/png'});const txt=`Tengo ${A.P.length} productos, pero ATLAS dice que son ≈ ${num(A.SC.bets.nb,1)} apuestas reales.`;
+      if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],text:txt});else{await dl();toast('Imagen descargada')}}catch(_){}}};
+  if(document.fonts&&document.fonts.ready)await document.fonts.ready;draw()}
 function flowBlock(A){const {L,SC}=A,nC=Object.entries(L.C).filter(([c,v])=>c!=='XX'&&v>=.05).length;
   return `<section class="ix-flowsec" data-reveal><div class="ix-k">Dónde está tu dinero por dentro</div>
     <nav class="ix-seg2" role="tablist">${[['comp','Empresas'],['sec','Sectores'],['country','Países']].map(([k,l])=>`<button role="tab" data-flow="${k}" aria-selected="${FLOW===k}">${l}</button>`).join('')}</nav>
@@ -343,6 +365,31 @@ function tabSec(A){const L=A.L;const ss=Object.entries(L.S).filter(([,v])=>v>.05
   return `<section class="ix-card"><div class="ix-k">¿A qué sectores estás expuesto?</div>${ss.map(([s,v])=>`<button class="ix-bar${s===UNK?' unk':''}" data-secx><span>${esc(s)}</span><i><b style="width:${v/mx*100}%;background:${s===UNK?SEC_C[UNK]:'var(--acc)'}"></b></i><em>${pct(v)}</em></button><div class="ix-sub" hidden>${(L.byS[s]||[]).sort((a,b)=>b.p-a.p).map(b=>`<p><span>${esc(b.e.name)}</span><em>${pct(b.p,1)}</em></p>`).join('')}</div>`).join('')}
     <p class="mp-note">Toca un sector para ver qué ETFs lo generan.</p><div class="ix-btns"><button class="btn" data-go="gsec">🌍 Sectores en el globo</button></div>${srcl('Yahoo Finance / justETF (reparto sectorial de cada ETF)',A.asof,'Real cuando el ETF publica todo su reparto')}</section>`}
 /* --- editor de cartera de prueba --- */
+/* ---------- Cartera rápida: pegar texto («VWCE 40», «IE00B4L5Y983 6.000 €», «NVDA») ---------- */
+function numOf(x){let v=String(x).replace(/[%€\s]|eur/gi,'');if(!v)return null;
+  if(v.includes('.')&&v.includes(','))v=v.lastIndexOf(',')>v.lastIndexOf('.')?v.replace(/\./g,'').replace(',','.'):v.replace(/,/g,'');
+  else if(/^\d{1,3}([.,]\d{3})+$/.test(v))v=v.replace(/[.,]/g,'');else v=v.replace(',','.');const n=parseFloat(v);return isFinite(n)&&n>0?n:null}
+function resolveTok(raw){const v=raw.trim().replace(/^[-•*·]+\s*/,'');if(!v)return null;const T=v.toUpperCase(),N=norm(v),E=ents();
+  const fund=E.filter(x=>x.k!=='s');
+  return fund.find(x=>String(x.tk).toUpperCase()===T||x.t.toUpperCase()===T)
+    ||(/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(T)?E.find(x=>x.txt.includes(N)):null)
+    ||E.find(x=>x.k==='s'&&(String(x.tk).toUpperCase()===T||x.t.toUpperCase()===T))
+    ||(N.length>=4?E.filter(x=>norm(x.name).includes(N)).sort((a,b)=>a.name.length-b.name.length)[0]:null)
+    ||(()=>{const w=N.split(/\s+/).filter(x=>x.length>=3);if(w.length<2)return null;const byTk=w.map(x=>fund.find(e=>String(e.tk).toLowerCase()===x||e.t.toLowerCase()===x)).find(Boolean);if(byTk)return byTk;
+      return fund.filter(e=>w.every(x=>e.txt.includes(x))).sort((a,b)=>a.name.length-b.name.length)[0]||null})()||null}
+function parsePaste(txt){const items=String(txt||'').split(/\n|;/).flatMap(l=>l.split(/,\s*(?=[A-Za-z])|\t+(?=[A-Za-z])|\s{2,}(?=[A-Za-z])/)).map(x=>x.trim()).filter(Boolean);
+  const rows=new Map(),miss=[];items.forEach(it=>{const m=it.match(/^(.*?)[\s:=–-]*([\d][\d.,]*)\s*(%|€|eur)?\s*$/i);const name=(m?m[1]:it).trim(),w=m?numOf(m[2]):null;if(!name)return;
+    const e=resolveTok(name);if(!e){miss.push(name);return}const k=e.k+'|'+e.t;const r=rows.get(k)||{k:e.k,t:e.t,w:0,n:0};r.w+=w==null?NaN:w;r.n++;rows.set(k,r)});
+  let R=[...rows.values()];if(R.some(r=>!isFinite(r.w)))R=R.map(r=>({...r,w:isFinite(r.w)?r.w:null}));
+  const anyW=R.some(r=>r.w);R=R.map(r=>({k:r.k,t:r.t,w:anyW?(r.w||0):1}));return{rows:R.filter(r=>r.w>0),miss,eq:!anyW}}
+function pasteBox(){const n=(DOC.rows||[]).filter(r=>r.k&&+r.w>0).length;const box=`<div class="qp"><label for="qpT"><b>Pega tu cartera</b><span>Un ETF, fondo o acción por línea, con su peso (%) o su importe (€). Ticker, ISIN o nombre.</span></label>
+  <textarea id="qpT" rows="5" spellcheck="false" autocomplete="off" placeholder="VWCE 40&#10;CSPX 25&#10;EQAC 15&#10;SMH 10&#10;NVDA 10">${esc(DOC.paste||'')}</textarea>
+  <div class="qp-b"><button class="btn sm" data-qp>Analizar</button><button class="lnk" data-qpex>Usar un ejemplo</button></div>${DOC.qpMsg?`<p class="qp-m">${esc(DOC.qpMsg)}</p>`:''}</div>`;
+  return n?`<details class="qp-c"><summary><span>Cartera rápida · ${n} producto${n>1?'s':''}</span><b>Editar</b></summary>${box}</details>${DOC.qpMsg?`<p class="qp-m">${esc(DOC.qpMsg)}</p>`:''}`:box}
+function bindPaste(el){const b=el.querySelector('[data-qp]');if(!b)return;b.onclick=()=>{const t=el.querySelector('#qpT').value;const r=parsePaste(t);DOC.paste=t;
+  if(!r.rows.length){DOC.qpMsg=r.miss.length?`No he encontrado: ${r.miss.slice(0,6).join(', ')}. Prueba con el ticker o el ISIN.`:'Escribe al menos un ETF o acción.';saveDoc();renderDoc();return}
+  DOC.rows=r.rows;DOC.src='custom';DOC.tab='doctor';DOC.qpMsg=[r.miss.length?`No encontrados (no se incluyen): ${r.miss.slice(0,6).join(', ')}.`:'',r.eq?'Sin pesos: se reparte a partes iguales.':''].filter(Boolean).join(' ');saveDoc();renderDoc();setTimeout(()=>{if(typeof renderOverview==='function')renderOverview()},50)};
+  const ex=el.querySelector('[data-qpex]');if(ex)ex.onclick=()=>{DOC.paste='VT 40\nSPY 25\nQQQ 15\nSMH 10\nEEM 10';DOC.qpMsg='';saveDoc();renderDoc()}}
 function docEditor(){const rows=DOC.rows&&DOC.rows.length?DOC.rows:[{k:'',t:'',w:''}];const tot=rows.reduce((a,r)=>a+(+r.w||0),0);
   return `<div class="ix-ed">${rows.map((r,i)=>{const e=r.k?entBy(r.k,r.t):null;return `<div class="ix-row"><input list="ixList" data-ri="${i}" placeholder="Ticker o nombre (VWCE, SPY, QQQ…)" value="${e?esc(e.tk+' · '+e.name):''}"><input type="number" min="0" step="1" inputmode="decimal" data-rw="${i}" value="${r.w}" placeholder="%"><em>%</em><button data-rx="${i}" aria-label="Quitar">✕</button></div>`}).join('')}
     <datalist id="ixList">${ents().filter(x=>x.k!=='s').concat(ents().filter(x=>x.k==='s')).map(x=>`<option value="${esc(x.tk)} · ${esc(x.name)}">`).join('')}</datalist>
@@ -485,12 +532,12 @@ async function cmpStart(el){const out=el.querySelector('#ixCmpOut');if(!out)retu
     box.outerHTML=`<button class="cs-c" data-cs="${opts.length-1}"><b>${esc(opts[opts.length-1].t)}</b><span>${esc(opts[opts.length-1].s)}</span></button>`;bind()}catch(_){const b=out.querySelector('[data-cs-low]');if(b)b.remove()}}
 async function renderCompare(){const el=$('#ixcmp');if(!el)return;await loadExpo();if(!CMP.A){const cur=await docPortfolio();CMP.A=cur.P.length?{name:cur.name,P:cur.P}:null}
   const pick=(id,cur)=>`<div class="ix-pk"><span>${id}</span><input list="ixCmpList" data-pk="${id}" placeholder="Cartera, ticker (VWCE, QQQ…) o nombre" value="${cur?esc(cur.name):''}"></div>`;
-  const alts=await altPortfolios();const choices=[['Mi cartera',null],['Cartera de prueba',null],...alts.map(a=>[a.ico+' '+a.name,a])];
+  const alts=await altPortfolios();const choices=[['Mi cartera',null],['Cartera rápida',null],...alts.map(a=>[a.ico+' '+a.name,a])];
   el.innerHTML=`<p class="pf-lead">Compara dos carteras o dos ETFs: características, riesgo, exposición, concentración, correlación y costes.</p>
     <div class="ix-pks">${pick('A',CMP.A)}<b>vs</b>${pick('B',CMP.B)}</div><datalist id="ixCmpList">${choices.map(([n])=>`<option value="${esc(n)}">`).join('')}${ents().filter(x=>x.k!=='s').map(x=>`<option value="${esc(x.tk)} · ${esc(x.name)}">`).join('')}</datalist>
     ${CMP.add?`<label class="ix-addw">Peso de ${esc(String(CMP.add.e.tk))} en la cartera B <select data-addw>${[.05,.1,.2,.3].map(v=>`<option value="${v}"${Math.abs(v-CMP.addW)<1e-9?' selected':''}>${v*100} %</option>`).join('')}</select><small>el resto se reduce en proporción</small></label>`:''}<div id="ixCmpOut">${CMP.A&&CMP.B?'<p class="mp-note">Comparando…</p>':'<div class="sk"><i></i><i></i><i></i></div>'}</div>`;
   el.querySelectorAll('[data-pk]').forEach(i=>i.onchange=async()=>{const v=i.value;let s=null;
-    if(v==='Mi cartera'){const c=(DOC.src='pf',await docPortfolio());s=c.P.length?{name:'Mi cartera',P:c.P}:null}else if(v==='Cartera de prueba'){const keep=DOC.src;DOC.src='custom';const c=await docPortfolio();DOC.src=keep;s=c.P.length?{name:v,P:c.P}:null}
+    if(v==='Mi cartera'){const c=(DOC.src='pf',await docPortfolio());s=c.P.length?{name:'Mi cartera',P:c.P}:null}else if(v==='Cartera rápida'){const keep=DOC.src;DOC.src='custom';const c=await docPortfolio();DOC.src=keep;s=c.P.length?{name:v,P:c.P}:null}
     else{const a=alts.find(x=>x.ico+' '+x.name===v);if(a)s={name:v,P:a.P};else{const tk=v.split(' · ')[0].trim().toUpperCase();const e=ents().find(x=>`${x.tk} · ${x.name}`===v)||ents().find(x=>String(x.tk).toUpperCase()===tk&&x.k!=='s')||ents().find(x=>x.t.toUpperCase()===tk&&x.k!=='s')||ents().find(x=>String(x.tk).toUpperCase()===tk)||ents().find(x=>x.k!=='s'&&x.name.toLowerCase().includes(v.toLowerCase()));if(e)s={name:e.name,P:[{e,w:1}]}}}
     CMP[i.dataset.pk]=s;CMP.add=null;renderCompare()});
   const aw=el.querySelector('[data-addw]');if(aw)aw.onchange=()=>{CMP.addW=+aw.value;CMP.B=withAdd(CMP.add.cur,CMP.add.e,CMP.addW);renderCompare()};
@@ -619,17 +666,18 @@ function ovHide(soft){OV.hidden=true;const b=$('#ovcard');if(b)b.hidden=true}
 function ovShow(){OV.hidden=false;if(!XP)renderOverview()}
 async function renderOverview(){if(OV.hidden||XP||typeof MAPMODE==='undefined'||!MAPMODE)return;const b=ovEl();b.hidden=false;
   const brand=`<div class="ov-br"><b>ATLAS</b><span>Inteligencia de ETFs y carteras</span></div>`;
-  if(!PF.length){b.className='ov empty';b.innerHTML=`${brand}<div class="ov-h"><div><b class="ov-t">Aún no tienes cartera</b></div><button data-ov="col" aria-label="Plegar">${OV.collapsed?'▴':'▾'}</button></div>${OV.collapsed?'':`<p>Crea tu cartera para descubrir qué tienes realmente:</p><ul class="ov-chk"><li>Salud de la cartera, explicada</li><li>Exposición real por empresa, sector y país</li><li>Solapamiento entre tus ETFs</li><li>Tu dinero en el globo</li></ul><div class="ov-b"><button class="btn" data-ov="pf">Crear mi cartera</button><button class="btn2" data-ov="ex">Ver un ejemplo</button></div>`}`;bindOv(b);return}
+  const QK=!PF.length&&DOC.rows&&DOC.rows.some(r=>r.k&&+r.w>0);
+  if(!PF.length&&!QK){b.className='ov empty';b.innerHTML=`${brand}<div class="ov-h"><div><b class="ov-t">¿Cuántas apuestas reales hay en tu cartera?</b></div><button data-ov="col" aria-label="Plegar">${OV.collapsed?'▴':'▾'}</button></div>${OV.collapsed?'':`<p>Seis ETFs pueden ser una sola apuesta. Pega tu cartera y en 30 segundos verás:</p><ul class="ov-chk"><li>Cuántas apuestas independientes haces de verdad</li><li>Qué empresas, sectores y países tienes por debajo</li><li>Dónde se solapan tus ETFs</li><li>Qué riesgos no se ven a simple vista</li></ul><div class="ov-b"><button class="btn" data-ov="qp">Pegar mi cartera</button><button class="btn2" data-ov="ex">Ver un ejemplo</button></div><p class="ov-fine">Sin cuenta. Tus datos se quedan en este dispositivo.</p>`}`;bindOv(b);return}
   b.className='ov';if(!b.querySelector('.ov-h'))b.innerHTML=`${brand}<div class="sk"><i></i><i></i><i></i></div>`;
-  const keep=DOC.src;DOC.src='pf';const A=await analyzeSrc('pf');DOC.src=keep;if(OV.hidden||XP||!A||A.empty)return;
+  const SRC=PF.length?'pf':'custom',A=await analyzeSrc(SRC);if(OV.hidden||XP||!A||A.empty)return;
   const v=_pfV||{val:0,inv:0},ret=v.inv?(v.val/v.inv-1)*100:null,ins=A.D.filter(d=>d.sev!=='info').slice(0,mobile()?2:3);
-  b.innerHTML=`${brand}<div class="ov-h"><div class="ov-v"><small>Tu cartera</small><b data-count="${Math.round(v.val)}">${num(v.val)}</b><span class="ov-eur">€</span><em class="${(ret||0)<0?'dn':'up'}">${ret==null?'—':(ret>0?'+':'')+pct(ret,1)}</em></div><button class="ov-g" data-ov="doc" title="Ver por qué">${gauge(A.SC,96)}</button><button data-ov="col" class="ov-c" aria-label="${OV.collapsed?'Desplegar':'Plegar'}">${OV.collapsed?'▴':'▾'}</button></div>
+  b.innerHTML=`${brand}<div class="ov-h">${SRC==='pf'?`<div class="ov-v"><small>Tu cartera</small><b data-count="${Math.round(v.val)}">${num(v.val)}</b><span class="ov-eur">€</span><em class="${(ret||0)<0?'dn':'up'}">${ret==null?'—':(ret>0?'+':'')+pct(ret,1)}</em></div>`:`<div class="ov-v"><small>Cartera rápida · por pesos</small><b class="ov-q">Rayos X</b><button class="lnk" data-ov="qp">Editar</button></div>`}<button class="ov-g" data-ov="doc" title="Ver por qué">${gauge(A.SC,96)}</button><button data-ov="col" class="ov-c" aria-label="${OV.collapsed?'Desplegar':'Plegar'}">${OV.collapsed?'▴':'▾'}</button></div>
     ${OV.collapsed?'':`${A.SC.bets&&A.R&&A.P.length>1?`<button class="ov-bets" data-ov="doc"><span><b>${A.P.length}</b> productos</span><i>→</i><span><b>≈ ${num(A.SC.bets.nb,1)}</b> apuesta${A.SC.bets.nb>=1.05?'s':''} real${A.SC.bets.nb>=1.05?'es':''}</span><em>Ver por qué</em></button>`:''}<p class="ov-lead">${esc(headline(A))}</p><ul class="ov-i">${ins.map(d=>`<li style="--c:${SEV[d.sev][2]}"><b>${esc(d.t)}</b><em>${esc(d.metric)}</em></li>`).join('')}</ul>
     <div class="ov-b"><button class="btn" data-ov="doc">Analizar cartera</button><div class="ov-x"><span>Exposición de tu cartera</span><button data-ov="geo">Países</button><button data-ov="comp">Empresas</button><button data-ov="sec">Sectores</button></div></div>`}`;bindOv(b,A);countUpEur(b)}
 function countUpEur(b){const el=b.querySelector('.ov-v b[data-count]');if(!el||RM()||el.dataset.done)return;el.dataset.done=1;const to=+el.dataset.count,t0=performance.now();const st=t=>{const k=Math.min(1,(t-t0)/800),e=1-Math.pow(1-k,3);el.textContent=num(to*e);if(k<1)requestAnimationFrame(st)};requestAnimationFrame(st)}
 function bindOv(b,A){b.querySelectorAll('[data-ov]').forEach(x=>x.onclick=()=>{const k=x.dataset.ov;
   if(k==='col'){OV.collapsed=!OV.collapsed;try{localStorage.setItem('atlas_ov',OV.collapsed?'0':'1')}catch(_){}renderOverview();return}
-  if(k==='pf')openHub('pf');else if(k==='ex'){loadExample();DOC.tab='doctor';openHub('doc')}else if(k==='doc'){DOC.src='pf';DOC.tab='doctor';saveDoc();openHub('doc')}else if(A)showExposureGlobe(A.P,A.name,k)})}
+  if(k==='pf')openHub('pf');else if(k==='ex'){loadExample();DOC.tab='doctor';saveDoc();openHub('doc')}else if(k==='doc'){DOC.src=PF.length?'pf':'custom';DOC.tab='doctor';saveDoc();openHub('doc')}else if(k==='qp'){DOC.src='custom';DOC.tab='doctor';saveDoc();openHub('doc');setTimeout(()=>{const t=$('#qpT');if(t)t.focus()},400)}else if(A)showExposureGlobe(A.P,A.name,k)})}
 
 /* ------------------------------ integración ------------------------------ */
 function install(){if(typeof HUB==='undefined'||!document.getElementById('menu')||!document.querySelector('.right .pbody')){setTimeout(install,400);return}

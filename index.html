@@ -2615,7 +2615,7 @@ async function renderPf(){const el=$('#myPf');if(!el)return;const _pfKeep=el.que
     return `<div class="pf-row" style="--c:${gc}" data-id="${r.pos.id}"><button class="pf-main" data-ed="${r.pos.id}"><i class="pf-ico">${e?esc(String(e.tk||e.t).replace(/\..*$/,'').slice(0,4)):'…'}</i><span class="pf-nm"><b>${esc(e?e.name:r.pos.t)}</b><small>${esc(sub)}${plan!=null?` · plan ${Math.round(plan*100)} %, tienes ${Math.round(w*100)} %`:''}</small>${r.err?`<small style="color:var(--warn)">${esc(r.err)}</small>`:''}${r.pending?`<a class="pf-act" href="${isinIssue(r.pos.t)}" target="_blank" rel="noopener">Activar precios diarios ↗</a>`:''}</span>
       <span class="pf-v">${right}</span><span class="pf-pen" aria-hidden="true">✎</span></button><div class="pf-ed" hidden></div></div>`}).join('');
   const early=ok.some(r=>r.early),asOf=ok.map(r=>r.asOf).filter(Boolean).sort().pop();
-  const TABS=[['res','📊','Resumen'],['evo','📈','Evolución'],['opt','🧭','Opciones'],['bt','⏳','5 años'],['buy','🛒','Este mes']];if(!TABS.some(t=>t[0]===pfTab))pfTab='res';
+  const TABS=[['res','📊','Resumen'],['evo','📈','Evolución'],['opt','🧭','Opciones'],['bt','⏳','5 años'],['buy','🛒','Este mes']].filter(t=>EXPERT()||!['opt','buy'].includes(t[0]));if(!TABS.some(t=>t[0]===pfTab))pfTab='res';
   el.innerHTML=`<div class="pf-head"><h3>Mi cartera</h3><button class="pf-map" id="pfMap">★ En el mapa</button></div>
     <div class="pf-big"><span>Vale hoy</span><b>${eur(val)}</b><div class="pf-sub">Has puesto <b>${eur(inv)}</b><span class="pf-chip big ${g<0?'dn':'up'}">${g<0?'▼':'▲'} ${eur(Math.abs(g))} · ${p1(Math.abs(gp),1)}</span></div></div>
     <div class="pf-tabs" role="tablist">${TABS.map(([k,i,l])=>`<button role="tab" data-pft="${k}" aria-selected="${pfTab===k}"><span>${i}</span>${l}</button>`).join('')}</div>
@@ -3241,9 +3241,9 @@ stream('sys',apiKey?'Uplink Gemini configurado: misión LIVE.':'Sin clave Gemini
 setTimeout(()=>{if(EXPERT())run()},3600);
 </script>
 <link rel="stylesheet" href="css/intel.css?v=11">
-<script src="js/intel.js?v=9"></script>
+<script src="js/intel.js?v=10"></script>
 <link rel="stylesheet" href="css/vault.css?v=1">
-<link rel="stylesheet" href="css/ui.css?v=1">
+<link rel="stylesheet" href="css/ui.css?v=2">
 <script src="js/vault.js?v=1"></script>
 <script src="js/kauai.js?v=2"></script>
 <script>if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>

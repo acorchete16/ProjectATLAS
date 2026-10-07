@@ -93,3 +93,9 @@ Grupos = activos unidos por correlación semanal ≥ 0,85 (5 años, en euros; en
 
 ## Comparar · estado inicial
 Sin A y B elegidos se proponen puntos de partida calculados con tu cartera (no son recomendaciones): tus dos fondos de más peso entre sí, tu cartera frente al MSCI World de referencia y tu cartera + 10 % del ETF amplio de ATLAS con menor correlación semanal con ella (se excluyen apalancados y temáticos).
+
+## Cartera rápida (pegar texto)
+Una línea por producto con peso (%) o importe (€); se aceptan ticker, ISIN o nombre. Los importes se convierten en pesos. Lo que no se reconoce **no se incluye** y se avisa. Sin pesos, se reparte a partes iguales (y se avisa). Se guarda solo en el dispositivo.
+
+## Tarjeta compartible «Rayos X»
+Nunca incluye importes. Muestra productos, apuestas reales, primer sector, primer país, 10 mayores empresas y mayor empresa, con fuente y fecha. Los nombres de los productos solo aparecen si el usuario lo marca.
