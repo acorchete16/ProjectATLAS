@@ -11,7 +11,8 @@ const BB=[-159.83,21.84,-159.27,22.26];                 // isla de Kauaʻi
 const ZMIN=15.3;
 let M=null,THR=null,layer=null,state={sat:false,ter:false,lay:false},card=null;
 const inKauai=c=>c.lng>BB[0]&&c.lng<BB[2]&&c.lat>BB[1]&&c.lat<BB[3];
-function waitMap(){if(typeof map!=='undefined'&&map&&typeof mapReady!=='undefined'&&mapReady){M=map;M.on('moveend',check);M.on('click',onClick);return}setTimeout(waitMap,1500)}
+function waitMap(){if(typeof map!=='undefined'&&map&&typeof mapReady!=='undefined'&&mapReady){M=map;M.on('moveend',check);M.on('click',onClick);
+    const go=()=>{if(/^#kalalau$/i.test(location.hash)){M.flyTo({center:[O.lng+.00012,O.lat-.00005],zoom:18.2,pitch:68,bearing:20,duration:5000,essential:true});history.replaceState(null,'',location.pathname+location.search)}};go();addEventListener('hashchange',go);return}setTimeout(waitMap,1500)}
 async function check(){const c=M.getCenter(),z=M.getZoom(),k=inKauai(c);
   if(k&&z>=11){if(typeof MBX!=='undefined'&&MBX){ensureSat();ensureTer(true)}}else if(state.ter&&(!k||z<9.5))ensureTer(false);
   if(k&&z>=ZMIN-1&&!state.lay){state.lay=true;try{await ensureThree();addLayer()}catch(e){state.lay=false}}
@@ -126,8 +127,9 @@ function addLayer(){if(layer)return;const isMbx=typeof MBX!=='undefined'&&MBX;le
         dinos.forEach(d=>{const ll=toLL(d.x,d.z),e=M.queryTerrainElevation?M.queryTerrainElevation(ll):null;d.gy=e!=null&&e0!=null?e-e0:0});if(e0!=null&&!layer.treesPlaced)placeTrees(layer.trees,e0)}catch(_){}}
       dinos.forEach(d=>{d.update(dt);const g=d.grp;g.updateMatrix();d.sh.matrix.multiplyMatrices(new THREE.Matrix4().makeTranslation(0,d.gy,0),d.shMat).multiply(new THREE.Matrix4().makeTranslation(0,-d.gy,0)).multiply(g.matrix);d.sh.children.forEach(ch=>ch.matrix.identity())});
       let P;if(isMbx){const mc=mapboxgl.MercatorCoordinate.fromLngLat([O.lng,O.lat],O_alt),s=mc.meterInMercatorCoordinateUnits();
-          const Mm=a&&a.length===16?a:(Array.isArray(a)||a instanceof Float32Array||a instanceof Float64Array?a:null);
-          const base=(c&&b&&b.name==='globe'&&c.length===16)?c:Mm;if(!base)return;
+          // Mapbox v3: «matrix» (a) es la cámara sobre coordenadas Mercator también con el globo (a este zoom el globo ya es Mercator).
+          // El 4º argumento (globo ECEF → Mercator) NO es una matriz de proyección: usarlo dejaba la capa fuera de pantalla.
+          const base=a&&a.length===16?a:null;if(!base)return;
           P=new THREE.Matrix4().fromArray(base).multiply(new THREE.Matrix4().makeTranslation(mc.x,mc.y,mc.z).scale(new THREE.Vector3(s,-s,s)).multiply(new THREE.Matrix4().makeRotationX(Math.PI/2)))}
       else{const mm=M.transform.getMatrixForModel([O.lng,O.lat],O_alt),pd=a.defaultProjectionData||a;P=new THREE.Matrix4().fromArray(pd.mainMatrix||a.modelViewProjectionMatrix).multiply(new THREE.Matrix4().fromArray(mm))}
       C.projectionMatrix=P;C.projectionMatrixInverse.copy(P).invert();lastM=P;layer.P=P;
