@@ -2141,6 +2141,7 @@ function fxSetup(){
     tip.setLngLat(e.lngLat).setHTML(`<b>${esc(x.name)}</b><span>${KIND_L[x.k]} · ${an?p1(an.mean,0)+' media anual':'sin historial'}</span>`).addTo(map)});
   map.on('mouseleave','pt',()=>tip.remove());
   ['mousedown','touchstart','wheel','dragstart'].forEach(ev=>map.on(ev,()=>{fxOrbit=false}));
+  map.on('touchstart',()=>{_mapTouch=true});map.on('touchend',()=>{setTimeout(()=>{_mapTouch=false},250)});map.on('touchcancel',()=>{_mapTouch=false});
   try{map.addSource('hqA',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:ATL},properties:{}}});atlantisSetup()}catch(e){console.warn('atlantis',e)}
   try{poleSetup()}catch(e){console.warn('polo',e)}
   cancelAnimationFrame(fxRaf);fxRaf=requestAnimationFrame(fxTick)}
@@ -2349,8 +2350,9 @@ function fxData(gj){ // flujos desde cada sede encendida hacia la base de datos 
 const DASH=[[0,4,3],[.5,4,2.5],[1,4,2],[1.5,4,1.5],[2,4,1],[2.5,4,.5],[3,4,0],[0,.5,3,3.5],[0,1,3,3],[0,1.5,3,2.5],[0,2,3,2],[0,2.5,3,1.5],[0,3,3,1],[0,3.5,3,.5]];
 let _dashI=-1,_lastNow=performance.now();
 let _pktT=0,_ringT=0;
+let _mapTouch=false;
 function fxTick(now){fxRaf=requestAnimationFrame(fxTick);if(!mapReady||document.hidden||!$('#detail').hidden||!$('#search').hidden)return;const dt=Math.min(.05,(now-_lastNow)/1000);_lastNow=now;
-  if(fxFlows.length&&map.getZoom()<9&&now-_pktT>(mobile()?320:160)){const sdt=(now-_pktT)/1000;_pktT=now;const di=Math.floor(now/260)%DASH.length;if(di!==_dashI){_dashI=di;map.setPaintProperty('flows','line-dasharray',DASH[di])}
+  if(fxFlows.length&&!map.isMoving()&&!_mapTouch&&map.getZoom()<9&&now-_pktT>(mobile()?600:160)){   // no recalcular capas mientras el usuario arrastra (en móvil se notaba «pegajoso»)const sdt=(now-_pktT)/1000;_pktT=now;const di=Math.floor(now/260)%DASH.length;if(di!==_dashI){_dashI=di;map.setPaintProperty('flows','line-dasharray',DASH[di])}
     fxPackets.forEach(p=>{p.t+=p.v*Math.min(.5,sdt);if(p.t>=1){p.t-=1;poleBlip(p.f.c)}});
     map.getSource('packets').setData({type:'FeatureCollection',features:fxPackets.map(p=>{const L=p.f.line,i=Math.min(L.length-1,Math.floor(p.t*(L.length-1)));return{type:'Feature',geometry:{type:'Point',coordinates:L[i]},properties:{c:p.f.c}}})})}
 
@@ -3241,9 +3243,9 @@ stream('sys',apiKey?'Uplink Gemini configurado: misión LIVE.':'Sin clave Gemini
 setTimeout(()=>{if(EXPERT())run()},3600);
 </script>
 <link rel="stylesheet" href="css/intel.css?v=11">
-<script src="js/intel.js?v=11"></script>
+<script src="js/intel.js?v=13"></script>
 <link rel="stylesheet" href="css/vault.css?v=1">
-<link rel="stylesheet" href="css/ui.css?v=3">
+<link rel="stylesheet" href="css/ui.css?v=5">
 <script src="js/vault.js?v=1"></script>
 <script src="js/kauai.js?v=2"></script>
 <script>if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>

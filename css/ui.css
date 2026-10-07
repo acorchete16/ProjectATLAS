@@ -127,3 +127,29 @@ body.mapmode #app .right .pbody>[data-s]{flex-shrink:0;overflow:visible!importan
 .bt-meth p,.bt-meth li{font-size:12.5px;line-height:1.5;color:var(--fg)}.bt-meth ul{margin:4px 0 8px;padding-left:18px}.bt-mh{margin:10px 0 0!important;font:700 11.5px var(--ui)!important;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)!important}
 .xr-rob table{width:100%;border-collapse:collapse;font-size:12.5px}.xr-rob th{text-align:left;font-weight:500;color:var(--mid);padding:6px 0;border-bottom:1px solid var(--ln)}.xr-rob td{text-align:right;font:700 12.5px var(--num);color:#fff;border-bottom:1px solid var(--ln)}.xr-rob tr.hl th,.xr-rob tr.hl td{color:var(--acc)}
 .wv>div span{max-width:9.5em;line-height:1.25}.wv{align-items:flex-end}
+
+/* ---- Inicio · Hoy / Lo que importa ahora ---- */
+.ov-day{display:block;margin-top:2px;font-size:13px}.ov-day b{font-weight:700}.ov-day .dn,.td .dn{color:var(--neg,#ff6b7d)}.ov-day .up,.td .up{color:var(--pos,#3ddc84)}
+.td{display:flex;flex-direction:column;gap:8px;padding:12px 0 4px;border-top:1px solid var(--ln)}
+.td-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}.td-t{font:700 12px var(--ui);letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
+.td-st{font-size:11.5px;color:var(--dim)}.td-st.live::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--pos,#3ddc84);margin-right:5px;vertical-align:1px}
+.td-why{margin:0;font:500 14.5px/1.45 var(--ui);color:var(--fg)}.td-why b{color:#fff}
+.q{display:inline-block;font:700 10px var(--ui);letter-spacing:.05em;text-transform:uppercase;padding:2px 6px;border-radius:999px;vertical-align:1px}.q.real{background:rgba(94,231,255,.1);color:var(--acc)}.q.est{background:rgba(242,193,78,.12);color:var(--amb,#f2c14e)}
+.td-k{font-size:11.5px;color:var(--dim);display:flex;gap:6px;align-items:center;margin-top:2px}
+.td-bars,.td-in{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.td-bars li{display:grid;grid-template-columns:52px 52px 1fr 72px;gap:8px;align-items:center;font-size:12.5px}
+.tb-tk{font:600 11.5px var(--tick);color:#dfe9ff}.tb-r{color:var(--mid);text-align:right;font-variant-numeric:tabular-nums}.tb-c{text-align:right;font:700 12.5px var(--num)}
+.tb-bar{position:relative;height:8px}.tb-bar::before{content:'';position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--ln)}
+.tb-bar i{position:absolute;top:0;bottom:0;border-radius:3px}.tb-bar i.dn{right:50%;background:var(--neg,#ff6b7d)}.tb-bar i.up{left:50%;background:var(--pos,#3ddc84)}
+.td-in li{display:grid;grid-template-columns:1fr 52px 72px;column-gap:8px;align-items:center;font-size:12.5px}.td-in li>div{min-width:0;display:flex;flex-direction:column}.td-in li>div strong{color:#fff;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.td-in li>div span{font-size:11px;color:var(--dim)}
+.td-in em{font-style:normal;color:var(--mid);text-align:right}.td-in li>strong{text-align:right;font:700 12.5px var(--num)}
+.td-d>summary{cursor:pointer;list-style:none}.td-d>summary::-webkit-details-marker{display:none}.td-d>summary .td-k::after{content:' ▾';color:var(--dim)}.td-d[open]>summary .td-k::after{content:' ▴'}.td-d .td-in{margin-top:6px}
+.td-a{margin-top:2px}.td-n{margin:0;font-size:11.5px;color:var(--dim)}
+.td-how summary{cursor:pointer;font-size:12px;color:var(--acc);font-weight:600}.td-how ul{margin:6px 0 0;padding-left:16px;font-size:12px;line-height:1.5;color:var(--mid)}.td-how b{color:var(--fg)}
+@media(max-width:700px){.td-bars li{grid-template-columns:48px 46px 1fr 64px}.td-why{font-size:14px}}
+
+/* tarjeta de inicio: nunca más alta que el hueco disponible; en móvil, lo esencial (el detalle está en Análisis) */
+#ovcard{max-height:calc(100vh - 170px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}#ovcard::-webkit-scrollbar{display:none}
+@media(max-width:700px){#ovcard{max-height:58vh}#ovcard .ov-lead,#ovcard .ov-i{display:none!important}#ovcard .ov-b{margin-top:2px}}
+.td.mini{padding-top:8px}.td.mini>*:not(.td-why){display:none!important}.td.mini .td-why{font-size:13.5px}
+.ov-day .ov-dv{display:inline;font:700 13.5px var(--ui)!important;letter-spacing:0}.td-why strong{display:inline;font-weight:700;color:#fff}.td strong{display:inline}

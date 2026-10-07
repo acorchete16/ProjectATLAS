@@ -698,7 +698,7 @@ async function renderCountry(){const el=$('#ixcty');if(!el||!CTY)return;let X=XP
   const h=document.querySelector('.right .phead h2 .sp');if(h)h.textContent='◍ '+nm}
 
 /* ------------------------------ 5 · RESUMEN (Overview) sobre el globo ------------------------------ */
-let OV={collapsed:(()=>{try{return localStorage.getItem('atlas_ov')==='0'}catch(_){return false}})(),hidden:false};
+let OV={collapsed:(()=>{try{const v=localStorage.getItem('atlas_ov');return v==null?innerWidth<=700:v==='0'}catch(_){return innerWidth<=700}})(),hidden:false};   // en móvil empieza recogida: el globo queda libre para moverlo
 function ovEl(){let b=$('#ovcard');if(!b){b=document.createElement('section');b.id='ovcard';document.body.appendChild(b)}return b}
 function ovHide(soft){OV.hidden=true;const b=$('#ovcard');if(b)b.hidden=true}
 function ovShow(){OV.hidden=false;if(!XP)renderOverview()}
@@ -711,13 +711,58 @@ async function renderOverview(){if(OV.hidden||XP||typeof MAPMODE==='undefined'||
   const v=_pfV||{val:0,inv:0},ret=v.inv?(v.val/v.inv-1)*100:null,ins=A.D.filter(d=>d.sev!=='info').slice(0,mobile()?2:3);
   b.innerHTML=`${brand}<div class="ov-h">${SRC==='pf'?`<div class="ov-v"><small>Tu cartera</small><b data-count="${Math.round(v.val)}">${num(v.val)}</b><span class="ov-eur">€</span><em class="${(ret||0)<0?'dn':'up'}">${ret==null?'—':(ret>0?'+':'')+pct(ret,1)}</em></div>`:`<div class="ov-v"><small>Cartera rápida · por pesos</small><b class="ov-q">Rayos X</b><button class="lnk" data-ov="qp">Editar</button></div>`}<button class="ov-g" data-ov="doc" title="Ver por qué">${gauge(A.SC,96)}</button><button data-ov="col" class="ov-c" aria-label="${OV.collapsed?'Desplegar':'Plegar'}">${OV.collapsed?'▴':'▾'}</button></div>
     ${OV.collapsed?'':`${A.SC.bets&&A.R&&A.P.length>1?`<button class="ov-bets" data-ov="doc"><span><b>${A.P.length}</b> productos</span><i>→</i><span><b>≈ ${fmtB(A.SC.bets.nb)}</b> apuesta${A.SC.bets.nb>=1.05?'s':''} independiente${A.SC.bets.nb>=1.05?'s':''}</span><em>Ver por qué</em></button>`:''}<p class="ov-lead">${esc(headline(A))}</p><ul class="ov-i">${ins.map(d=>`<li style="--c:${SEV[d.sev][2]}"><b>${esc(d.t)}</b><em>${esc(d.metric)}</em></li>`).join('')}</ul>
-    <div class="ov-b"><button class="btn" data-ov="doc">Analizar cartera</button><div class="ov-x"><span>Exposición de tu cartera</span><button data-ov="geo">Países</button><button data-ov="comp">Empresas</button><button data-ov="sec">Sectores</button></div></div>`}`;bindOv(b,A);countUpEur(b)}
+    <div class="ov-b"><button class="btn" data-ov="doc">Analizar cartera</button><div class="ov-x"><span>Exposición de tu cartera</span><button data-ov="geo">Países</button><button data-ov="comp">Empresas</button><button data-ov="sec">Sectores</button></div></div>`}`;bindOv(b,A);countUpEur(b);todayInto(b,A)}
+/* ---------- Inicio · «Hoy / Lo que importa ahora» ---------- */
+const sgn=v=>v>0?'+':v<0?'−':'';const pctS=(v,d=2)=>sgn(v)+pct(Math.abs(v)*100,d);const eurS=v=>sgn(Math.round(v))+num(Math.abs(v))+' €';
+const hhmm=t=>new Date(t).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+const dLong=d=>new Date(d+'T12:00:00Z').toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short'});
+async function todayInto(b,A){const h=b.querySelector('.ov-h');if(!h)return;const ov=b.querySelector('.ov-v');
+  let day=b.querySelector('.ov-day');if(!day&&ov){ov.insertAdjacentHTML('beforeend','<span class="ov-day" aria-live="polite">Hoy …</span>');day=b.querySelector('.ov-day')}
+  h.insertAdjacentHTML('afterend',`<section class="td${OV.collapsed?' mini':''}" aria-label="Lo que importa ahora"><div class="sk"><i></i></div></section>`);let box=b.querySelector('.td');
+  const T=await getPortfolioContribution(A);if(!b.isConnected)return;
+  if(!T){if(day)day.textContent='Sin cotización de hoy';if(box)box.remove();return}
+  const closed=T.status==='close',lbl=closed?`Última sesión (${dLong(T.session)})`:'Hoy',dn=T.R<0;
+  if(day)day.innerHTML=`<span class="ov-dv ${dn?'dn':'up'}">${lbl}: ${pctS(T.R)}${T.eur?` · ${eurS(T.eur.d)}`:''}</span>`;
+  if(A.src&&A.src.src==='pf'&&typeof _pfDay!=='undefined'&&T.eur){try{_pfDay={v:T.eur.now,c:T.R*100};renderTick()}catch(_){}}   // la franja usa la misma cifra (en euros)
+  if(!box)return;
+  const N=A.P.length,IND=T.ind.filter(o=>o.via.some(e=>e.k!=='s')),lead=IND.find(o=>o.share!=null&&o.share>=.25),top=T.items[0],quiet=Math.abs(T.R)<.0005;
+  const st=T.status==='live'?`<span class="td-st live">En directo · ${hhmm(T.ts)}</span>`:T.status==='delayed'?`<span class="td-st">Actualizado ${hhmm(T.ts)}</span>`:`<span class="td-st">Mercado cerrado · cierre del ${dLong(T.session)}</span>`;
+  let why;if(quiet)why=`Día tranquilo: tu cartera apenas se ha movido.`;
+  else if(lead&&lead.share>1.05)why=`<strong>${esc(lead.name.replace(/ (Corp|Inc|Ltd|Co|Corporation|Class [A-C])\b.*$/,''))}</strong> (${pctS(lead.r,1)}) ha pesado más que todo el movimiento neto de ${closed?'la última sesión':'hoy'}: el resto de tu cartera lo ha compensado en parte. Pesa ${lead.exact?'':'≥ '}${pct(lead.wmin*100,0)} de tu cartera. <span class="q est">Estimación</span>`;
+  else if(lead)why=`<strong>${esc(lead.name.replace(/ (Corp|Inc|Ltd|Co|Corporation|Class [A-C])\b.*$/,''))}</strong> explica <strong>${lead.exact?'≈':'≥'} ${num(lead.share*100,0)} %</strong> del movimiento de ${closed?'la última sesión':'hoy'}: ${pctS(lead.r,1)}, y pesa ${lead.exact?'':'≥ '}${pct(lead.wmin*100,0)} de tu cartera (en ${lead.products} de ${N} productos). <span class="q est">Estimación</span>`;
+  else why=`<strong>${tk(top.e)}</strong> es lo que más te ha movido: ${pctS(top.r,1)} → ${pctS(top.c)} de tu cartera${top.eur!=null?` (${eurS(top.eur)})`:''}. <span class="q real">Dato</span>`;
+  const mx=Math.max(...T.items.map(i=>Math.abs(i.c)),1e-9);
+  const bars=T.items.slice(0,4).map(i=>`<li><span class="tb-tk">${tk(i.e)}</span><span class="tb-r">${i.today?pctS(i.r,1):'sin cotizar'}</span><span class="tb-bar"><i class="${i.c<0?'dn':'up'}" style="width:${(Math.abs(i.c)/mx*50).toFixed(1)}%"></i></span><span class="tb-c ${i.c<0?'dn':'up'}">${i.eur!=null?eurS(i.eur):pctS(i.c)}</span></li>`).join('');
+  const inside=IND.filter(o=>Math.abs(o.est)>=.0002).slice(0,3);
+  box.innerHTML=`<div class="td-h"><span class="td-t">Lo que importa ${closed?'de la última sesión':'ahora'}</span>${st}</div>
+    <p class="td-why">${why}</p>
+    <div class="td-k">Qué te ha movido · por producto <span class="q real">Dato</span></div><ul class="td-bars">${bars}</ul>
+    ${inside.length?`<details class="td-d"${innerWidth>700?' open':''}><summary><span class="td-k">Por dentro de tus ETFs <span class="q est">Estimación</span></span></summary><ul class="td-in">${inside.map(o=>`<li><div><strong>${esc(o.name.replace(/ (Corp|Inc|Ltd|Co|Corporation|Class [A-C])\b.*$/,''))}</strong><span>${o.exact?'':'≥ '}${pct(o.wmin*100,0)} de tu cartera · ${o.products} de ${N} productos</span></div><em>${pctS(o.r,1)}</em><strong class="${o.est<0?'dn':'up'}">≈ ${pctS(o.est)}</strong></li>`).join('')}</ul></details>`:''}
+    ${lead?`<div class="td-a"><button class="btn2 sm" data-tdx="${esc(lead.key)}">Ver mi exposición a ${esc(lead.name.split(' ')[0])}</button></div>`:''}
+    ${T.missing.length?`<p class="td-n">${T.missing.map(i=>tk(i.e)).join(', ')}: sin cotización de esta sesión; cuenta como 0 %.</p>`:''}
+    <details class="td-how"><summary>Cómo se calcula</summary><ul>
+      <li><strong>Por producto (dato):</strong> rentabilidad en euros de cada producto desde el cierre anterior (precio + divisa) × su peso de ayer. La suma es el movimiento de tu cartera${T.eur?'; los euros salen de tu valor de ayer':'; sin importes, solo en %'}.</li>
+      <li><strong>Por dentro (estimación):</strong> movimiento de la empresa × su peso en tu cartera, contando solo las posiciones publicadas de cada ETF (por eso «≥»). Explica parte del movimiento de tus ETFs; no se suma a él.</li>
+      <li>Fuente: ${esc(T.src)}. Sesión: ${fdate(T.session)}${T.ts?`, última cotización ${hhmm(T.ts)}`:''}. Retraso habitual: hasta 15–20 min.</li></ul></details>`;
+  const bx=box.querySelector('[data-tdx]');if(bx)bx.onclick=()=>focusCompany(A,bx.dataset.tdx);
+  if(box.classList.contains('mini')){box.style.cursor='pointer';box.title='Ver detalle';box.onclick=()=>{const c=b.querySelector('[data-ov=col]');if(c)c.click()}}}
 function countUpEur(b){const el=b.querySelector('.ov-v b[data-count]');if(!el||RM()||el.dataset.done)return;el.dataset.done=1;const to=+el.dataset.count,t0=performance.now();const st=t=>{const k=Math.min(1,(t-t0)/800),e=1-Math.pow(1-k,3);el.textContent=num(to*e);if(k<1)requestAnimationFrame(st)};requestAnimationFrame(st)}
 function bindOv(b,A){b.querySelectorAll('[data-ov]').forEach(x=>x.onclick=()=>{const k=x.dataset.ov;
   if(k==='col'){OV.collapsed=!OV.collapsed;try{localStorage.setItem('atlas_ov',OV.collapsed?'0':'1')}catch(_){}renderOverview();return}
   if(k==='pf')openHub('pf');else if(k==='ex'){loadExample();DOC.tab='doctor';saveDoc();openHub('doc')}else if(k==='doc'){DOC.src=PF.length?'pf':'custom';DOC.tab='doctor';saveDoc();openHub('doc')}else if(k==='qp'){DOC.src='custom';DOC.tab='doctor';saveDoc();openHub('doc');setTimeout(()=>{const t=$('#qpT');if(t)t.focus()},400)}else if(A)showExposureGlobe(A.P,A.name,k)})}
 
 /* ------------------------------ integración ------------------------------ */
+/* Globo en móvil: centrarlo en el hueco visible (entre la barra superior y la tarjeta de inicio) para que se pueda arrastrar con el dedo
+   en vez de quedar escondido debajo de los paneles. */
+let _padT=0;function syncMapPad(){clearTimeout(_padT);_padT=setTimeout(()=>{if(typeof map==='undefined'||!map||typeof mapReady==='undefined'||!mapReady)return;
+  if(map.isMoving&&map.isMoving()){syncMapPad();return}const m=innerWidth<=700;let top=0,bottom=0;
+  if(m){const mb=document.getElementById('mapBar'),ov=document.getElementById('ovcard'),bb=document.getElementById('bbar');const r=mb&&mb.getBoundingClientRect();top=r&&r.height?Math.max(0,Math.round(r.bottom-24)):90;
+    const vis=el=>el&&!el.hidden&&getComputedStyle(el).display!=='none'&&el.getBoundingClientRect().height>0;
+    bottom=vis(ov)?Math.round(innerHeight-ov.getBoundingClientRect().top+4):vis(bb)?Math.round(innerHeight-bb.getBoundingClientRect().top+4):0;
+    if(innerHeight-top-bottom<180)bottom=Math.max(0,innerHeight-top-180)}
+  else return;
+  const c=map.getPadding?map.getPadding():{top:0,bottom:0};if(Math.abs((c.top||0)-top)<6&&Math.abs((c.bottom||0)-bottom)<6&&!(c.left||c.right))return;if(document.body.classList.contains('hub-open')||(typeof mapFocus!=='undefined'&&mapFocus))return;
+  try{map.easeTo({padding:{top,bottom,left:0,right:0},duration:300,essential:true})}catch(_){}},120)}
 function install(){if(typeof HUB==='undefined'||!document.getElementById('menu')||!document.querySelector('.right .pbody')){setTimeout(install,400);return}
   Object.assign(HUB,{doc:['◐','Análisis de cartera'],radar:['◇','Radar'],cmp:['⇄','Comparar'],cty:['◍','País']});
   const pb=document.querySelector('.right .pbody');[['ixdoc','doc'],['ixradar','radar'],['ixcmp','cmp'],['ixcty','cty']].forEach(([id,s])=>{if(!document.getElementById(id)){const d=document.createElement('div');d.id=id;d.className='pf ix';d.dataset.s=s;pb.prepend(d)}});
@@ -727,7 +772,7 @@ function install(){if(typeof HUB==='undefined'||!document.getElementById('menu')
     const A=await analyzeSrc(PF.length?'pf':DOC.src);if(!A||A.empty){toast('Primero crea una cartera');DOC.tab='doctor';openHub('doc');return}showExposureGlobe(A.P,A.name,'geo')},true);
   const orig=window.openHub;window.openHub=function(sec){orig(sec);ovHide();if(sec==='doc')renderDoc();if(sec==='radar')renderRadar();if(sec==='cmp')renderCompare();if(sec==='cty')renderCountry()};
   const oc=window.closeHub;window.closeHub=function(p){oc(p);if(!hubSec&&!XP)setTimeout(ovShow,50)};
-  watchEmoji();try{if(window.Chart){Chart.defaults.font.family='"Plus Jakarta Sans",Inter,system-ui,sans-serif';Chart.defaults.color='#a9b9c9'}}catch(_){}
+  watchEmoji();try{const ro=new ResizeObserver(()=>syncMapPad());const hook=()=>{const o=document.getElementById('ovcard');if(o&&!o._ro){o._ro=1;ro.observe(o)}};setInterval(hook,1500);addEventListener('resize',syncMapPad);document.addEventListener('click',()=>setTimeout(syncMapPad,400))}catch(_){}try{if(window.Chart){Chart.defaults.font.family='"Plus Jakarta Sans",Inter,system-ui,sans-serif';Chart.defaults.color='#a9b9c9'}}catch(_){}
   loadExpo().then(()=>{const go=()=>{if(typeof mapReady!=='undefined'&&mapReady)renderOverview();else setTimeout(go,600)};setTimeout(go,1200)})}
 /* Lenguaje visual único: sin emojis decorativos en la interfaz (las banderas y los símbolos tipográficos ★ ✓ ↻ se mantienen;
    un emoji que es el único contenido de su elemento, como un icono, tampoco se toca). */
@@ -735,6 +780,50 @@ const EP1=/\p{Extended_Pictographic}/u,EPG=/\p{Extended_Pictographic}[️‍]*\s
 function stripEmoji(root){if(!root||!root.querySelectorAll)return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:n=>{const p=n.parentElement;if(!p||p.closest('script,style,textarea,input,.tk,#svv,.kx-card,.mn-i'))return NodeFilter.FILTER_REJECT;return EP1.test(n.data)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT}});
   const L=[];while(w.nextNode())L.push(w.currentNode);L.forEach(n=>{const t=n.data.replace(EPG,'');if(t.trim()&&t!==n.data)n.data=t})}
 let _seq=0;const _eq=new Set();function watchEmoji(){stripEmoji(document.body);const mo=new MutationObserver(ms=>{ms.forEach(m=>{const t=m.target.nodeType===3?m.target.parentElement:m.target;if(t)_eq.add(t)});if(_seq)return;_seq=requestAnimationFrame(()=>{_seq=0;const q=[..._eq];_eq.clear();q.forEach(t=>{if(t.isConnected)stripEmoji(t)})})});mo.observe(document.body,{childList:true,subtree:true,characterData:true})}
-window.ATLASI={betsOf,betsRobust,lookThrough,overlap,overlapDetail,riskOf,docPortfolio,analyze,analyzeSrc:s=>analyzeSrc(s),renderDoc,renderRadar,renderCompare,showExposureGlobe,hideExposure,openCompare,openRadar,openCountry,loadExpo,renderOverview,get DOC(){return DOC},set DOC(v){DOC=v;saveDoc()}};
+window.ATLASI={expOf,betsOf,betsRobust,docScores,lookThrough,overlap,overlapDetail,riskOf,docPortfolio,analyze,analyzeSrc:s=>analyzeSrc(s),renderDoc,renderRadar,renderCompare,showExposureGlobe,hideExposure,openCompare,openRadar,openCountry,loadExpo,renderOverview,get DOC(){return DOC},set DOC(v){DOC=v;saveDoc()}};
+/* ======================= CAPA COMPARTIDA · ATLASI.* =======================
+   Nombres estables sobre los cálculos que ya existen (no los cambia). Todas las pantallas nuevas deben usar esto.
+   Cada resultado lleva su estado de dato: 'real' (dato publicado/precio), 'est' (estimación), 'model' (supuesto), 'inc' (incompleto). */
+const QUALITY={real:'Dato',est:'Estimación',model:'Modelo',inc:'Incompleto'};
+const getPortfolio=src=>analyzeSrc(src||(PF.length?'pf':'custom'));
+async function analyzePortfolio(list){await loadExpo();const P=list.map(x=>({e:x.e,w:x.w})).filter(x=>x.e&&x.w>0);const t=P.reduce((a,x)=>a+x.w,0);P.forEach(x=>x.w/=t);if(!P.length)return{empty:true};
+  const L=lookThrough(P),[R,R3]=await Promise.all([riskOf(P),riskOf(P,3)]),SC=docScores(L,R,P,R3);const A={P,L,R,R3,SC,name:'Simulación',src:{src:'sim'}};A.D=diagnose(A);return A}
+function getCompanyExposure(A,key){const c=A.L.comps.find(x=>x.key===key||x.tk===key||x.name===key);if(!c)return null;
+  return{key:c.key,name:c.name,tk:c.tk,min:c.w,max:c.up,direct:c.dir,indirect:c.w-c.dir,exact:c.exact,quality:c.exact?'real':c.up==null?'inc':'est',
+    via:c.by.map(b=>({e:b.e,w:b.w,direct:b.e.k==='s'})),products:c.by.length,of:A.P.length,sector:c.sec,country:c.cc}}
+const getSectorExposure=A=>({by:A.L.S,unknown:A.L.S[UNK]||0,quality:A.L.cover>90?'real':'inc'});
+const getCountryExposure=A=>({by:A.L.C,unknown:A.L.C.XX||0,quality:A.L.ccCover>90?'real':A.L.ccCover>50?'est':'inc'});
+const getEffectiveBets=A=>A.SC.bets&&A.SC.bets.rob?{...A.SC.bets.rob,groups:A.SC.bets.groups,quality:'model'}:null;
+const getPortfolioHealth=A=>({score:A.SC.health,label:hLabel(A.SC.health)[0],dims:DIMS.map(([id,t,q,keys])=>({id,label:t,question:q,score:dimOf(A.SC,keys),factors:keys})),factors:A.SC.S,evidence:A.SC.ev,missing:A.SC.miss,insights:A.D});
+
+/* --- ¿Por qué se ha movido mi cartera hoy? ---
+   Directo (DATO): movimiento en euros de cada producto desde el cierre anterior (precio de Yahoo cada 15 min + divisa), ponderado por su peso de ayer.
+     Suma exactamente el movimiento de la cartera con esos pesos.
+   Indirecto (ESTIMACIÓN): empresa × su peso conocido en tu cartera (directo + dentro de ETFs, solo posiciones publicadas → mínimo).
+     Es una atribución dentro del movimiento de los ETFs, NO se suma a él. */
+async function dayMove(e){try{const s=await eurSeries(e.k,e.obj);if(!s||s.length<2)return null;const n=s.length,a=s[n-1],b=s[n-2];if(!(a[1]>0&&b[1]>0))return null;
+  const q=typeof LIVE!=='undefined'&&LIVE&&LIVE.d&&LIVE.d[priceKey(e.k,e.obj)],qd=q?new Date(q[2]*1000):null,live=!!(qd&&qd.toISOString().slice(0,10)===a[0]);
+  return{r:a[1]/b[1]-1,date:a[0],prev:b[0],live,ts:live?qd.getTime():null}}catch(_){return null}}
+const _CT=new Map();
+async function getPortfolioContribution(A){const sig=(A.src&&A.src.src)+sigOf(A.P)+(typeof LIVE!=='undefined'&&LIVE?LIVE.u:'');if(_CT.has(sig))return _CT.get(sig);
+  const pr=(async()=>{try{if(typeof LIVE==='undefined'||!LIVE)await ((typeof _liveP!=='undefined'&&_liveP)||loadLiveQ())}catch(_){}
+  const items=await Promise.all(A.P.map(async x=>({e:x.e,w:x.w,m:await dayMove(x.e)})));
+  const session=items.filter(i=>i.m).map(i=>i.m.date).sort().pop()||null;if(!session)return null;
+  items.forEach(i=>{i.today=!!(i.m&&i.m.date===session);i.r=i.today?i.m.r:0});
+  const w0=items.map(i=>i.w/(1+i.r)),sw=w0.reduce((a,v)=>a+v,0);items.forEach((i,k)=>{i.c=w0[k]*i.r/sw;i.quality='real'});
+  const R=items.reduce((a,i)=>a+i.c,0),V=A.src&&A.src.src==='pf'&&A.src.val?A.src.val:null,eur=V?{now:V,prev:V/(1+R),d:V-V/(1+R)}:null;if(eur)items.forEach(i=>{i.eur=i.c*eur.prev});
+  const covered=items.filter(i=>i.today).reduce((a,i)=>a+i.w,0),missing=items.filter(i=>!i.today);
+  /* empresas por dentro: solo las de mayor peso que tienen precio propio en ATLAS */
+  const E=ents(),cand=A.L.comps.slice(0,15).map(c=>({c,se:E.find(x=>x.k==='s'&&(x.t===c.tk||String(x.tk)===c.tk))})).filter(o=>o.se);
+  const cm=await Promise.all(cand.map(async o=>({...o,m:await dayMove(o.se)})));
+  const ind=cm.filter(o=>o.m&&o.m.date===session).map(o=>{const wmin=o.c.w/100,wmax=o.c.up!=null?o.c.up/100:null,r=o.m.r;const est=wmin*r,estMax=wmax!=null?wmax*r:null;
+      return{key:o.c.key,name:o.c.name,tk:o.se.tk,r,wmin,wmax,exact:o.c.exact,est,estMax,share:Math.abs(R)>=.0005&&Math.sign(est)===Math.sign(R)?est/R:null,
+        products:o.c.by.length,via:o.c.by.map(b=>b.e),direct:o.c.dir/100,quality:'est'}}).sort((a,b)=>Math.abs(b.est)-Math.abs(a.est));
+  const liveTs=items.map(i=>i.m&&i.m.ts).filter(Boolean),ts=liveTs.length?Math.max(...liveTs):null,today=new Date().toISOString().slice(0,10);
+  const age=ts?(Date.now()-ts)/6e4:null,status=session<today?'close':ts&&age<=40?'live':ts?'delayed':'close';
+  return{session,today,status,ts,R,eur,items:items.slice().sort((a,b)=>Math.abs(b.c)-Math.abs(a.c)),ind,covered,missing,quality:'real',
+    src:'Yahoo Finance (cotización cada 15 min con mercado abierto) · divisas incluidas',method:'Rentabilidad en euros desde el cierre anterior × peso de ayer'}})();
+  _CT.set(sig,pr);if(_CT.size>8)_CT.delete(_CT.keys().next().value);return pr}
+Object.assign(window.ATLASI,{QUALITY,getPortfolio,analyzePortfolio,getPortfolioExposure:A=>A.L,getCompanyExposure,getSectorExposure,getCountryExposure,getEffectiveBets,getPortfolioHealth,getAssetOverlap:(a,b)=>overlapDetail(a,b),getPortfolioContribution,dayMove});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();

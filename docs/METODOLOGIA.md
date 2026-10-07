@@ -113,3 +113,13 @@ Una línea por producto con peso (%) o importe (€); se aceptan ticker, ISIN o 
 
 ## Tarjeta compartible «Rayos X»
 Nunca incluye importes. Muestra productos, apuestas reales, primer sector, primer país, 10 mayores empresas y mayor empresa, con fuente y fecha. Los nombres de los productos solo aparecen si el usuario lo marca.
+
+## Inicio · «Hoy / Lo que importa ahora»
+- **Por producto (DATO):** rentabilidad en euros de cada producto desde el cierre anterior (último precio de Yahoo, cada 15 min con mercado abierto, más la divisa) × su peso al cierre anterior. La suma de las contribuciones es exactamente el movimiento de la cartera con esos pesos. Con importes se muestra en €; con pesos, solo en %.
+- **Por dentro de tus ETFs (ESTIMACIÓN):** movimiento de la empresa × su peso en tu cartera contando solo las posiciones publicadas (por eso «≥»). Es una atribución dentro del movimiento de los ETFs; no se suma a él. Solo empresas con precio propio en ATLAS.
+- «X explica ≈ N % del movimiento» solo aparece si la estimación tiene el mismo signo que el movimiento y es al menos el 25 %.
+- Estado: «En directo» (última cotización < 40 min), «Actualizado HH:MM» o «Mercado cerrado · cierre del …» (se muestra la última sesión). Un producto sin cotización de la sesión cuenta como 0 % y se avisa.
+- La franja superior «Mi cartera» usa la misma cifra (antes calculaba el día en la divisa de cada producto, sin el efecto del euro).
+
+## Tests
+`python tests/regression.py` recalcula 8 carteras de control y comprueba invariantes (100 % S&P = 1 apuesta, Mundo+EM+Bonos > Mundo+S&P+Nasdaq…), que las pantallas principales no fallan y que la contribución diaria cuadra. Las referencias (`tests/golden.json`) llevan tolerancia porque los precios cambian a diario.
