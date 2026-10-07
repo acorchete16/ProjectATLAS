@@ -1,0 +1,44 @@
+crumb ok
+screener iShares: 526 productos
+  índice world ← URTH falló: sin cabecera
+  índice world ← URTH falló: sin cabecera
+  índice sp500 ← IVV falló: sin cabecera
+  índice sp500 ← IVV falló: sin cabecera
+  índice acwi ← ACWI falló: sin cabecera
+  índice acwi ← ACWI falló: sin cabecera
+  índice em ← EEM falló: sin cabecera
+  índice em ← EEM falló: sin cabecera
+  índice eafe ← EFA falló: sin cabecera
+  índice eafe ← EFA falló: sin cabecera
+  índice europe ← IEUR falló: sin cabecera
+  índice europe ← IEUR falló: sin cabecera
+  índice emu ← EZU falló: sin cabecera
+  índice emu ← EZU falló: sin cabecera
+  índice japan ← EWJ falló: sin cabecera
+  índice japan ← EWJ falló: sin cabecera
+  índice small ← IWM falló: sin cabecera
+  índice small ← IWM falló: sin cabecera
+  índice wsmall ← ACWX falló: sin cabecera
+  índice wsmall ← ACWX falló: sin cabecera
+  índice india ← INDA falló: sin cabecera
+  índice india ← INDA falló: sin cabecera
+  índice china ← MCHI falló: sin cabecera
+  índice china ← MCHI falló: sin cabecera
+  índice semis ← SOXX falló: sin cabecera
+  índice semis ← SOXX falló: sin cabecera
+  índice tech ← IYW falló: sin cabecera
+  índice tech ← IYW falló: sin cabecera
+  índice health ← IYH falló: sin cabecera
+  índice health ← IYH falló: sin cabecera
+  índice biotech ← IBB falló: sin cabecera
+  índice biotech ← IBB falló: sin cabecera
+  índice defense ← ITA falló: sin cabecera
+  índice defense ← ITA falló: sin cabecera
+  índice cleanen ← ICLN falló: sin cabecera
+  índice cleanen ← ICLN falló: sin cabecera
+  índice infra ← IGF falló: sin cabecera
+  índice infra ← IGF falló: sin cabecera
+  índice eufin ← EUFN falló: sin cabecera
+  índice eufin ← EUFN falló: sin cabecera
+  índice ndx (Invesco) falló: pocos datos
+OK · 0 índices completos · 153 ETFs/fondos (0 por índice, 152 con datos de Yahoo)
