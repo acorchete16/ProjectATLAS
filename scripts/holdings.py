@@ -115,16 +115,45 @@ def parse_ishares(txt, tk):
             'sector': {s: round(v * k, 2) for s, v in sorted(sector.items(), key=lambda x: -x[1])},
             'top': [[h[0], h[1], round(h[2] * k, 3), h[3], h[4]] for h in hold[:120]]}
 
+def parse_ishares_json(txt):
+    j = json.loads(txt.lstrip('\ufeff'))
+    rows = j.get('aaData') or []
+    hold, country, sector, tot = [], {}, {}, 0.0
+    for r in rows:
+        try:
+            tk, nm, sc, ac = r[0], r[1], r[2], r[3]
+            w = r[5]['raw'] if isinstance(r[5], dict) else float(r[5])
+            loc = next((x for x in r if isinstance(x, str) and x.strip().lower() in COUNTRY), '')
+        except Exception: continue
+        if not w or 'equity' not in str(ac).lower(): continue
+        cc = COUNTRY.get(loc.strip().lower(), 'XX'); s2 = sect(sc)
+        country[cc] = country.get(cc, 0) + w; sector[s2] = sector.get(s2, 0) + w; tot += w
+        hold.append([str(nm).title()[:48], str(tk), round(w, 3), cc, s2])
+    if tot < 50: raise ValueError(f'json: solo {tot:.0f} %')
+    k = 100 / tot; hold.sort(key=lambda h: -h[2])
+    return {'asof': None, 'n': len(hold), 'country': {c: round(v * k, 2) for c, v in sorted(country.items(), key=lambda x: -x[1])},
+            'sector': {s: round(v * k, 2) for s, v in sorted(sector.items(), key=lambda x: -x[1])}, 'top': [[h[0], h[1], round(h[2] * k, 3), h[3], h[4]] for h in hold[:120]]}
+
+UK = {'world': ('SWDA', 251882, 'ishares-msci-world-ucits-etf-acc-fund'), 'sp500': ('CSPX', 253743, 'ishares-sp-500-b-ucits-etf-acc-fund'),
+      'acwi': ('SSAC', 251850, 'ishares-msci-acwi-ucits-etf'), 'em': ('EIMI', 264659, 'ishares-msci-emerging-markets-imi-ucits-etf'),
+      'europe': ('IMEU', 251861, 'ishares-msci-europe-ucits-etf-acc-fund'), 'japan': ('IJPA', 251852, 'ishares-msci-japan-ucits-etf-acc-fund')}
+
 def get_index(key, urls):
     tk, name, pid, slug = INDEX[key]
-    cands = []
-    if tk in urls: cands.append('https://www.ishares.com' + urls[tk] + f'/1467271812596.ajax?fileType=csv&fileName={tk}_holdings&dataType=fund')
-    cands.append(f'https://www.ishares.com/us/products/{pid}/{slug}/1467271812596.ajax?fileType=csv&fileName={tk}_holdings&dataType=fund')
-    for u in cands:
+    base = ('https://www.ishares.com' + urls[tk]) if tk in urls else f'https://www.ishares.com/us/products/{pid}/{slug}'
+    tries = [('csv', base + f'/1467271812596.ajax?fileType=csv&fileName={tk}_holdings&dataType=fund'),
+             ('json', base + '/1467271812596.ajax?tab=all&fileType=json'),
+             ('csv', base + f'/1395165510754.ajax?fileType=csv&fileName={tk}_holdings&dataType=fund')]
+    if key in UK:
+        t2, p2, s2 = UK[key]; ub = f'https://www.ishares.com/uk/individual/en/products/{p2}/{s2}'
+        tries += [('csv', ub + f'/1506575576011.ajax?fileType=csv&fileName={t2}_holdings&dataType=fund'), ('json', ub + '/1506575576011.ajax?tab=all&fileType=json')]
+    for kind, u in tries:
         try:
-            d = parse_ishares(raw(u), tk); d.update(name=name, src=f'iShares {tk} (cartera completa publicada)', etf=tk)
-            L(f'  índice {key} ← {tk}: {d["n"]} empresas a {d["asof"]} · EE. UU. {d["country"].get("US", 0):.1f} %'); return d
-        except Exception as e: L(f'  índice {key} ← {tk} falló: {str(e)[:400]} · {u[:160]}')
+            txt = raw(u)
+            d = parse_ishares(txt, tk) if kind == 'csv' else parse_ishares_json(txt)
+            d.update(name=name, src=f'iShares {tk} (cartera completa publicada)', etf=tk)
+            L(f'  índice {key} ← {kind} OK: {d["n"]} empresas a {d["asof"]} · EE. UU. {d["country"].get("US", 0):.1f} % · {u[:120]}'); return d
+        except Exception as e: L(f'  índice {key} {kind} falló: {str(e)[:160]} · {u[:130]}')
     return None
 
 def get_ndx():
