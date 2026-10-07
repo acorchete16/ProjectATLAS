@@ -446,7 +446,7 @@ def main():
             if b2 in STOCK_CC: t[3] = STOCK_CC[b2]
             if b2 in STOCK_SEC: t[4] = SEC_ES.get(STOCK_SEC[b2], STOCK_SEC[b2])
         rec['asof'] = now[:10]
-        if not rec.get('proxy') and not rec.get('top') and not rec.get('sector') and k in old.get('fund', {}): rec = old['fund'][k]
+        if not rec.get('proxy') and not rec.get('top') and not rec.get('sector') and not rec.get('country') and k in old.get('fund', {}): rec = old['fund'][k]
         fund[k] = rec
     json.dump({'u': now, 'idx': idx, 'fund': fund}, open(os.path.join(ROOT, 'data', 'expo.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
     np = sum(1 for f in fund.values() if f.get('proxy'))
