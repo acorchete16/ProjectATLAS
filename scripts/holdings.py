@@ -1,0 +1,247 @@
+#!/usr/bin/env python3
+"""Composición real de ETFs y fondos para el análisis de exposición de ATLAS.
+
+Dos fuentes, siempre con fecha:
+ 1. Carteras COMPLETAS publicadas por iShares (CSV oficial: empresa, peso, sector, país) para los índices de
+    referencia. Un ETF/fondo que replica ese índice hereda la composición (marcado como 'proxy').
+ 2. Yahoo Finance quoteSummary (topHoldings, fundProfile, summaryDetail): 10 mayores posiciones, reparto
+    sectorial, P/E y P/B de la cartera, % en acciones/bonos/liquidez y gastos. El peso que no cubren las 10
+    mayores queda como 'sin desglose': no se inventa.
+
+Salida: data/expo.json
+  idx[clave]  = {name, src, asof, n, country{ISO2:%}, sector{sector:%}, top[[nombre,ticker,%,ISO2,sector]...]}
+  fund[clave] = {proxy, idx_name, asof, src, sector{}, top[], cover, pe, pb, stock, bond, cash, ter, cat}
+Registro: data/expo_log.txt"""
+import csv, io, json, os, re, sys, time, glob, datetime, urllib.parse
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import enrich as E
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LOG = []
+def L(*a):
+    s = ' '.join(str(x) for x in a); print(s); LOG.append(s)
+
+# ---------- normalización ----------
+SECT = {  # GICS (iShares) y claves de Yahoo -> nombre ATLAS
+    'information technology': 'Tecnología', 'technology': 'Tecnología',
+    'financials': 'Finanzas', 'financial_services': 'Finanzas', 'financial services': 'Finanzas',
+    'health care': 'Salud', 'healthcare': 'Salud',
+    'consumer discretionary': 'Consumo discrecional', 'consumer_cyclical': 'Consumo discrecional', 'consumer cyclical': 'Consumo discrecional',
+    'consumer staples': 'Consumo básico', 'consumer_defensive': 'Consumo básico', 'consumer defensive': 'Consumo básico',
+    'industrials': 'Industria', 'communication': 'Comunicaciones', 'communication services': 'Comunicaciones', 'communication_services': 'Comunicaciones',
+    'energy': 'Energía', 'materials': 'Materiales', 'basic_materials': 'Materiales', 'basic materials': 'Materiales',
+    'real estate': 'Inmobiliario', 'realestate': 'Inmobiliario', 'utilities': 'Servicios públicos',
+    'cash and/or derivatives': 'Liquidez', 'cash': 'Liquidez', 'money market': 'Liquidez',
+}
+def sect(x): return SECT.get((x or '').strip().lower(), 'Otros')
+
+COUNTRY = {'united states': 'US', 'japan': 'JP', 'united kingdom': 'GB', 'canada': 'CA', 'france': 'FR', 'switzerland': 'CH', 'germany': 'DE',
+  'australia': 'AU', 'netherlands': 'NL', 'denmark': 'DK', 'sweden': 'SE', 'italy': 'IT', 'spain': 'ES', 'hong kong': 'HK', 'singapore': 'SG',
+  'finland': 'FI', 'belgium': 'BE', 'israel': 'IL', 'norway': 'NO', 'ireland': 'IE', 'new zealand': 'NZ', 'austria': 'AT', 'portugal': 'PT',
+  'china': 'CN', 'taiwan': 'TW', 'india': 'IN', 'korea (south)': 'KR', 'south korea': 'KR', 'korea': 'KR', 'brazil': 'BR', 'saudi arabia': 'SA',
+  'south africa': 'ZA', 'mexico': 'MX', 'indonesia': 'ID', 'thailand': 'TH', 'malaysia': 'MY', 'united arab emirates': 'AE', 'poland': 'PL',
+  'qatar': 'QA', 'kuwait': 'KW', 'turkey': 'TR', 'chile': 'CL', 'greece': 'GR', 'philippines': 'PH', 'peru': 'PE', 'hungary': 'HU',
+  'colombia': 'CO', 'czech republic': 'CZ', 'egypt': 'EG', 'luxembourg': 'LU', 'macau': 'MO', 'argentina': 'AR', 'bermuda': 'BM',
+  'cayman islands': 'KY', 'jersey': 'JE', 'guernsey': 'GG', 'puerto rico': 'PR', 'uruguay': 'UY', 'zambia': 'ZM', 'jordan': 'JO',
+  'european union': 'EU', 'cash': 'XX', 'other': 'XX', '-': 'XX'}
+SUFFIX_CC = {'TW': 'TW', 'TWO': 'TW', 'AS': 'NL', 'T': 'JP', 'L': 'GB', 'PA': 'FR', 'DE': 'DE', 'F': 'DE', 'SW': 'CH', 'HK': 'HK', 'KS': 'KR', 'KQ': 'KR',
+  'MC': 'ES', 'MI': 'IT', 'CO': 'DK', 'ST': 'SE', 'TO': 'CA', 'V': 'CA', 'AX': 'AU', 'NS': 'IN', 'BO': 'IN', 'SS': 'CN', 'SZ': 'CN', 'HE': 'FI',
+  'BR': 'BE', 'OL': 'NO', 'IR': 'IE', 'LS': 'PT', 'VI': 'AT', 'SA': 'BR', 'MX': 'MX', 'JK': 'ID', 'BK': 'TH', 'SI': 'SG', 'TA': 'IL', 'SR': 'SA', 'JO': 'ZA'}
+
+# ---------- 1. carteras completas de iShares ----------
+INDEX = {  # clave: (ticker iShares, nombre del índice, id de producto conocido, slug)
+    'world': ('URTH', 'MSCI World', 239696, 'ishares-msci-world-etf'),
+    'sp500': ('IVV', 'S&P 500', 239726, 'ishares-core-sp-500-etf'),
+    'acwi': ('ACWI', 'MSCI ACWI (mundo + emergentes)', 239600, 'ishares-msci-acwi-etf'),
+    'em': ('EEM', 'MSCI Emerging Markets', 239637, 'ishares-msci-emerging-markets-etf'),
+    'eafe': ('EFA', 'MSCI EAFE (desarrollados sin EE. UU.)', 239623, 'ishares-msci-eafe-etf'),
+    'europe': ('IEUR', 'MSCI Europe IMI', 264617, 'ishares-core-msci-europe-etf'),
+    'emu': ('EZU', 'MSCI EMU (zona euro)', 239644, 'ishares-msci-eurozone-etf'),
+    'japan': ('EWJ', 'MSCI Japan', 239665, 'ishares-msci-japan-etf'),
+    'small': ('IWM', 'Russell 2000 (pequeñas EE. UU.)', 239710, 'ishares-russell-2000-etf'),
+    'wsmall': ('ACWX', 'MSCI ACWI ex US', 239601, 'ishares-msci-acwi-ex-us-etf'),
+    'india': ('INDA', 'MSCI India', 239659, 'ishares-msci-india-etf'),
+    'china': ('MCHI', 'MSCI China', 239619, 'ishares-msci-china-etf'),
+    'semis': ('SOXX', 'NYSE Semiconductor', 239705, 'ishares-semiconductor-etf'),
+    'tech': ('IYW', 'Russell 1000 Technology', 239522, 'ishares-us-technology-etf'),
+    'health': ('IYH', 'Russell 1000 Health Care', 239511, 'ishares-us-healthcare-etf'),
+    'biotech': ('IBB', 'NYSE Biotechnology', 239699, 'ishares-nasdaq-biotechnology-etf'),
+    'defense': ('ITA', 'Dow Jones US Select Aerospace & Defense', 239502, 'ishares-us-aerospace-defense-etf'),
+    'cleanen': ('ICLN', 'S&P Global Clean Energy', 239738, 'ishares-global-clean-energy-etf'),
+    'infra': ('IGF', 'S&P Global Infrastructure', 239746, 'ishares-global-infrastructure-etf'),
+    'eufin': ('EUFN', 'MSCI Europe Financials', 239647, 'ishares-msci-europe-financials-etf'),
+}
+UA = {'User-Agent': E.UA, 'Accept': 'text/csv,application/json,*/*'}
+def raw(url, t=25):
+    req = E.urllib.request.Request(url, headers=UA)
+    with E.urllib.request.urlopen(req, timeout=t) as r: return r.read().decode('utf-8-sig', 'replace')
+
+def ishares_urls():
+    """Mapa ticker -> URL de producto desde el buscador oficial de iShares (si responde)."""
+    try:
+        j = json.loads(raw('https://www.ishares.com/us/product-screener/product-screener-v3.1.jsn?dcrPath=/templatedata/config/product-screener-v3/data/en/us-ishares/ishares-product-screener-backend-config&siteEntryPassthrough=true', 40))
+        out = {}
+        for pid, p in j.items():
+            if not isinstance(p, dict): continue
+            t = p.get('localExchangeTicker'); u = p.get('productPageUrl')
+            if t and u: out[t] = u
+        L('screener iShares:', len(out), 'productos'); return out
+    except Exception as e:
+        L('screener iShares no disponible:', str(e)[:80]); return {}
+
+def parse_ishares(txt, tk):
+    lines = txt.splitlines(); asof = None
+    for ln in lines[:12]:
+        m = re.match(r'"?Fund Holdings as of"?,\s*"?([^"]+)"?', ln)
+        if m: asof = m.group(1).strip()
+    hi = next((i for i, ln in enumerate(lines) if ln.startswith('Ticker,') or ln.startswith('"Ticker"')), None)
+    if hi is None: raise ValueError('sin cabecera')
+    rows = list(csv.DictReader(io.StringIO('\n'.join(lines[hi:]))))
+    hold, country, sector, tot = [], {}, {}, 0.0
+    for r in rows:
+        try: w = float(str(r.get('Weight (%)', '0')).replace(',', ''))
+        except Exception: continue
+        ac = (r.get('Asset Class') or '').lower()
+        if not w or ('equity' not in ac and ac): continue
+        cc = COUNTRY.get((r.get('Location') or '').strip().lower(), 'XX'); sc = sect(r.get('Sector'))
+        country[cc] = country.get(cc, 0) + w; sector[sc] = sector.get(sc, 0) + w; tot += w
+        hold.append([r.get('Name', '').strip().title()[:48], (r.get('Ticker') or '').strip(), round(w, 3), cc, sc])
+    if tot < 50: raise ValueError(f'solo {tot:.0f} % en acciones')
+    k = 100 / tot  # re-escalado a 100 % de la parte en acciones
+    hold.sort(key=lambda h: -h[2])
+    try: asof_iso = datetime.datetime.strptime(asof, '%b %d, %Y').date().isoformat()
+    except Exception: asof_iso = asof
+    return {'asof': asof_iso, 'n': len(hold), 'country': {c: round(v * k, 2) for c, v in sorted(country.items(), key=lambda x: -x[1])},
+            'sector': {s: round(v * k, 2) for s, v in sorted(sector.items(), key=lambda x: -x[1])},
+            'top': [[h[0], h[1], round(h[2] * k, 3), h[3], h[4]] for h in hold[:120]]}
+
+def get_index(key, urls):
+    tk, name, pid, slug = INDEX[key]
+    cands = []
+    if tk in urls: cands.append('https://www.ishares.com' + urls[tk] + f'/1467271812596.ajax?fileType=csv&fileName={tk}_holdings&dataType=fund')
+    cands.append(f'https://www.ishares.com/us/products/{pid}/{slug}/1467271812596.ajax?fileType=csv&fileName={tk}_holdings&dataType=fund')
+    for u in cands:
+        try:
+            d = parse_ishares(raw(u), tk); d.update(name=name, src=f'iShares {tk} (cartera completa publicada)', etf=tk)
+            L(f'  índice {key} ← {tk}: {d["n"]} empresas a {d["asof"]} · EE. UU. {d["country"].get("US", 0):.1f} %'); return d
+        except Exception as e: L(f'  índice {key} ← {tk} falló: {str(e)[:90]}')
+    return None
+
+def get_ndx():
+    """Nasdaq-100 desde el CSV oficial de Invesco (QQQ). No trae país: se usa el sufijo/mercado (aproximado)."""
+    try:
+        txt = raw('https://www.invesco.com/us/financial-products/etfs/holdings/main/holdings/0?audienceType=Investor&action=download&ticker=QQQ')
+        rows = list(csv.DictReader(io.StringIO(txt)))
+        hold = []; sector = {}; asof = None
+        for r in rows:
+            try: w = float(str(r.get('Weight', '0')).replace('%', ''))
+            except Exception: continue
+            if not w: continue
+            sc = sect(r.get('Sector')); sector[sc] = sector.get(sc, 0) + w; asof = asof or r.get('Date')
+            hold.append([(r.get('Name') or '').title()[:48], (r.get('Holding Ticker') or '').strip(), w, 'US', sc])
+        tot = sum(h[2] for h in hold)
+        if tot < 50: raise ValueError('pocos datos')
+        k = 100 / tot; hold.sort(key=lambda h: -h[2])
+        L(f'  índice ndx ← QQQ (Invesco): {len(hold)} empresas')
+        return {'name': 'Nasdaq-100', 'src': 'Invesco QQQ (cartera completa; país supuesto EE. UU.)', 'etf': 'QQQ', 'asof': asof, 'n': len(hold),
+                'country': {'US': 100.0}, 'country_note': 'Invesco no publica el país: se asume EE. UU. (cotizan allí); hay excepciones como ASML o AstraZeneca.',
+                'sector': {s: round(v * k, 2) for s, v in sorted(sector.items(), key=lambda x: -x[1])}, 'top': [[h[0], h[1], round(h[2] * k, 3), h[3], h[4]] for h in hold[:120]]}
+    except Exception as e:
+        L('  índice ndx (Invesco) falló:', str(e)[:90]); return None
+
+# ---------- 2. qué replica cada ETF / fondo ----------
+TICK_IDX = {'URTH': 'world', 'SPY': 'sp500', 'IVV': 'sp500', 'VOO': 'sp500', 'SSO': 'sp500', 'VT': 'acwi', 'ACWI': 'acwi', 'EEM': 'em', 'IEMG': 'em', 'VWO': 'em',
+            'EWJ': 'japan', 'DXJ': 'japan', 'VGK': 'europe', 'IEUR': 'europe', 'EZU': 'emu', 'IWM': 'small', 'INDA': 'india', 'EPI': 'india', 'MCHI': 'china', 'FXI': 'china',
+            'SOXX': 'semis', 'QQQ': 'ndx', 'QLD': 'ndx', 'TQQQ': 'ndx', 'IBB': 'biotech', 'ITA': 'defense', 'ICLN': 'cleanen', 'IGF': 'infra', 'EUFN': 'eufin', 'IYW': 'tech'}
+RULES = [(r'msci world small', None), (r'equal weight', None), (r'msci world|developed world|world index', 'world'), (r'all[- ]world|acwi|total world|all country', 'acwi'),
+         (r's&p 500|s&p500|sp 500|\b500\b', 'sp500'), (r'nasdaq[- ]?100', 'ndx'), (r'emerging', 'em'), (r'\bemu\b|euro ?zone|eurozone', 'emu'),
+         (r'europe|stoxx 600', 'europe'), (r'japan|topix|nikkei', 'japan'), (r'india', 'india'), (r'china', 'china'), (r'semiconductor', 'semis'),
+         (r'russell 2000', 'small'), (r'eafe|ex[- ]u\.?s', 'eafe')]
+LEV = re.compile(r'\b(2x|3x|ultra|lev|bull|bear|short)\b', re.I)
+
+def names():
+    s = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read()
+    nm = {}
+    i = s.find('const UNIV='); j = s.find('\n];', i)
+    for t, n in re.findall(r'\{t:"([^"]+)",node:"[^"]*",n:"([^"]+)"', s[i:j]): nm['e:' + t] = n
+    i = s.find('const FUNDS='); j = s.find('];', i)
+    try:
+        for f in json.loads(s[i + len('const FUNDS='):j + 1]): nm['f:' + f['t']] = ' '.join(x for x in (f.get('full'), f.get('n'), f.get('idx') or '') if x)
+    except Exception as e: L('FUNDS no legible', e)
+    try:
+        U = json.load(open(os.path.join(ROOT, 'data', 'universe_x.json')))
+        for x in U.get('e', []): nm['e:x:' + x['t']] = (x.get('full') or x.get('n') or '') + ' ' + (x.get('cat') or '')
+        for x in U.get('f', []): nm['f:x:' + x['t']] = (x.get('full') or x.get('n') or '') + ' ' + (x.get('cat') or '')
+    except Exception: pass
+    return nm
+
+def which_index(key, sym, name):
+    base = key.split(':')[-1]
+    if base in TICK_IDX: return TICK_IDX[base]
+    if LEV.search(name or ''): return None
+    for pat, ix in RULES:
+        if re.search(pat, (name or '').lower()): return ix
+    return None
+
+def yahoo_fund(sym):
+    r = E.summary(sym, ['topHoldings', 'fundProfile', 'summaryDetail'])
+    th = r.get('topHoldings') or {}; fp = r.get('fundProfile') or {}; sd = r.get('summaryDetail') or {}
+    v = lambda d, k: (d.get(k) or {}).get('raw') if isinstance(d.get(k), dict) else d.get(k)
+    sec = {}
+    for d in th.get('sectorWeightings') or []:
+        for k, x in d.items():
+            w = (x or {}).get('raw') if isinstance(x, dict) else x
+            if w: s = sect(k); sec[s] = round(sec.get(s, 0) + w * 100, 2)
+    top = []
+    for h in th.get('holdings') or []:
+        t = h.get('symbol') or ''; w = (h.get('holdingPercent') or {}).get('raw')
+        if not w: continue
+        suf = t.rsplit('.', 1)[1] if '.' in t else ''; cc = SUFFIX_CC.get(suf, 'US' if t and not suf else 'XX')
+        top.append([(h.get('holdingName') or t).title()[:48], t, round(w * 100, 3), cc, None])
+    eq = th.get('equityHoldings') or {}
+    fees = (fp.get('feesExpensesInvestment') or {})
+    return {'sector': dict(sorted(sec.items(), key=lambda x: -x[1])), 'top': top, 'cover': round(sum(t[2] for t in top), 1),
+            'pe': v(eq, 'priceToEarnings') or v(sd, 'trailingPE'), 'pb': v(eq, 'priceToBook'),
+            'stock': (v(th, 'stockPosition') or 0) * 100 if v(th, 'stockPosition') is not None else None,
+            'bond': (v(th, 'bondPosition') or 0) * 100 if v(th, 'bondPosition') is not None else None,
+            'cash': (v(th, 'cashPosition') or 0) * 100 if v(th, 'cashPosition') is not None else None,
+            'ter': (v(fees, 'annualReportExpenseRatio') or 0) * 100 if v(fees, 'annualReportExpenseRatio') else None,
+            'cat': fp.get('categoryName'), 'yld': v(sd, 'yield')}
+
+def main():
+    now = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%MZ')
+    E.init_crumb(); L('crumb', 'ok' if E.crumb else 'NO')
+    try: old = json.load(open(os.path.join(ROOT, 'data', 'expo.json')))
+    except Exception: old = {'idx': {}, 'fund': {}}
+    urls = ishares_urls(); idx = {}
+    for k in INDEX:
+        d = get_index(k, urls)
+        if d: idx[k] = d
+        elif k in old.get('idx', {}): idx[k] = old['idx'][k]; L(f'  índice {k}: se conserva el anterior ({old["idx"][k].get("asof")})')
+        time.sleep(.6)
+    d = get_ndx()
+    if d: idx['ndx'] = d
+    elif 'ndx' in old.get('idx', {}): idx['ndx'] = old['idx']['ndx']
+    nm = names(); fund = {}; nok = 0
+    for p in sorted(glob.glob(os.path.join(ROOT, 'data', 'p', '*.json'))):
+        b = os.path.basename(p)
+        if not (b.startswith('e_') or b.startswith('f_')): continue
+        try: j = json.load(open(p))
+        except Exception: continue
+        k = j.get('k'); y = str(j.get('y') or '')
+        if not k: continue
+        ix = which_index(k, y, nm.get(k, ''))
+        rec = {'proxy': ix if ix in idx else None, 'idx_name': idx[ix]['name'] if ix in idx else None}
+        if y and ':' not in y:
+            try: rec.update(yahoo_fund(y)); rec['src'] = 'Yahoo Finance (10 mayores posiciones y sectores)'; nok += 1
+            except Exception as e: L(f'  {k} {y}: Yahoo sin composición ({str(e)[:50]})')
+            time.sleep(.35)
+        rec['asof'] = now[:10]
+        if not rec.get('proxy') and not rec.get('top') and not rec.get('sector') and k in old.get('fund', {}): rec = old['fund'][k]
+        fund[k] = rec
+    json.dump({'u': now, 'idx': idx, 'fund': fund}, open(os.path.join(ROOT, 'data', 'expo.json'), 'w'), ensure_ascii=False, separators=(',', ':'))
+    np = sum(1 for f in fund.values() if f.get('proxy'))
+    L(f'OK · {len(idx)} índices completos · {len(fund)} ETFs/fondos ({np} por índice, {nok} con datos de Yahoo)')
+    open(os.path.join(ROOT, 'data', 'expo_log.txt'), 'w').write('\n'.join(LOG) + '\n')
+
+if __name__ == '__main__': main()
