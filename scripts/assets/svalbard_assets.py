@@ -26,13 +26,32 @@ try:
     z[z < -50] = 0
     zmin, zmax = float(z.min()), float(z.max())
     q = np.clip((z - zmin) / (zmax - zmin) * 65535, 0, 65535).astype('uint16')
-    Image.fromarray(q, mode='I;16').save(f'{OUT}/dem.png')
+    Image.fromarray(q, mode='I;16').save(f'{OUT}/dem.png'); q.astype('<u2').tofile(f'{OUT}/dem.u16')  # binario: el navegador no lee PNG de 16 bits
     json.dump({'size_m': HALF_KM * 2000, 'px': N, 'zmin': zmin, 'zmax': zmax, 'center': [VLAT, VLON],
                'source': 'Copernicus DEM GLO-30 (© DLR e.V. 2010-2014 y © Airbus Defence and Space GmbH 2014-2018, distribuido por la ESA)'}, open(f'{OUT}/dem.json', 'w'))
     credits['dem'] = 'Copernicus DEM GLO-30'
     print('DEM', zmin, zmax)
 except Exception as e:
     print('DEM falló:', e)
+
+# ---------- 1b · relieve lejano (40 × 40 km, mosaico de 3 hojas) para el horizonte ----------
+try:
+    import rasterio
+    from rasterio.merge import merge
+    from rasterio.enums import Resampling
+    tiles = [f'https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N78_00_E0{e}_00_DEM/Copernicus_DSM_COG_10_N78_00_E0{e}_00_DEM.tif' for e in ('14', '15', '16')]
+    srcs = [rasterio.open(t) for t in tiles]
+    FAR_KM, NF = 20.0, 640
+    dlat = FAR_KM / 111.32; dlon = FAR_KM / (111.32 * math.cos(math.radians(VLAT)))
+    res = ((2 * dlon) / NF, (2 * dlat) / NF)
+    arr, tr = merge(srcs, bounds=(VLON - dlon, VLAT - dlat, VLON + dlon, VLAT + dlat), res=res, resampling=Resampling.bilinear)
+    z = arr[0].astype('float32')[:NF, :NF]; z[z < -50] = 0
+    zmin, zmax = float(z.min()), float(z.max())
+    q = np.clip((z - zmin) / (zmax - zmin) * 65535, 0, 65535).astype('<u2'); q.tofile(f'{OUT}/far.u16')
+    json.dump({'size_m': FAR_KM * 2000, 'px': int(z.shape[0]), 'zmin': zmin, 'zmax': zmax, 'center': [VLAT, VLON]}, open(f'{OUT}/far.json', 'w'))
+    print('FAR', z.shape, zmin, zmax)
+except Exception as e:
+    print('FAR falló:', e)
 
 # ---------- 2 · texturas ----------
 SLOTS = {
