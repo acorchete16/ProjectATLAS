@@ -2113,7 +2113,8 @@ function slerpLine(a,b,n=48){const R=Math.PI/180,toV=([lo,la])=>[Math.cos(la*R)*
   const d=Math.acos(Math.max(-1,Math.min(1,A[0]*B[0]+A[1]*B[1]+A[2]*B[2])));if(d<1e-6)return[a,b];const out=[];
   for(let i=0;i<=n;i++){const t=i/n,s1=Math.sin((1-t)*d)/Math.sin(d),s2=Math.sin(t*d)/Math.sin(d),v=[s1*A[0]+s2*B[0],s1*A[1]+s2*B[1],s1*A[2]+s2*B[2]];
     out.push([Math.atan2(v[1],v[0])/R,Math.atan2(v[2],Math.hypot(v[0],v[1]))/R])}return out}
-const POLE=[-40,84.05];let fxFlows=[],fxPackets=[],fxT0=performance.now(),fxOrbit=false,fxRaf=0,_roadOrig=null;
+const POLE=[15.4911,78.2357]; // Svalbard Global Seed Vault (Platåberget): aquí llegan los datos de ATLAS
+let fxFlows=[],fxPackets=[],fxT0=performance.now(),fxOrbit=false,fxRaf=0,_roadOrig=null;
 function fxSetup(){
   map.addImage('win-lit',winPattern(true),{pixelRatio:2});map.addImage('win-dim',winPattern(false),{pixelRatio:2});
   if(map.getLayer('b3d')){map.setPaintProperty('b3d','fill-extrusion-pattern','win-dim')}
@@ -2267,7 +2268,7 @@ vec3 wP=normalize(wx*tb.x+wy*tb.y+wz*tb.z);normal=normalize((viewMatrix*vec4(wP,
   ATLV.raf=requestAnimationFrame(tick)}
 
 /* ================= ATLÁNTIDA: la base de datos hundida del Polo Norte ================= */
-const ATL=[-40,84.05];
+const ATL=[15.4911,78.2357];
 function atlOff(dx,dy){return[ATL[0]+dx/(111.32*Math.cos(ATL[1]*Math.PI/180)),ATL[1]+dy/110.57]} // km -> lon/lat
 function atlCircle(r,n=48,cx=0,cy=0){const p=[];for(let i=0;i<=n;i++){const a=i/n*Math.PI*2;p.push(atlOff(cx+Math.cos(a)*r,cy+Math.sin(a)*r))}return[p]}
 function atlArc(r0,r1,a0,a1,n=24){const p=[];for(let i=0;i<=n;i++){const a=a0+(a1-a0)*i/n;p.push(atlOff(Math.cos(a)*r1,Math.sin(a)*r1))}for(let i=n;i>=0;i--){const a=a0+(a1-a0)*i/n;p.push(atlOff(Math.cos(a)*r0,Math.sin(a)*r0))}p.push(p[0]);return[p]}
@@ -2303,18 +2304,8 @@ function ensureAtlModel(){if(_atlM||!MBX||!map)return;_atlM=true;
   try{map.addModel('atlantis','data/atlantis_lite.glb');map.addSource('atl-pt',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:ATL},properties:{}}});
     map.addLayer({id:'atl-model',type:'model',source:'atl-pt',minzoom:5.5,layout:{'model-id':'atlantis'},paint:{'model-scale':[1,1,1],'model-rotation':[0,0,0],'model-type':'common-3d','model-emissive-strength':1.4,'model-opacity':1}})}
   catch(e){console.warn('modelo Atlántida',e);_atlM=false}}
-function atlantisSetup(){
-  map.addSource('atl-w',{type:'geojson',data:atlWater()});
-  map.addLayer({id:'atl-water',type:'fill',source:'atl-w',minzoom:6,paint:{'fill-color':'#073c52','fill-opacity':.92}});
-  map.addLayer({id:'atl-shore',type:'line',source:'atl-w',minzoom:6,paint:{'line-color':'#35e0ff','line-width':2,'line-blur':3,'line-opacity':.7}});
-  if(MBX){map.on('moveend',()=>{if(map.getZoom()>5.5&&Math.abs(map.getCenter().lat-ATL[1])<4)ensureAtlModel()});
-    map.on('click',e=>{if(map.getZoom()>7&&Math.abs(e.lngLat.lat-ATL[1])<.04&&Math.abs(e.lngLat.lng-ATL[0])<.4)showPole()})}
-  if(!MBX){map.addSource('atl',{type:'geojson',data:atlantis()});
-  map.addLayer({id:'atl-3d',type:'fill-extrusion',source:'atl',minzoom:6.5,paint:{'fill-extrusion-color':['get','c'],'fill-extrusion-height':['get','h'],'fill-extrusion-base':['get','b'],'fill-extrusion-opacity':.95}});
-  map.addLayer({id:'atl-glow',type:'circle',source:'hqA',minzoom:6,paint:{'circle-color':'#9ff8ff','circle-radius':['interpolate',['exponential',2],['zoom'],7,30,11,500],'circle-blur':1,'circle-opacity':.22,'circle-pitch-alignment':'map'}},'atl-3d');
-  map.on('click','atl-3d',e=>{showPole()})}
-  if(MBX)map.addLayer({id:'atl-glow',type:'circle',source:'hqA',minzoom:6,paint:{'circle-color':'#9ff8ff','circle-radius':['interpolate',['exponential',2],['zoom'],7,30,11,500],'circle-blur':1,'circle-opacity':.18,'circle-pitch-alignment':'map'}});
-  if(MBX){try{map.setPaintProperty('atl-water','fill-emissive-strength',.6);map.setPaintProperty('atl-shore','line-emissive-strength',1);map.setPaintProperty('atl-glow','circle-emissive-strength',1)}catch(_){}}
+function atlantisSetup(){ // la Atlántida ficticia se sustituye por la bóveda real de Svalbard: sin islas inventadas en el mapa
+  map.on('click',e=>{if(map.getZoom()>9&&Math.abs(e.lngLat.lat-ATL[1])<.01&&Math.abs(e.lngLat.lng-ATL[0])<.05)showPole()});
   map.on('zoom',()=>{const el=poleMk&&poleMk.getElement();if(el)el.classList.toggle('near',map.getZoom()>7.5)})}
 
 /* ---- Generador de datos del Polo Norte: aquí llegan los datos de todas las sedes ---- */
@@ -2327,17 +2318,17 @@ async function poleStat(){const n=searchEntities().length;let up='';try{const r=
   window._poleUp=up;const e=$('#pgStat');if(e)e.textContent=`${n} inversiones${up?' · '+relWhen(up):''}`}
 function poleBlip(c){const el=poleMk&&poleMk.getElement();if(!el)return;el.style.setProperty('--blip',c||'#9ff8ff');el.classList.remove('blip');void el.offsetWidth;el.classList.add('blip')}
 function showPole(){const p=$('#mcard'),ents=searchEntities(),n={s:0,e:0,f:0};ents.forEach(x=>n[x.k]++);const up=window._poleUp||'';
-  p.innerHTML=`<div class="mc-h"><div><h3>Base de datos</h3><p>Aquí llegan cada día los precios y datos de todas las empresas, ETFs y fondos del mapa.</p></div><button class="x-close" data-mclose aria-label="Cerrar">✕</button></div>
+  p.innerHTML=`<div class="mc-h"><div><h3>Base de datos</h3><p>Svalbard, 78° N. Aquí llegan cada día los precios y datos de todas las empresas, ETFs y fondos del mapa.</p></div><button class="x-close" data-mclose aria-label="Cerrar">✕</button></div>
    <div class="pg-card"><div class="pg-n"><div><b style="color:${KIND_C.s}">${n.s}</b><span>acciones</span></div><div><b style="color:${KIND_C.e}">${n.e}</b><span>ETFs</span></div><div><b style="color:${KIND_C.f}">${n.f}</b><span>fondos</span></div></div>
    <p>↻ Precios actualizados <b>${up?relWhen(up):'—'}</b>. Se actualizan solos cada día laborable, al cierre de la bolsa europea y de la americana.</p>
    <details class="mp-why"><summary>ℹ️ De dónde salen los datos</summary><p>Yahoo Finance (precios, cifras y rentabilidades), OpenStreetMap (sedes), EODHD (respaldo de fondos), fichas de las gestoras, Mapbox (mapa) y TradingView (gráfico interactivo).</p></details>
-   <button class="av-go" data-pg="3d">🏛 Entrar en la ciudad en 3D</button><div class="pg-act"><button class="btn" data-pg="all">Encender todo el mapa</button><button class="btn2" data-pg="plan">Ver mi plan</button></div></div>`;
+   <button class="av-go" data-pg="3d">Entrar en la bóveda de Svalbard</button><div class="pg-act"><button class="btn" data-pg="all">Encender todo el mapa</button><button class="btn2" data-pg="plan">Ver mi plan</button></div></div>`;
   p.hidden=false;requestAnimationFrame(()=>p.classList.add('on'));mapFocus='pole';
   p.querySelector('[data-mclose]').addEventListener('click',closePlace);
-  p.querySelector('[data-pg="3d"]').addEventListener('click',()=>openAtlantis3D());
+  p.querySelector('[data-pg="3d"]').addEventListener('click',()=>{if(window.ATLAS_VAULT)ATLAS_VAULT.open();else openAtlantis3D()});
   p.querySelector('[data-pg=all]').addEventListener('click',()=>{sq.active=true;sq.type='all';sq.sec='all';sq.fit=false;sq.q='';closePlace();updateMap()});
   p.querySelector('[data-pg=plan]').addEventListener('click',()=>{closePlace();const r=$('.right');if(r)r.scrollIntoView({behavior:'smooth'})});
-  ensureAtlModel();fxOrbit=false;map.flyTo({center:ATL,zoom:mobile()?9.4:10.1,pitch:62,bearing:24,duration:2400,curve:1.5,essential:true,padding:mobile()?{...mapPad(),bottom:Math.round(innerHeight*.12)}:{...mapPad(),left:430}});map.once('moveend',()=>{if(mapFocus==='pole'&&!mobile())fxOrbit=!reduced})}
+  fxOrbit=false;map.flyTo({center:ATL,zoom:mobile()?11.2:12,pitch:58,bearing:200,duration:2400,curve:1.5,essential:true,padding:mobile()?{...mapPad(),bottom:Math.round(innerHeight*.12)}:{...mapPad(),left:430}});map.once('moveend',()=>{if(mapFocus==='pole'&&!mobile())fxOrbit=!reduced})}
 function fxData(gj){ // flujos desde cada sede encendida hacia la base de datos del Polo Norte
   const seen=new Map();gj.features.forEach(f=>{const k=f.properties.gk;if(!seen.has(k))seen.set(k,f)});
   fxFlows=[...seen.values()].slice(0,60).map((f,i)=>({c:f.properties.c,line:slerpLine(f.geometry.coordinates,POLE,60),ph:Math.random()}));
@@ -3235,6 +3226,9 @@ setTimeout(()=>{if(EXPERT())run()},3600);
 </script>
 <link rel="stylesheet" href="css/intel.css?v=10">
 <script src="js/intel.js?v=8"></script>
+<link rel="stylesheet" href="css/vault.css?v=1">
+<script src="js/vault.js?v=1"></script>
+<script src="js/kauai.js?v=1"></script>
 <script>if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
 </body>
 </html>

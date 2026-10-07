@@ -1,0 +1,26 @@
+/* Svalbard · escena de entrada a la base de datos */
+#svv{position:fixed;inset:0;z-index:200;background:#0b0f14;color:#eef3f8;font-family:var(--ui);transition:opacity .45s ease}
+#svv[hidden]{display:none}#svv.out{opacity:0}
+#svvC{position:absolute;inset:0;width:100%;height:100%;display:block}
+#svv::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 90% at 50% 45%,transparent 60%,rgba(0,0,0,.35))}
+.sv-top{position:absolute;z-index:2;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:calc(env(safe-area-inset-top,0px) + 18px) 22px 0}
+.sv-br{display:flex;align-items:baseline;gap:10px}.sv-br b{font:800 12px var(--ui);letter-spacing:.34em;color:#fff}.sv-br span{font-size:12px;color:rgba(238,243,248,.7)}
+.sv-skip{border:0;background:rgba(10,14,20,.45);backdrop-filter:blur(8px);color:#fff;font:600 13px var(--ui);padding:9px 14px;border-radius:999px;cursor:pointer}
+.sv-cap{position:absolute;z-index:2;left:22px;bottom:calc(env(safe-area-inset-bottom,0px) + 92px);max-width:min(460px,calc(100vw - 44px));display:flex;flex-direction:column;gap:4px;transition:opacity .5s ease,transform .5s ease;text-shadow:0 1px 18px rgba(0,0,0,.45)}
+.sv-cap.mv{opacity:.0;transform:translateY(6px)}
+.sv-cap small{font:600 11px var(--ui);letter-spacing:.18em;color:rgba(238,243,248,.65)}.sv-cap b{font:700 26px/1.15 var(--ui);letter-spacing:-.01em}.sv-cap span{font:500 14px/1.45 var(--ui);color:rgba(238,243,248,.82)}
+.sv-nav{position:absolute;z-index:2;left:22px;right:22px;bottom:calc(env(safe-area-inset-bottom,0px) + 26px);display:flex;align-items:center;gap:10px}
+.sv-dots{flex:1;display:flex;gap:6px}.sv-dots i{width:22px;height:3px;border-radius:2px;background:rgba(255,255,255,.25);cursor:pointer;transition:background .3s}.sv-dots i.on{background:#fff}
+.sv-nav button{border:0;cursor:pointer;font:600 13.5px var(--ui);border-radius:999px;padding:10px 16px;background:rgba(10,14,20,.45);backdrop-filter:blur(8px);color:#fff}
+.sv-nav .sv-next{background:#fff;color:#0b0f14}
+.sv-load{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:12px;color:rgba(238,243,248,.75);font-size:13px}
+.sv-load i{width:28px;height:28px;border-radius:50%;border:2px solid rgba(255,255,255,.15);border-top-color:#fff;animation:ixsp 1s linear infinite}
+.sv-cred{position:absolute;z-index:2;right:22px;bottom:calc(env(safe-area-inset-bottom,0px) + 4px);margin:0;font-size:10px;color:rgba(238,243,248,.45)}
+@media(max-width:600px){.sv-cap b{font-size:21px}.sv-cred{left:22px;right:auto}.sv-br span{display:none}}
+body.sv-open #bbar,body.sv-open #ovcard,body.sv-open #xpbar{display:none!important}
+/* ficha de anomalía (sin explicación a propósito) */
+.kx-card{position:fixed;z-index:80;width:230px;padding:12px 14px;border-radius:12px;background:rgba(6,9,14,.94);border:1px solid rgba(255,255,255,.08);box-shadow:0 14px 40px -12px rgba(0,0,0,.8);color:#d9e3ec;font:12px/1.45 var(--ui);animation:kxin .25s ease}
+@keyframes kxin{from{opacity:0;transform:translateY(4px)}}
+.kx-card .kx-h{margin:0 0 8px;font:700 10.5px var(--ui);letter-spacing:.22em;color:#ffb35a}
+.kx-card dl{margin:0;display:flex;flex-direction:column;gap:4px}.kx-card dl div{display:flex;justify-content:space-between;gap:10px}.kx-card dt{color:rgba(217,227,236,.6)}.kx-card dd{margin:0;font-weight:700;letter-spacing:.02em}
+.kx-card .kx-f{margin:9px 0 0;font-style:italic;color:rgba(217,227,236,.55);font-size:11.5px}
