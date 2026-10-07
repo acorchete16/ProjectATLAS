@@ -1,0 +1,13 @@
+{
+ "dem": "Copernicus DEM GLO-30",
+ "textures": {
+  "snow": "snow_02",
+  "rock": "rock_face_03",
+  "scree": "aerial_rocks_02",
+  "concrete": "concrete_wall_008",
+  "shotcrete": "rock_wall_08",
+  "floor": "concrete_floor_02",
+  "metal": "metal_plate"
+ },
+ "textures_source": "Poly Haven (CC0)"
+}
