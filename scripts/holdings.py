@@ -238,18 +238,83 @@ def yahoo_fund(sym):
             'ter': (v(fees, 'annualReportExpenseRatio') or 0) * 100 if v(fees, 'annualReportExpenseRatio') else None,
             'cat': fp.get('categoryName'), 'yld': v(sd, 'yield')}
 
+
+# ---------- 3. SEC N-PORT: cartera completa oficial de cada ETF registrado en EE. UU. (con país ISO) ----------
+import xml.etree.ElementTree as ET
+SEC_UA = {'User-Agent': 'ProjectATLAS research tool (github.com/acorchete16/ProjectATLAS)', 'Accept-Encoding': 'identity'}
+def sec_get(url, t=60):
+    req = E.urllib.request.Request(url, headers=SEC_UA)
+    with E.urllib.request.urlopen(req, timeout=t) as r: return r.read()
+_SECMAP = None
+def sec_series(ticker):
+    global _SECMAP
+    if _SECMAP is None:
+        try:
+            j = json.loads(sec_get('https://www.sec.gov/files/company_tickers_mf.json'))
+            f = j['fields']; _SECMAP = {r[f.index('symbol')]: (r[f.index('cik')], r[f.index('seriesId')]) for r in j['data']}
+            L('SEC: mapa de', len(_SECMAP), 'clases de fondos/ETFs')
+        except Exception as e: L('SEC mapa falló:', str(e)[:120]); _SECMAP = {}
+    return _SECMAP.get(ticker)
+STOCK_CC, STOCK_SEC = {}, {}
+def load_stock_meta():
+    s = open(os.path.join(ROOT, 'index.html'), encoding='utf-8').read()
+    for t, cc in re.findall(r'"t":"([^"]+)"[^{}]*?"cc":"([A-Z]{2})"', s): STOCK_CC[t] = cc
+    for t, sc in re.findall(r'"t":"([^"]+)"[^{}]*?"sec":"([^"]+)"', s): STOCK_SEC[t] = sc
+    try:
+        for x in json.load(open(os.path.join(ROOT, 'data', 'universe_x.json'))).get('s', []):
+            if x.get('cc'): STOCK_CC[x['t']] = x['cc']
+            if x.get('sec'): STOCK_SEC[x['t']] = x['sec']
+    except Exception: pass
+SEC_ES = {'Tecnología': 'Tecnología', 'Finanzas': 'Finanzas', 'Salud': 'Salud', 'Energía': 'Energía', 'Consumo': 'Consumo discrecional', 'Industria': 'Industria',
+          'Telecomunicaciones': 'Comunicaciones', 'Inmobiliario': 'Inmobiliario', 'Materias primas': 'Materiales', 'Automoción': 'Consumo discrecional',
+          'Defensa y espacio': 'Industria', 'Infraestructuras': 'Industria', 'Lujo': 'Consumo discrecional'}
+def nport(ticker):
+    m = sec_series(ticker)
+    if not m: raise ValueError('sin serie SEC')
+    cik, series = m
+    atom = sec_get(f'https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={series}&type=NPORT-P&dateb=&owner=include&count=5&output=atom').decode('utf-8', 'replace')
+    hrefs = re.findall(r'<filing-href>([^<]+)</filing-href>', atom)
+    if not hrefs: raise ValueError('sin N-PORT')
+    folder = hrefs[0].rsplit('/', 1)[0]
+    xml = sec_get(folder + '/primary_doc.xml', 120)
+    root = ET.fromstring(xml); ns = {'n': 'http://www.sec.gov/edgar/nport'}
+    asof = (root.findtext('.//n:genInfo/n:repPdDate', namespaces=ns) or '').strip()
+    hold = {}; country = {}; tot = 0.0
+    for it in root.iterfind('.//n:invstOrSec', ns):
+        cat = (it.findtext('n:assetCat', namespaces=ns) or '').strip()
+        try: pct = float(it.findtext('n:pctVal', namespaces=ns) or 0)
+        except Exception: continue
+        if cat not in ('EC', 'EP') or pct <= 0: continue
+        nm = (it.findtext('n:name', namespaces=ns) or it.findtext('n:title', namespaces=ns) or '').strip()
+        tkel = it.find('n:identifiers/n:ticker', ns); tk = tkel.get('value') if tkel is not None else ''
+        cc = (it.findtext('n:invCountry', namespaces=ns) or 'XX').strip() or 'XX'
+        key = (nm.upper(), cc)
+        h = hold.setdefault(key, [nm.title()[:48], tk or '', 0.0, cc, None]); h[2] += pct
+        country[cc] = country.get(cc, 0) + pct; tot += pct
+    if tot < 30: raise ValueError(f'solo {tot:.0f} % en acciones')
+    k = 100 / tot; top = sorted(hold.values(), key=lambda h: -h[2])
+    for h in top:
+        h[2] = round(h[2] * k, 3)
+        b = h[1].split('.')[0] if h[1] else ''
+        if b in STOCK_SEC: h[4] = SEC_ES.get(STOCK_SEC[b], STOCK_SEC[b])
+    return {'asof': asof, 'n': len(top), 'country': {c: round(v * k, 2) for c, v in sorted(country.items(), key=lambda x: -x[1]) if v * k >= .01},
+            'top': top[:150], 'src': f'SEC N-PORT de {ticker} (cartera completa oficial, trimestral)'}
+
 def main():
     now = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%MZ')
     E.init_crumb(); L('crumb', 'ok' if E.crumb else 'NO')
     try: old = json.load(open(os.path.join(ROOT, 'data', 'expo.json')))
     except Exception: old = {'idx': {}, 'fund': {}}
-    urls = ishares_urls(); idx = {}
+    load_stock_meta(); idx = {}
     for k in INDEX:
-        d = get_index(k, urls)
+        d = None
+        try: d = nport(INDEX[k][0]); d.update(name=INDEX[k][1], etf=INDEX[k][0]); L(f'  índice {k} ← N-PORT {INDEX[k][0]}: {d["n"]} empresas a {d["asof"]} · EE. UU. {d["country"].get("US", 0):.1f} %')
+        except Exception as e: L(f'  índice {k} N-PORT falló: {str(e)[:120]}')
         if d: idx[k] = d
         elif k in old.get('idx', {}): idx[k] = old['idx'][k]; L(f'  índice {k}: se conserva el anterior ({old["idx"][k].get("asof")})')
         time.sleep(.6)
-    d = get_ndx()
+    try: d = nport('QQQM'); d.update(name='Nasdaq-100', etf='QQQM'); L(f'  índice ndx ← N-PORT QQQM: {d["n"]}')
+    except Exception as e: d = None; L('  ndx N-PORT falló:', str(e)[:100])
     if d: idx['ndx'] = d
     elif 'ndx' in old.get('idx', {}): idx['ndx'] = old['idx']['ndx']
     nm = names(); fund = {}; nok = 0
@@ -266,6 +331,18 @@ def main():
             try: rec.update(yahoo_fund(y)); rec['src'] = 'Yahoo Finance (10 mayores posiciones y sectores)'; nok += 1
             except Exception as e: L(f'  {k} {y}: Yahoo sin composición ({str(e)[:50]})')
             time.sleep(.35)
+        base = k.split(':')[-1]
+        if k.startswith('e:') and ':x:' not in k and not (rec.get('proxy') and INDEX.get(rec['proxy'], ('',))[0] == base):
+            try:
+                dn = nport(base); rec.update(country=dn['country'], top_full=dn['top'], n=dn['n'], asof_h=dn['asof'], src_h=dn['src']); L(f'  {k}: N-PORT {dn["n"]} posiciones a {dn["asof"]}')
+            except Exception as e: L(f'  {k}: N-PORT no ({str(e)[:60]})')
+            time.sleep(.25)
+        if rec.get('pe') and rec['pe'] < 1: rec['pe'] = round(1 / rec['pe'], 2)
+        if rec.get('pb') and rec['pb'] < 1 and rec['pb'] > 0: rec['pb'] = round(1 / rec['pb'], 2)
+        for t in rec.get('top') or []:
+            b2 = t[1].split('.')[0]
+            if b2 in STOCK_CC: t[3] = STOCK_CC[b2]
+            if b2 in STOCK_SEC: t[4] = SEC_ES.get(STOCK_SEC[b2], STOCK_SEC[b2])
         rec['asof'] = now[:10]
         if not rec.get('proxy') and not rec.get('top') and not rec.get('sector') and k in old.get('fund', {}): rec = old['fund'][k]
         fund[k] = rec
