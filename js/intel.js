@@ -406,16 +406,19 @@ function drawExposure(){if(!XP||!GEO)return;const m=map,L=XP.L;
   const vals=xpMode==='geo'&&xpView==='hq'?hqShare(L):L.C;const mx=Math.max(...Object.entries(vals).filter(([c])=>c!=='XX'&&c!=='_known').map(([,v])=>v),1);
   const fc={type:'FeatureCollection',features:GEO.features.map(f=>({...f,properties:{...f.properties,v:vals[f.properties.c]||0,r:(vals[f.properties.c]||0)/mx}}))};
   if(!m.getSource('xp-cty')){m.addSource('xp-cty',{type:'geojson',data:fc});
-    m.addLayer({id:'xp-fill',type:'fill',source:'xp-cty',paint:{'fill-color':['interpolate',['linear'],['get','r'],0,'rgba(40,50,90,0.05)',0.001,'#1d3566',0.05,'#2a62a3',0.25,'#3aa6cf',0.6,'#7fdcc0',1,'#f1dc84'],'fill-opacity':['case',['>',['get','v'],0],0.62,0.06]}});
-    m.addLayer({id:'xp-line',type:'line',source:'xp-cty',paint:{'line-color':'rgba(200,220,255,0.3)','line-width':0.6}});
+    const EMI=typeof MBX!=='undefined'&&MBX?{'fill-emissive-strength':1}:{},EML=typeof MBX!=='undefined'&&MBX?{'line-emissive-strength':1}:{};
+    /* rampa muy contrastada sobre el globo oscuro: violeta → magenta → coral → ámbar → amarillo */
+    m.addLayer({id:'xp-fill',type:'fill',source:'xp-cty',paint:{'fill-color':['interpolate',['linear'],['get','r'],0,'rgba(0,0,0,0)',0.0001,'#5b2bd6',0.04,'#9b37e0',0.15,'#e0458f',0.35,'#ff6f4d',0.65,'#ffae34',1,'#ffe45c'],'fill-opacity':['case',['>',['get','v'],0],0.9,0],...EMI}});
+    m.addLayer({id:'xp-line',type:'line',source:'xp-cty',paint:{'line-color':['case',['>',['get','v'],0],'rgba(255,255,255,0.85)','rgba(200,220,255,0.18)'],'line-width':['case',['>',['get','v'],0],1.1,0.5],...EML}});
+    m.addLayer({id:'xp-sel',type:'line',source:'xp-cty',filter:['==',['get','c'],''],paint:{'line-color':'#7ff6ff','line-width':3.2,'line-blur':.5,...EML}});
     m.addSource('xp-pts',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
     m.addLayer({id:'xp-circ',type:'circle',source:'xp-pts',paint:{'circle-radius':['interpolate',['linear'],['get','w'],0,3,1,6,5,13,15,24],'circle-color':['get','c'],'circle-opacity':.8,'circle-stroke-color':['case',['get','x'],'#ffffff','rgba(255,255,255,.35)'],'circle-stroke-width':['case',['get','x'],1,.6]}});
     m.addLayer({id:'xp-lbl',type:'symbol',source:'xp-pts',layout:{'text-field':['get','l'],'text-size':11,'text-offset':[0,1.6],'text-allow-overlap':false},paint:{'text-color':'#e9f0ff','text-halo-color':'#05060f','text-halo-width':1.4}});
-    m.on('click','xp-fill',ev=>{if(!XP||xpMode!=='geo')return;const f=ev.features&&ev.features[0];if(f)openCountry(f.properties.c,CNAME[f.properties.c]||f.properties.n)});
+    m.on('click','xp-fill',ev=>{if(!XP||xpMode!=='geo')return;const f=ev.features&&ev.features[0];if(f)selCountry(f.properties.c);if(f)openCountry(f.properties.c,CNAME[f.properties.c]||f.properties.n)});
     m.on('click','xp-circ',ev=>{const f=ev.features&&ev.features[0];if(f&&f.properties.cc)openCountry(f.properties.cc,CNAME[f.properties.cc]||f.properties.cc)});
     m.on('mouseenter','xp-fill',()=>m.getCanvas().style.cursor='pointer');m.on('mouseleave','xp-fill',()=>m.getCanvas().style.cursor='')}
   else m.getSource('xp-cty').setData(fc);
-  ['xp-fill','xp-line','xp-circ','xp-lbl'].forEach(id=>m.setLayoutProperty(id,'visibility','visible'));m.setLayoutProperty('xp-fill','visibility',xpMode==='geo'?'visible':'none');
+  ['xp-fill','xp-line','xp-sel','xp-circ','xp-lbl'].forEach(id=>m.setLayoutProperty(id,'visibility','visible'));m.setLayoutProperty('xp-fill','visibility',xpMode==='geo'?'visible':'none');
   const pts=[];if(xpMode!=='geo'){L.comps.slice(0,80).forEach(c=>{if(xpMode==='sec'&&XP.sec&&c.sec!==XP.sec)return;const h=hqOf(c);if(!h)return;
       pts.push({type:'Feature',geometry:{type:'Point',coordinates:h.ll},properties:{w:c.w,l:c.name.split(' ').slice(0,2).join(' ')+' '+pct(c.w),c:SEC_C[c.sec]||'#b49ae6',cc:c.cc,x:h.exact}})})}
   m.getSource('xp-pts').setData({type:'FeatureCollection',features:pts})}
@@ -426,7 +429,7 @@ function renderXpBar(){let b=$('#xpbar');if(!XP){if(b)b.remove();return}if(!b){b
     <div class="xp-seg">${[['geo','Geografía'],['comp','Empresas'],['sec','Sectores']].map(([k,l])=>`<button data-xpm="${k}" aria-pressed="${xpMode===k}">${l}</button>`).join('')}</div>
     ${xpMode==='geo'?`<div class="xp-view">${[['idx','Exposición de cartera'],['hq','Sedes de empresas']].map(([k,l])=>`<button data-xpv="${k}" aria-pressed="${xpView===k}">${l}</button>`).join('')}<button disabled title="Requiere datos de ingresos por país de cada empresa: no disponibles">Ingresos · sin datos</button></div>
       <div class="xp-top">${top.map(([c,v])=>`<button data-cty="${c}"><span>${esc(CNAME[c]||c)}</span><b>${pct(v,0)}</b></button>`).join('')}</div>
-      <p class="xp-n">${xpView==='idx'?`País de cada empresa según el proveedor del índice (justETF). No es dónde factura.${L.C.XX?` ${pct(L.C.XX,0)} no desglosado.`:''}`:`País de la dirección real de la sede. Solo empresas con sede localizada en ATLAS: ${pct(vals._known,0)} de la cartera (de ${pct(L.cover,0)} identificado).`} Toca un país.</p>`:''}
+      <div class="xp-leg"><span>0 %</span><i></i><span>${pct(Math.max(...top.map(t=>t[1]),0),0)}</span></div><p class="xp-n">${xpView==='idx'?`País de cada empresa según el proveedor del índice (justETF). No es dónde factura.${L.C.XX?` ${pct(L.C.XX,0)} no desglosado.`:''}`:`País de la dirección real de la sede. Solo empresas con sede localizada en ATLAS: ${pct(vals._known,0)} de la cartera (de ${pct(L.cover,0)} identificado).`} Toca un país.</p>`:''}
     ${xpMode==='sec'?`<div class="xp-top">${secs.slice(0,8).map(([s,v])=>`<button data-sec="${esc(s)}" class="${XP.sec===s?'on':''}" style="--c:${SEC_C[s]||'#7aa2ff'}"><span>${esc(s)}</span><b>${pct(v,0)}</b></button>`).join('')}</div><p class="xp-n">${XP.sec?`Empresas de ${esc(XP.sec)} en su sede. Viene de: ${(L.byS[XP.sec]||[]).sort((a,b)=>b.p-a.p).slice(0,3).map(x=>`${tk(x.e)} ${pct(x.p,0)}`).join(' · ')}`:'Elige un sector para ver sus empresas en el mapa.'}</p>`:''}
     ${xpMode==='comp'?`<ol class="xp-list">${L.comps.slice(0,6).map(c=>`<li><span>${esc(c.name)}</span><b>${pct(c.w,1)}</b></li>`).join('')}</ol><p class="xp-n">Burbujas en la sede real (borde blanco) o en el centro del país si no hay dirección. Tamaño = peso mínimo en tu cartera.</p>`:''}
     <p class="xp-s">justETF + Yahoo Finance · ${fdate((XP.P.map(x=>expOf(x.e).asof).filter(Boolean).sort().pop()))}</p>`;
@@ -435,12 +438,13 @@ function renderXpBar(){let b=$('#xpbar');if(!XP){if(b)b.remove();return}if(!b){b
   b.querySelectorAll('[data-xpv]').forEach(x=>x.onclick=()=>{xpView=x.dataset.xpv;drawExposure();renderXpBar()});
   b.querySelectorAll('[data-cty]').forEach(x=>x.onclick=()=>openCountry(x.dataset.cty,CNAME[x.dataset.cty]||x.dataset.cty));
   b.querySelectorAll('[data-sec]').forEach(x=>x.onclick=()=>{XP.sec=XP.sec===x.dataset.sec?null:x.dataset.sec;drawExposure();renderXpBar()})}
-function hideExposure(){XP=null;const m=map;['xp-fill','xp-line','xp-circ','xp-lbl'].forEach(id=>{if(m&&m.getLayer(id))m.setLayoutProperty(id,'visibility','none')});if(m&&m.getSource('xp-pts'))m.getSource('xp-pts').setData({type:'FeatureCollection',features:[]});renderXpBar();ovShow()}
+function hideExposure(){XP=null;const m=map;['xp-fill','xp-line','xp-sel','xp-circ','xp-lbl'].forEach(id=>{if(m&&m.getLayer(id))m.setLayoutProperty(id,'visibility','none')});if(m&&m.getSource('xp-pts'))m.getSource('xp-pts').setData({type:'FeatureCollection',features:[]});renderXpBar();ovShow()}
 
 /* ------------------------------ PAÍS: «¿Cómo estoy expuesto a este país?» ------------------------------ */
 let CTY=null,ctyTab='etf';
 const CTY_ETF={US:'SPY',JP:'EWJ',IN:'INDA',CN:'MCHI',GB:'VGK',FR:'VGK',DE:'VGK',CH:'VGK',NL:'VGK',ES:'VGK',IT:'VGK',SE:'VGK',DK:'VGK',TW:'EEM',KR:'EEM',BR:'EEM'};
-function openCountry(c,n){CTY={c,n};ctyTab='etf';openHub('cty')}
+function selCountry(c){try{if(map&&map.getLayer('xp-sel'))map.setFilter('xp-sel',['==',['get','c'],c||''])}catch(_){}}
+function openCountry(c,n){CTY={c,n};selCountry(c);ctyTab='etf';openHub('cty')}
 async function renderCountry(){const el=$('#ixcty');if(!el||!CTY)return;let X=XP;if(!X){const A=await analyze();X=A&&!A.empty?{P:A.P,name:A.name,L:A.L}:null}
   if(!X){el.innerHTML='<p class="mp-note">Primero crea o elige una cartera en «Análisis».</p>';return}
   const L=X.L,c=CTY.c,tot=L.C[c]||0,dir=L.dir[c]||0,ind=L.ind[c]||0,nm=CTY.n||CNAME[c]||c;

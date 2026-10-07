@@ -168,3 +168,33 @@ body:has(#search:not([hidden])) #ovcard,body:has(#mcard:not([hidden])) #ovcard,b
 .ov-x button{border:0;background:none;color:var(--mid);font:11.5px var(--ui);padding:6px 7px;border-radius:7px;cursor:pointer}.ov-x button:hover{background:rgba(127,246,255,.12);color:#fff}
 .ix-mini em{white-space:nowrap}
 .ov-h>div:first-child b{white-space:nowrap;font-size:20px!important}
+
+/* ======================= Estilo amable (v2): tipografía y botones suaves =======================
+   Una sola familia humanista (Plus Jakarta Sans) con cifras tabulares; la monoespaciada queda solo para el terminal experto. */
+:root{--ui:"Plus Jakarta Sans","Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--mono:var(--ui);--code:"JetBrains Mono",ui-monospace,Menlo,monospace;--r-sm:10px;--r-md:14px;--r-lg:20px}
+body{font-variant-numeric:tabular-nums;letter-spacing:-.005em}
+#stream,#stream *,#matrix,#qps,.code{font-family:var(--code)!important}
+/* botones */
+.btn{font-family:var(--ui);font-size:13.5px;font-weight:700;letter-spacing:0;text-transform:none;padding:11px 20px;border-radius:999px;border:0;background:linear-gradient(180deg,#ffd77a,#f3b94a);color:#2a1d00;box-shadow:0 6px 18px -6px rgba(243,185,74,.55);transition:transform .15s ease,box-shadow .15s ease,filter .15s}
+.btn:hover{filter:brightness(1.04);transform:translateY(-1px);box-shadow:0 10px 22px -8px rgba(243,185,74,.6)}
+.btn:active{transform:translateY(0)}
+.btn2{font-family:var(--ui);font-size:13px;font-weight:600;letter-spacing:0;text-transform:none;padding:10px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:var(--fg);transition:background .15s,border-color .15s}
+.btn2:hover{border-color:rgba(127,246,255,.35);background:rgba(127,246,255,.1)}
+.ix .btn2.sm,.ix .btn.sm,.ov-b .btn,.ov-b .btn2{font-size:12.5px!important;padding:8px 14px!important;letter-spacing:0!important}
+/* etiquetas, pestañas y cabeceras: sin mayúsculas ni espaciado de terminal */
+.lbl,.pill,.seg button,.tabs button,th,.slbl,.mn-sec{text-transform:none!important;letter-spacing:.01em!important;font-family:var(--ui)!important}
+.lbl{font-size:11.5px}.pill{font-size:11px}.tabs button{font-size:12.5px}.seg button{font-size:11.5px}th{font-size:11px}
+.mn-sec{font-size:12px!important;font-weight:700!important;color:var(--mid)!important}
+.mn-box,.mn-grid button{border-radius:var(--r-lg)!important}
+.ix-k{font:700 13px var(--ui);letter-spacing:0;text-transform:none;color:var(--mid)}
+.ix h6{font:700 12px var(--ui);letter-spacing:0;text-transform:none;color:var(--mid)}
+.xp-h small,.ov-h small{font:600 11.5px var(--ui);letter-spacing:0;text-transform:none}
+.qb{font:700 10px var(--ui);letter-spacing:.02em;border-radius:999px;padding:2px 8px}
+.srcl,.xp-s,.ix-meta{font-family:var(--ui)}
+.ix-card,.ix-dx,.ix-alt,.ix-empty,.ix-op{border-radius:var(--r-lg)}.ix-wow{border-radius:22px}
+#xpbar,#ovcard{border-radius:22px;box-shadow:0 18px 50px -20px rgba(0,0,0,.7)}
+.ix-src,.xp-seg,.xp-view,.ov-x{border-radius:999px}.ix-src button,.xp-seg button,.xp-view button,.ov-x button{border-radius:999px}
+.xp-top button,.ix-tags em{border-radius:999px}
+.ix-row input,.ix-pair select,.ix-filt select,.ix-filt input,.ix-pk input,.ix-addw select{border-radius:12px}
+.ix-wow3 b,.ix-big,.ix-ring b,.ov-h>div:first-child b{font-weight:800;letter-spacing:-.03em}
+.xp-leg{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dim)}.xp-leg i{flex:1;height:8px;border-radius:999px;background:linear-gradient(90deg,#5b2bd6,#9b37e0,#e0458f,#ff6f4d,#ffae34,#ffe45c)}
