@@ -1,0 +1,233 @@
+{
+ "reduce_nasdaq_15": {
+  "P1": [
+   {
+    "id": "e:AGG",
+    "w": 0.056667
+   },
+   {
+    "id": "e:EEM",
+    "w": 0.113333
+   },
+   {
+    "id": "e:IWM",
+    "w": 0.113333
+   },
+   {
+    "id": "e:QQQ",
+    "w": 0.15
+   },
+   {
+    "id": "e:VT",
+    "w": 0.566667
+   }
+  ],
+  "m": {
+   "bets": [
+    1.2083,
+    1.217,
+    "MODEL",
+    null
+   ],
+   "health": [
+    75.23,
+    79.72,
+    "MODEL",
+    null
+   ],
+   "topCo": [
+    4.24,
+    3.7,
+    "INCOMPLETE",
+    "lower"
+   ],
+   "ovl": [
+    7.15,
+    5.31,
+    "ESTIMATE",
+    "lower"
+   ],
+   "ter": [
+    0.17,
+    0.17,
+    "DATA",
+    null
+   ],
+   "vol": [
+    14.6,
+    14.02,
+    "MODEL",
+    null
+   ],
+   "sec:Tecnología": [
+    36.18,
+    32.96,
+    "DATA",
+    null
+   ],
+   "cty:US": [
+    64.48,
+    60.48,
+    "ESTIMATE",
+    "lower"
+   ]
+  },
+  "mat": "mixed",
+  "asm": [
+   "Redistribución pro-rata entre el resto de posiciones"
+  ]
+ },
+ "quitar_nasdaq_repartir": {
+  "P1": [
+   {
+    "id": "e:AGG",
+    "w": 0.05
+   },
+   {
+    "id": "e:EEM",
+    "w": 0.225
+   },
+   {
+    "id": "e:IWM",
+    "w": 0.1
+   },
+   {
+    "id": "e:VT",
+    "w": 0.625
+   }
+  ],
+  "m": {
+   "bets": [
+    1.2083,
+    1.2229,
+    "MODEL",
+    null
+   ],
+   "health": [
+    75.23,
+    82.35,
+    "MODEL",
+    null
+   ],
+   "topCo": [
+    4.24,
+    4.46,
+    "INCOMPLETE",
+    "lower"
+   ],
+   "ovl": [
+    7.15,
+    0.8,
+    "ESTIMATE",
+    "lower"
+   ],
+   "ter": [
+    0.17,
+    0.22,
+    "DATA",
+    null
+   ],
+   "vol": [
+    14.6,
+    13.31,
+    "MODEL",
+    null
+   ],
+   "sec:Tecnología": [
+    36.18,
+    30.41,
+    "DATA",
+    null
+   ],
+   "cty:US": [
+    64.48,
+    48.34,
+    "ESTIMATE",
+    "lower"
+   ]
+  },
+  "mat": "mixed",
+  "asm": [
+   "Reparto a partes iguales entre los destinos indicados"
+  ]
+ },
+ "aportar_300_12m": {
+  "P1": [
+   {
+    "id": "e:AGG",
+    "w": 0.036765
+   },
+   {
+    "id": "e:EEM",
+    "w": 0.073529
+   },
+   {
+    "id": "e:IWM",
+    "w": 0.073529
+   },
+   {
+    "id": "e:QQQ",
+    "w": 0.183824
+   },
+   {
+    "id": "e:VT",
+    "w": 0.632353
+   }
+  ],
+  "m": {
+   "bets": [
+    1.2083,
+    1.1591,
+    "MODEL",
+    null
+   ],
+   "health": [
+    75.23,
+    76.53,
+    "MODEL",
+    null
+   ],
+   "topCo": [
+    4.24,
+    4.26,
+    "INCOMPLETE",
+    "lower"
+   ],
+   "ovl": [
+    7.15,
+    7.98,
+    "ESTIMATE",
+    "lower"
+   ],
+   "ter": [
+    0.17,
+    0.14,
+    "DATA",
+    null
+   ],
+   "vol": [
+    14.6,
+    14.34,
+    "MODEL",
+    null
+   ],
+   "sec:Tecnología": [
+    36.18,
+    34.63,
+    "DATA",
+    null
+   ],
+   "cty:US": [
+    64.48,
+    63.23,
+    "ESTIMATE",
+    "lower"
+   ]
+  },
+  "mat": "mixed",
+  "asm": [
+   "Cartera definida por pesos: los importes se derivan del total indicado",
+   "Precios constantes durante el periodo de aportaciones (no se proyectan rentabilidades)"
+  ]
+ }
+}

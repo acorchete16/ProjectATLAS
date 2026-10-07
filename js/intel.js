@@ -86,11 +86,11 @@ function overlapDetail(a,b){const A=expOf(a).hold,B=expOf(b).hold;if(!A.length||
 const overlap=(a,b)=>{const d=overlapDetail(a,b);return d?d.o:null};
 
 /* ------------------------------ precios: riesgo y correlaciones ------------------------------ */
-function weeklyGrid(years){const out=[],end=new Date();const d=new Date(end);d.setFullYear(d.getFullYear()-years);while(d.getDay()!==5)d.setDate(d.getDate()+1);while(d<=end){out.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+7)}return out}
+function weeklyGrid(years,endD){const out=[],end=endD?new Date(endD+'T12:00:00Z'):new Date();const d=new Date(end);d.setFullYear(d.getFullYear()-years);while(d.getDay()!==5)d.setDate(d.getDate()+1);while(d<=end){out.push(d.toISOString().slice(0,10));d.setDate(d.getDate()+7)}return out}
 async function retSeries(e,grid){const s=await eurSeries(e.k,e.obj);if(!s||!s.length)return null;const first=s[0][0];const px=grid.map(d=>d<first?null:priceAt(s,d).v);
   const r=[];for(let i=1;i<px.length;i++)r.push(px[i]!=null&&px[i-1]!=null?px[i]/px[i-1]-1:null);return{r,first}}
 const corr=(a,b)=>{const p=[];for(let i=0;i<a.length;i++)if(a[i]!=null&&b[i]!=null)p.push([a[i],b[i]]);if(p.length<40)return null;const n=p.length,ma=p.reduce((s,x)=>s+x[0],0)/n,mb=p.reduce((s,x)=>s+x[1],0)/n;let c=0,va=0,vb=0;p.forEach(([x,y])=>{c+=(x-ma)*(y-mb);va+=(x-ma)**2;vb+=(y-mb)**2});return va&&vb?c/Math.sqrt(va*vb):null};
-async function riskOf(P,years=5){const grid=weeklyGrid(years),R=await Promise.all(P.map(x=>retSeries(x.e,grid)));
+async function riskOf(P,years=5,end){const grid=weeklyGrid(years,end),R=await Promise.all(P.map(x=>retSeries(x.e,grid)));
   const ok=P.map((x,i)=>({...x,r:R[i]})).filter(x=>x.r);if(!ok.length)return null;const tw=ok.reduce((a,x)=>a+x.w,0);
   const pr=grid.slice(1).map((_,t)=>{let s=0,ww=0;ok.forEach(x=>{const v=x.r.r[t];if(v!=null){s+=x.w*v;ww+=x.w}});return ww>tw*.6?s/ww:null});
   const v=pr.filter(x=>x!=null);if(v.length<30)return null;const m=v.reduce((a,x)=>a+x,0)/v.length,sd=Math.sqrt(v.reduce((a,x)=>a+(x-m)**2,0)/(v.length-1));
@@ -208,7 +208,8 @@ const tk=e=>esc(String(e.tk||e.t).slice(0,6));
 function matrix(items,cell,note){if(items.length<2)return '';return `<div class="ix-mat" style="--n:${items.length}"><span></span>${items.map(x=>`<b title="${esc(x.name)}">${tk(x)}</b>`).join('')}${items.map((a,i)=>`<b title="${esc(a.name)}">${tk(a)}</b>`+items.map((b,j)=>cell(a,b,i,j)).join('')).join('')}</div>${note?`<p class="mp-note">${note}</p>`:''}`}
 
 /* ------------------------------ PANEL «ANÁLISIS» (Portfolio) ------------------------------ */
-const TABS=[['doctor','Doctor'],['opt','Optimizar'],['hold','Holdings'],['risk','Riesgo'],['geo','Países'],['comp','Empresas'],['sec','Sectores']];
+/* P0 «¿Y si…?»: la pestaña Optimizar queda oculta hasta que P1 la sustituya (su código sigue intacto). */
+const TABS=[['doctor','Doctor'],['hold','Holdings'],['risk','Riesgo'],['geo','Países'],['comp','Empresas'],['sec','Sectores']];
 function docTab(t){DOC.tab=t;saveDoc();if(typeof hubSec!=='undefined'&&hubSec==='doc')renderDoc();else openHub('doc')}
 async function renderDoc(){const el=$('#ixdoc');if(!el)return;
   el.innerHTML=`<div class="ix-top"><div class="ix-src"><button data-dsrc="pf" aria-pressed="${DOC.src==='pf'}">Mi cartera</button><button data-dsrc="custom" aria-pressed="${DOC.src==='custom'}">Cartera rápida</button></div>
@@ -221,7 +222,7 @@ async function renderDoc(){const el=$('#ixdoc');if(!el)return;
   const A=await analyze();if(A.empty){out.innerHTML='<p class="mp-note">Añade al menos un activo con su porcentaje.</p>';return}
   if($('#ixdocOut')!==out)return;drawTab()}
 function loadExample(){const pick=t=>{const e=ents().find(x=>x.t===t);return e?{k:e.k,t:e.t}:null};DOC.src='custom';DOC.paste='VT 40\nSPY 25\nQQQ 15\nSMH 10\nEEM 10';DOC.qpMsg='';DOC.rows=[['VT',40],['SPY',25],['QQQ',15],['SMH',10],['EEM',10]].map(([t,w])=>{const p=pick(t);return p?{...p,w}:null}).filter(Boolean);saveDoc()}
-function drawTab(){const out=$('#ixdocOut'),A=ANA;if(!out||!A||A.empty)return;out.innerHTML=({doctor:tabDoctor,opt:tabOpt,hold:tabHold,risk:tabRisk,geo:tabGeo,comp:tabComp,sec:tabSec})[DOC.tab](A);
+function drawTab(){const out=$('#ixdocOut'),A=ANA;if(!out||!A||A.empty)return;if(DOC.tab==='opt')DOC.tab='doctor';out.innerHTML=({doctor:tabDoctor,opt:tabOpt,hold:tabHold,risk:tabRisk,geo:tabGeo,comp:tabComp,sec:tabSec})[DOC.tab](A);
   out.querySelectorAll('[data-dx]').forEach(b=>{const [i,j]=b.dataset.dx.split(':').map(Number);b.onclick=()=>A.D[i].acts[j][1]()});
   out.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>({globe:()=>showExposureGlobe(A.P,A.name,'geo'),gcomp:()=>showExposureGlobe(A.P,A.name,'comp'),gsec:()=>showExposureGlobe(A.P,A.name,'sec'),comp:()=>docTab('comp'),why:()=>docTab('comp'),radar:()=>openRadar(),share:()=>shareXray(A),opt:()=>docTab('opt')})[b.dataset.go]());
   out.querySelectorAll('[data-cty]').forEach(b=>b.onclick=()=>openCountry(b.dataset.cty,CNAME[b.dataset.cty]||b.dataset.cty));
@@ -350,7 +351,7 @@ function healthBlock(A){const {SC}=A,[lab,col]=hLabel(SC.health),H=SC.health==nu
 function dxBlock(A){const shown=A.D.filter(d=>d.sev!=='info'),info=A.D.filter(d=>d.sev==='info');
   const card=(d)=>{const i=A.D.indexOf(d),[ico,lab,c]=SEV[d.sev];return `<article class="ix-dx" style="--c:${c}"><div class="dx-l"><span class="dx-sev">${ico} ${lab}</span><h4>${esc(d.t)}</h4><p class="dx-big">${esc(d.metric)}</p><p>${esc(d.exp)}</p><p class="dx-why"><b>¿Por qué?</b> ${esc(d.evid)}</p>${srcl(d.src,d.date)}</div>${d.acts.length?`<div class="ix-btns">${d.acts.map((a,j)=>`<button class="lnk" data-dx="${i}:${j}">${a[0]} →</button>`).join('')}</div>`:''}</article>`};
   return `<section><div class="ix-k">Lo importante</div>${shown.map(card).join('')}${info.map(card).join('')}</section>`}
-function tabDoctor(A){return wowBlock(A)+flowBlock(A)+healthBlock(A)+`<section class="op-teaser"><div><b>¿Qué cambiaría ATLAS?</b><span>Prueba cambios concretos sobre tu cartera y te enseña solo los que la mejoran de forma medible, con lo que ganas y lo que pierdes.</span></div><button class="btn sm" data-go="opt">Optimizar</button></section>`+dxBlock(A)+`<section><div class="ix-k">Escenarios para comparar</div><div id="ixAlt"><div class="sk"><i></i><i></i><i></i></div></div></section><p class="ix-src2">${SOURCES} Herramienta de análisis: no es una recomendación de inversión.</p>`}
+function tabDoctor(A){return wowBlock(A)+flowBlock(A)+healthBlock(A)+dxBlock(A)+`<section><div class="ix-k">Escenarios para comparar</div><div id="ixAlt"><div class="sk"><i></i><i></i><i></i></div></div></section><p class="ix-src2">${SOURCES} Herramienta de análisis: no es una recomendación de inversión.</p>`}
 async function renderAlts(A){const box=$('#ixAlt');if(!box)return;const alts=await altPortfolios(),rows=await Promise.all(alts.map(async a=>{const L=lookThrough(a.P),R=await riskOf(a.P);return{...a,L,R,SC:docScores(L,R,a.P)}}));if(!$('#ixAlt'))return;
   const ts=L=>{const s=Object.entries(L.S).filter(([k])=>k!==UNK&&k!=='Otros').sort((a,b)=>b[1]-a[1])[0];return s?`${s[0]} ${pct(s[1],0)}`:'—'};const em=L=>Object.entries(L.C).filter(([c])=>EM.has(c)).reduce((a,[,v])=>a+v,0);
   const met=(o)=>[['Supuesto de rentabilidad',o.assume==null?'n/d':pct(o.assume,1)+'/año'],['Volatilidad',o.R?pct(o.R.vol,0):'—'],['Caída máx.',o.R?pct(o.R.dd,0):'—'],['EE. UU.',pct(o.L.C.US||0,0)],['Emergentes',pct(em(o.L),0)],['1er sector',ts(o.L)],['10 mayores empresas',o.SC.top10?'≥ '+pct(o.SC.top10,0):'—'],['Coste (TER)',o.L.ter==null?'—':pct(o.L.ter,2)]];
@@ -809,7 +810,10 @@ function metOf(A){const {L,R,SC,P}=A,ss=Object.entries(L.S).filter(([s])=>s!==UN
   return{health:SC.health,bets:SC.bets&&SC.bets.rob?SC.bets.rob.d5:SC.bets?SC.bets.nb:null,S:L.S,C:L.C,topSec:ss[0]||null,topCty:cs[0]||null,top10:SC.top10,top1:SC.top1,top1n:L.comps[0]?L.comps[0].name:null,
     ovl:SC.ovAvg,vol:R?R.vol:null,dd:R?R.dd:null,cagr:R?R.cagr:null,sharpe:R&&R.vol?(R.cagr-(typeof RF==='number'?RF:2))/R.vol:null,ter:L.ter,n:P.length,em,bond,gold,us:L.C.US||0,corr:SC.avgCorr}}
 /* simulación rápida (sin la comprobación de 3 años) */
-async function simP(list){const P=list.filter(x=>x.e&&x.w>1e-4).map(x=>({e:x.e,w:x.w}));const t=P.reduce((a,x)=>a+x.w,0);P.forEach(x=>x.w/=t);const L=lookThrough(P),R=await riskOf(P);const SC=docScores(L,R,P);return{P,L,R,SC}}
+/* opt (opcional, lo usa ATLASI.scenarios): {r3:true} añade la comprobación de 3 años como en analyzePortfolio; {end:'AAAA-MM-DD'} fija el final de la ventana histórica */
+async function simP(list,opt){const P=list.filter(x=>x.e&&x.w>1e-4).map(x=>({e:x.e,w:x.w}));const t=P.reduce((a,x)=>a+x.w,0);P.forEach(x=>x.w/=t);const L=lookThrough(P);
+  if(!opt){const R=await riskOf(P);const SC=docScores(L,R,P);return{P,L,R,SC}}
+  const [R,R3]=await Promise.all([riskOf(P,5,opt.end),opt.r3?riskOf(P,3,opt.end):null]);const SC=docScores(L,R,P,R3||undefined);return{P,L,R,R3,SC}}
 const wmap=P=>{const m=new Map();P.forEach(x=>m.set(x.e,(m.get(x.e)||0)+x.w));return m};
 function withMoves(P,fn){const m=wmap(P);fn(m);return[...m.entries()].map(([e,w])=>({e,w})).filter(x=>x.w>1e-4)}
 const shiftTo=(m,from,amt,to)=>{const a=Math.min(m.get(from)||0,amt);m.set(from,(m.get(from)||0)-a);if(to)m.set(to,(m.get(to)||0)+a);else{const rest=[...m.keys()].filter(k=>k!==from),tw=rest.reduce((s,k)=>s+m.get(k),0);rest.forEach(k=>m.set(k,m.get(k)+a*m.get(k)/tw))}};
@@ -982,6 +986,10 @@ async function getPortfolioContribution(A){const sig=(A.src&&A.src.src)+sigOf(A.
   return{session,today,status,ts,R,eur,items:items.slice().sort((a,b)=>Math.abs(b.c)-Math.abs(a.c)),ind,covered,missing,quality:'real',
     src:'Yahoo Finance (cotización cada 15 min con mercado abierto) · divisas incluidas',method:'Rentabilidad en euros desde el cierre anterior × peso de ayer'}})();
   _CT.set(sig,pr);if(_CT.size>8)_CT.delete(_CT.keys().next().value);return pr}
+/* Primitivas internas para ATLASI.scenarios (solo exportadas; sin cambios de comportamiento) */
+Object.assign(window.ATLASI,{simP,wmap,withMoves,shiftTo,addNew,movesOf,candidates,tagsOf,scoreOf,entBy,sigOf,assetClass,terOf,isNarrow,diagnose,
+  UNK,EM_SET:EM,resolveTok,CNAME});
+Object.defineProperty(window.ATLASI,'EXPO',{get:()=>EXPO,configurable:true});
 Object.assign(window.ATLASI,{optimize,marginalOf:A=>marginalOf(A,metOf(A)),metOf,QUALITY,getPortfolio,analyzePortfolio,getPortfolioExposure:A=>A.L,getCompanyExposure,getSectorExposure,getCountryExposure,getEffectiveBets,getPortfolioHealth,getAssetOverlap:(a,b)=>overlapDetail(a,b),getPortfolioContribution,dayMove});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
 })();

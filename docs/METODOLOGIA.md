@@ -136,3 +136,30 @@ ATLAS no busca una "cartera ideal". Propone cambios pequeños y explicables sobr
 - **Confianza:** baja si faltan desgloses o precios de algún producto relevante.
 - La rentabilidad pasada nunca es criterio de optimización. Preferencias y decisiones se guardan solo en el dispositivo.
 - Tests obligatorios A–F en `tests/regression.py`.
+
+## Motor de escenarios «¿Y si…?» (P0 · `js/scenarios.js`, `ATLASI.scenarios`)
+
+Responde «si la cartera cambiara así, ¿qué cambiaría cuantitativamente?». No decide qué comprar o vender: no hay ganador, «mejor» ni «recomendado» en ninguna salida (lo comprueba `tests/scenarios.py`).
+Durante P0 la pestaña **Optimizar está oculta**; su código sigue en `intel.js` hasta que P1 lo sustituya.
+
+**Flujo:** `parse(texto)` → escenario JSON v1 → `build()` (pura) → pesos P1 → `simulate()` → `ATLASI.simP` sobre P0 y P1 (el mismo simulador que Doctor) → métricas + calidad + comparación + explicación.
+
+**Escenario v1:** `{v, type, base:{sig,mode}, changes[], objectives[], constraints{}, assumptions[], source{text,parsedBy}}`. Activos con id `k:t` (p. ej. `e:QQQ`). Pesos en tanto por uno.
+Operaciones (se aplican en orden): `set` (fijar peso), `adjust` (± puntos o % relativo), `shift` (mover una cantidad), `remove`, `add` (financiado pro-rata, desde un activo o una lista), `replace`, `contrib` (aportaciones).
+JSON canónico: claves ordenadas, destinos ordenados por id, números a 1e-6. `source.text` no forma parte de la clave.
+
+**Supuestos (siempre visibles en el resultado):** el peso liberado o necesario se reparte pro-rata salvo que el escenario diga otra cosa; «reparte entre A y B» sin porcentajes = a partes iguales; aportaciones = **precios constantes** (no se proyectan rentabilidades): peso final = (V + C)/(total + C). `monthsTo()` da los meses de aportación para llegar a un peso objetivo bajo ese mismo supuesto.
+
+**Calidad de cada métrica:** DATA (pesos, nº de productos, TER, clase de activo; sector cuando el desglose cubre ≥ 99,5 %), ESTIMATE (sector/país con cobertura parcial, empresas, solapamiento), MODEL (apuestas efectivas, salud, volatilidad, caída máxima, historia, aportaciones, plusvalía), INCOMPLETE (< 60 % del peso con dato, < 104 semanas de precios o > 10 % del peso sin precios). Cada métrica lleva su cobertura y `bound:'lower'` cuando es una **cota inferior**: empresas y solapamiento se calculan con las 10 mayores posiciones publicadas de cada ETF (cobertura mediana ≈ 35 %), así que la exposición real puede ser superior. Los productos que provocan un hueco se listan por nombre.
+
+**Dirección fija:** se considera mejora ↑ apuestas efectivas, ↑ salud, ↓ mayor posición, ↓ mayor empresa / 10 mayores empresas, ↓ solapamiento, ↓ TER. Sector, país, clase de activo, volatilidad, caída máxima y rentabilidad histórica solo «cambian», salvo que el escenario declare un objetivo sobre ellas.
+**Materialidad** (`none` / `oneSided` / `mixed`): umbrales apuestas ±0,15 · salud ±2 · sector, país, clase de activo y emergentes ±3 pp · solapamiento ±3 pp · volatilidad ±0,5 pp · caída máxima ±1 pp · TER ±0,02 pp · mayor posición ±3 pp · mayor empresa ±1 pp · 10 mayores ±3 pp. Si nada los supera: «No se observa un cambio material en los escenarios explorados».
+
+**Histórico:** solo `riskOf()` (5 años, semanal, en euros, pesos constantes = reequilibrio semanal implícito). Etiqueta «SIMULACIÓN HISTÓRICA»; nunca predicción ni rentabilidad esperada. Series: «precio ajustado por dividendos según el proveedor; no verificado para todos los productos» (Yahoo `adjclose` / EODHD `adjusted_close`, con cierre sin ajustar como respaldo).
+**Reproducibilidad:** la ventana termina el último viernes con ≥ 3 días de antigüedad respecto a la fecha de `data/p/_meta.json`, nunca en la hora del navegador; así la cotización intradía no entra y el resultado no depende de que el mercado esté abierto. Clave de caché = cartera + escenario canónico + `dataVersion()` (`expo:<u>|px:<updated>`) + contexto.
+**Fiscalidad:** capa separada. En modo importes, plusvalía estimada de lo que se vendería (coste medio, MODEL, sin tipo impositivo ni reglas por país). Con solo pesos: «no calculable».
+
+**Parser:** gramática española determinista (sin IA). Resuelve primero en la cartera y luego en el universo de ATLAS. Si la frase es ambigua pregunta en vez de adivinar: «un 10 %» (¿puntos o relativo?), dos productos del mismo índice en cartera, una categoría sin producto concreto (lista con el criterio de orden visible, TER), objetivo sectorial sin porcentaje, aportaciones sin meses o sin importe.
+**Exploración:** `removals`, `reductions` (−10 pp y pares), `additions` (exige `sortKey` explícito; universo = 3 de menor TER por categoría de `candidates()`, o todos los de una categoría), `pareto` (devuelve `front` y `dominated`, nunca un elegido).
+**Límites de P0:** objetivos por sector/país/riesgo/solapamiento se reconocen pero generar escenarios para ellos es P2 (`GENERATOR_P2`). Universo cerrado (~150 ETFs + acciones de ATLAS). `annStats` (tabla anual fija de `index.html`) es otra fuente distinta de `riskOf`: deuda técnica para P3; What If no la usa.
+**Tests:** `tests/scenarios.py` (46 frases del parser, invariantes en 6 carteras, operaciones exactas, aportaciones, coherencia con Doctor, materialidad, datos incompletos, mercado cerrado, cartera vacía, importes vs pesos, reproducibilidad, exploración, lenguaje, golden en `tests/scenarios_golden.json`, pantallas sin errores a 1280 y 390 px).
