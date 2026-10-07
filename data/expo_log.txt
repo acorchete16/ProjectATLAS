@@ -20,88 +20,28 @@ crumb ok
   índice infra N-PORT falló: omitido (SEC bloquea a GitHub)
   índice eufin N-PORT falló: omitido (SEC bloquea a GitHub)
   ndx N-PORT falló: omitido
-  e:AGG: justETF IE00BDBRDM35 · 15 países (completo) · 8 sectores
-  e:DXJ: justETF IE00BYQCZJ13 · 2 países (4 + otros) · 8 sectores
-  e:EEM: justETF IE00BKM4GZ66 · 14 países (completo) · 8 sectores
   e:EPI: justETF IE000VCYXLY9 falló: sin composición
-  e:EUFN: justETF DE000A0F5UJ7 · 15 países (completo) · 2 sectores
-  e:EWJ: justETF IE00B4L5YX21 · 2 países (4 + otros) · 8 sectores
-  e:EWW: justETF IE00B5WHFQ43 · 2 países (4 + otros) · 4 sectores
-  e:EWZ: justETF IE00B0M63516 · 2 países (4 + otros) · 7 sectores
-  e:FXI: justETF IE00B02KXK85 · 4 países (4 + otros) · 7 sectores
   e:GLD: justETF DE000A0S9GB0 falló: sin composición
-  e:IBB: justETF IE00BYXG2H39 · 8 países (completo) · 2 sectores
-  e:ICLN: justETF IE00B1XNHC34 · 13 países (completo) · 4 sectores
-  e:IGF: justETF IE00B1FZS467 · 11 países (completo) · 6 sectores
-  e:ILF: justETF IE00B27YCK28 · 7 países (completo) · 7 sectores
-  e:INDA: justETF IE00BZCQB185 · 2 países (4 + otros) · 8 sectores
-  e:ITA: justETF IE000YYE6WK5 · 11 países (completo) · 3 sectores
-  e:IWM: justETF IE00BJ38QD84 · 3 países (4 + otros) · 8 sectores
-  e:KWEB: justETF IE00BFXR7892 · 4 países (4 + otros) · 5 sectores
-  e:MCHI: justETF IE00BJ5JPG56 · 5 países (4 + otros) · 8 sectores
-  e:NLR: justETF IE000M7V94E1 · 8 países (completo) · 4 sectores
   e:QLD: justETF FR0010342592 falló: sin composición
-  e:QQQ: justETF IE00BFZXGZ54 · 5 países (4 + otros) · 8 sectores
-  e:SCJ: justETF IE00B2QWDY88 · 2 países (4 + otros) · 8 sectores
-  e:SHY: justETF IE00B14X4S71 · 2 países (4 + otros) · 1 sectores
-  e:SMH: justETF IE00BMC38736 · 4 países (4 + otros) · 1 sectores
-  e:SOXX: justETF IE000I8KRLL9 · 7 países (completo) · 3 sectores
-  e:SPY: justETF IE00B5BMR087 · 3 países (4 + otros) · 8 sectores
   e:SSO: justETF LU0411078552 falló: sin composición
-  e:TAN: justETF IE00BM8QRZ79 · 13 países (completo) · 5 sectores
   e:TIP: justETF IE00B1FZSC47 · 2 países (4 + otros) · 1 sectores
   e:TQQQ: justETF IE00BLRPRL42 falló: sin composición
-  e:UFO: justETF IE000YU9K6K2 · 9 países (completo) · 3 sectores
   e:URA: justETF IE000NDWFGA5 falló: sin composición
-  e:URNM: justETF IE0005YK6564 · 6 países (completo) · 3 sectores
-  e:URTH: justETF IE00B4L5Y983 · 11 países (completo) · 8 sectores
-  e:VCR: justETF IE00B4MCHD36 · 3 países (4 + otros) · 2 sectores
-  e:VGK: justETF LU0908500753 · 13 países (completo) · 8 sectores
-  e:VIG: justETF IE00B6YX5D40 · 5 países (4 + otros) · 8 sectores
-  e:VT: justETF IE00BK5BQT80 · 14 países (completo) · 8 sectores
-  e:XAR: justETF IE000OJ5TQP4 · 10 países (completo) · 3 sectores
-  e:XLF: justETF IE00BM67HL84 · 15 países (completo) · 3 sectores
-  e:XLK: justETF IE00B3WJKG14 · 2 países (4 + otros) · 3 sectores
-  e:XLP: justETF IE00BM67HN09 · 10 países (completo) · 1 sectores
-  e:XLU: justETF IE00B4KBBD01 · 2 países (4 + otros) · 2 sectores
-  e:XLV: justETF IE00B43HR379 · 3 países (4 + otros) · 3 sectores
-  e:XLY: justETF IE00BM67HP23 · 10 países (completo) · 3 sectores
-  e:x:CNDX.L: justETF IE00B53SZB19 · 4 países (4 + otros) · 8 sectores
-  e:x:ECAR.L: justETF IE00BGL86Z12 · 11 países (completo) · 3 sectores
   e:x:EGLN.L: justETF IE00B4ND3602 falló: sin composición
   e:x:EUNA.DE: justETF IE00B3F81409 · 15 países (completo) · 8 sectores
   e:x:EUNH.DE: justETF IE00B4WXJJ64 · 12 países (completo) · 1 sectores
-  e:x:EXSA.DE: justETF DE0002635307 · 13 países (completo) · 8 sectores
-  e:x:HEAL.L: justETF IE00BYZK4776 · 15 países (completo) · 3 sectores
   e:x:IBGS.AS: justETF IE00B14X4Q57 · 5 países (4 + otros) · 1 sectores
-  e:x:IMAE.AS: justETF IE00B4K48X80 · 14 países (completo) · 8 sectores
-  e:x:IS3Q.DE: justETF IE00BP3QZ601 · 12 países (completo) · 8 sectores
-  e:x:IS3S.DE: justETF IE00BP3QZB59 · 12 países (completo) · 8 sectores
-  e:x:IUSN.DE: justETF IE00BF4RFH31 · 12 países (completo) · 8 sectores
-  e:x:IUSQ.DE: justETF IE00B6R52259 · 15 países (completo) · 8 sectores
-  e:x:LYXIB.MC: justETF FR0010251744 · 4 países (4 + otros) · 8 sectores
-  e:x:NDIA.L: justETF IE00BHZRQZ17 · 2 países (4 + otros) · 8 sectores
-  e:x:RBOT.L: justETF IE00BYZK4552 · 12 países (completo) · 5 sectores
-  e:x:SPPW.DE: justETF IE00BFY0GT14 · 10 países (completo) · 8 sectores
-  e:x:SPYI.DE: justETF IE00B3YLTY66 · 14 países (completo) · 8 sectores
-  e:x:SXRT.DE: justETF IE00B53L3W79 · 8 países (completo) · 8 sectores
-  e:x:TDIV.AS: justETF NL0011683594 · 17 países (completo) · 8 sectores
-  e:x:VEUR.AS: justETF IE00BKX55T58 · 11 países (completo) · 8 sectores
-  e:x:VFEM.DE: justETF IE00B3VVMM84 · 12 países (completo) · 8 sectores
   e:x:VGEA.DE: justETF IE00BH04GL39 · 12 países (completo) · 1 sectores
-    justETF IE00B3RBWM25 countries ampliado falló: HTTP Error 403: Forbidden
-    justETF IE00B3RBWM25 sectors ampliado falló: HTTP Error 403: Forbidden
-  e:x:VGWL.DE: justETF IE00B3RBWM25 · 5 países (4 + otros) · 4 sectores
-  e:x:VHYL.AS: justETF IE00B8GKDB10 falló: HTTP Error 403: Forbidden
-  e:x:VUAA.DE: justETF IE00BFMXXD54 falló: HTTP Error 403: Forbidden
-  e:x:WTAI.MI: justETF IE00BDVPNG13 falló: HTTP Error 403: Forbidden
-  e:x:XAIX.DE: justETF IE00BGV5VN51 falló: HTTP Error 403: Forbidden
-  e:x:XDEM.DE: justETF IE00BL25JP72 falló: HTTP Error 403: Forbidden
-  e:x:XDEW.DE: justETF IE00BLNMYC90 falló: HTTP Error 403: Forbidden
-  e:x:XDWD.DE: justETF IE00BJ0KDQ92 falló: HTTP Error 403: Forbidden
-  e:x:XEON.DE: justETF LU0290358497 falló: HTTP Error 403: Forbidden
-  e:x:XMME.DE: justETF IE00BTJRMP35 falló: HTTP Error 403: Forbidden
-  e:x:ZPRV.DE: justETF IE00BSPLC413 falló: HTTP Error 403: Forbidden
-  e:x:ZPRX.DE: justETF IE00BSPLC298 falló: HTTP Error 403: Forbidden
-  f:F_VEUZ: justETF IE00B53QG562 falló: HTTP Error 403: Forbidden
+  e:x:VHYL.AS: justETF IE00B8GKDB10 · 17 países (completo) · 8 sectores
+  e:x:VUAA.DE: justETF IE00BFMXXD54 · 3 países (4 + otros) · 8 sectores
+  e:x:WTAI.MI: justETF IE00BDVPNG13 · 4 países (4 + otros) · 5 sectores
+  e:x:XAIX.DE: justETF IE00BGV5VN51 · 6 países (completo) · 4 sectores
+  e:x:XDEM.DE: justETF IE00BL25JP72 · 12 países (completo) · 8 sectores
+  e:x:XDEW.DE: justETF IE00BLNMYC90 · 3 países (4 + otros) · 8 sectores
+  e:x:XDWD.DE: justETF IE00BJ0KDQ92 · 10 países (completo) · 8 sectores
+  e:x:XEON.DE: justETF LU0290358497 falló: sin composición
+  e:x:XMME.DE: justETF IE00BTJRMP35 · 12 países (completo) · 8 sectores
+  e:x:ZPRV.DE: justETF IE00BSPLC413 · 3 países (4 + otros) · 8 sectores
+  e:x:ZPRX.DE: justETF IE00BSPLC298 · 15 países (completo) · 8 sectores
+  f:F_VEUZ: justETF IE00B53QG562 · 10 países (completo) · 8 sectores
 OK · 0 índices completos · 153 ETFs/fondos (0 por índice, 152 con datos de Yahoo)
