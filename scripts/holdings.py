@@ -310,12 +310,18 @@ def main():
         d = None
         try: d = nport(INDEX[k][0]); d.update(name=INDEX[k][1], etf=INDEX[k][0]); L(f'  índice {k} ← N-PORT {INDEX[k][0]}: {d["n"]} empresas a {d["asof"]} · EE. UU. {d["country"].get("US", 0):.1f} %')
         except Exception as e: L(f'  índice {k} N-PORT falló: {str(e)[:120]}')
+        if d:
+            try: yf = yahoo_fund(INDEX[k][0]); d['sector'] = yf['sector']; d['pe'] = round(1 / yf['pe'], 2) if yf.get('pe') and yf['pe'] < 1 else yf.get('pe')
+            except Exception as e: L(f'  índice {k}: sin sectores Yahoo ({str(e)[:60]})')
         if d: idx[k] = d
         elif k in old.get('idx', {}): idx[k] = old['idx'][k]; L(f'  índice {k}: se conserva el anterior ({old["idx"][k].get("asof")})')
         time.sleep(.6)
     try: d = nport('QQQM'); d.update(name='Nasdaq-100', etf='QQQM'); L(f'  índice ndx ← N-PORT QQQM: {d["n"]}')
     except Exception as e: d = None; L('  ndx N-PORT falló:', str(e)[:100])
-    if d: idx['ndx'] = d
+    if d:
+        try: yf = yahoo_fund('QQQM'); d['sector'] = yf['sector']
+        except Exception: pass
+        idx['ndx'] = d
     elif 'ndx' in old.get('idx', {}): idx['ndx'] = old['idx']['ndx']
     nm = names(); fund = {}; nok = 0
     for p in sorted(glob.glob(os.path.join(ROOT, 'data', 'p', '*.json'))):
