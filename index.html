@@ -2453,19 +2453,19 @@ function liveHTML(rows,cur,label,color,note){const last=rows[rows.length-1],prev
 function fmtN(x){return Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
 const CUR_SYM={USD:'$',EUR:'€',GBp:'p',GBP:' £',DKK:' kr',JPY:'¥',HKD:' HK$',INR:'₹',CHF:' CHF'};
 async function refreshMarket(btn){if(refreshMarket.busy)return;refreshMarket.busy=true;document.querySelectorAll('[data-g=ref],.hub-ref').forEach(b=>b.classList.add('spin'));
-  try{await loadLive();for(const k in _pcache)delete _pcache[k];for(const k in _eurSer)delete _eurSer[k];for(const k in _simC)delete _simC[k];_btKey='';await loadRank();renderCalc();
+  try{await loadLiveQ();for(const k in _pcache)delete _pcache[k];for(const k in _eurSer)delete _eurSer[k];for(const k in _simC)delete _simC[k];_btKey='';await loadRank();renderCalc();
     const d=$('#detail');if(d&&!d.hidden&&d.dataset.k)openDetail(d.dataset.k,d.dataset.t,d.dataset.n);
     toast(LIVE&&LIVE.u?`↻ Mercado actualizado · precios de ${relWhen(LIVE.u)}`:'↻ Datos recargados')}catch(_){toast('No se pudo actualizar. Revisa la conexión.')}
   refreshMarket.busy=false;refreshMarket.at=Date.now();document.querySelectorAll('.spin').forEach(b=>b.classList.remove('spin'))}
 function toast(t){let el=$('#toast');if(!el){el=document.createElement('div');el.id='toast';document.body.appendChild(el)}el.textContent=t;el.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('on'),2600)}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-(refreshMarket.at||performance.timeOrigin)>15*60e3)refreshMarket()});
-let LIVE=null,_liveP=null;function loadLive(){return _liveP=fetch('data/live.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{LIVE=j;return j}).catch(()=>null)}
+let LIVE=null,_liveP=null;function loadLiveQ(){return _liveP=fetch('data/live.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{LIVE=j;return j}).catch(()=>null)}
 function applyLive(pk,p){if(!p||!LIVE||!LIVE.d)return p;const q=LIVE.d[pk];if(!q||!p.o||!p.o.length)return p;const dt=new Date(q[2]*1000).toISOString().slice(0,10),d0=new Date(p.d0+'T00:00:00Z').getTime(),off=Math.round((new Date(dt+'T00:00:00Z').getTime()-d0)/864e5),lo=p.o[p.o.length-1];
   if(off>lo){p.o.push(off);p.c.push(q[0])}else if(off===lo)p.c[p.c.length-1]=q[0];else return p;p.u=new Date(q[2]*1000).toISOString().slice(0,16)+'Z';p.live=true;return p}
 const _pcache={};const priceKey=(k,o)=>o.x?`${k}:x:${o.y}`:k+':'+o.t;
 function loadPrice(pk){if(pk in _pcache)return _pcache[pk];const f=pk.replace(/[^A-Za-z0-9_.-]/g,'_')+'.json';
   const tryUrl=u=>fetch(u,{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error(r.status);return r.json()});
-  const lp=_liveP||loadLive();return _pcache[pk]=Promise.all([tryUrl('data/p/'+f).catch(()=>tryUrl('https://raw.githubusercontent.com/acorchete16/ProjectATLAS/main/data/p/'+f)).catch(()=>null),Promise.race([lp,new Promise(r=>setTimeout(r,2500))])]).then(([p])=>applyLive(pk,p))}
+  const lp=_liveP||loadLiveQ();return _pcache[pk]=Promise.all([tryUrl('data/p/'+f).catch(()=>tryUrl('https://raw.githubusercontent.com/acorchete16/ProjectATLAS/main/data/p/'+f)).catch(()=>null),Promise.race([lp,new Promise(r=>setTimeout(r,2500))])]).then(([p])=>applyLive(pk,p))}
 function prefetchPrices(list){list.slice(0,12).forEach(x=>{try{loadPrice(priceKey(x.k,x.obj))}catch(_){}})}
 function priceRows(p){const d0=new Date(p.d0+'T00:00:00Z').getTime();return p.o.map((o,i)=>[new Date(d0+o*864e5).toISOString().slice(0,10),p.c[i]])}
 async function loadLive(el,k,o,color){if(!el)return;el.innerHTML=`<p class="lv-off">Cargando precio…</p>`;
