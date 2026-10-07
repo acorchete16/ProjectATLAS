@@ -16,12 +16,12 @@ POS = {  # palabra/expresión -> (peso, etiqueta)
  r'fda (approv|clear)|approval': (2.0, 'Aprobación'), r'partnership|partners with|collaborat|teams up': (1.2, 'Alianza'),
  r'buyback|share repurchase': (1.5, 'Recompra de acciones'), r'dividend (hike|increase)|raises dividend': (1.5, 'Sube dividendo'),
  r'price target (raised|hike)|raises (price )?target|lifts target': (1.8, 'Suben precio objetivo'), r'\boutperform|\bbuy rating|overweight': (1.2, 'Recomendación de compra'),
- r'surge|soar|jump|rall(y|ies)|climbs?|gains?': (.3, 'Sube con fuerza'), r'strong demand|demand (boom|surge)': (1.2, 'Demanda fuerte'),
+ r'surge|soar|jump|rall(y|ies)|climbs?': (.3, 'Sube con fuerza'), r'strong demand|demand (boom|surge)': (1.2, 'Demanda fuerte'),
  r'\bai\b|artificial intelligence|data center': (.25, 'Tirón de la IA'), r'launch(es|ed)?|unveil': (.6, 'Lanzamiento'), r'acquir|takeover|to buy ': (.8, 'Operación corporativa'),
 }
 NEG = {
  r'\bdowngrad': 2.2, r'\bmiss(es|ed)?\b|below estimates|worse-than-expected': 2.0, r'cuts? (its )?(guidance|outlook|forecast)|lowers? (guidance|outlook)': 2.5,
- r'lawsuit|sued|probe|investigation|subpoena|antitrust|fine[ds]?\b': 1.6, r'recall|halt|suspend': 1.5, r'layoffs?|job cuts': .8, r'plunge|tumble|sink|slump|falls?|drops?|slides?': .9,
+ r'lawsuit|sued|probe|investigation|subpoena|antitrust|fine[ds]?\b': 1.6, r'recall|halt|suspend': 1.5, r'layoffs?|job cuts': .8, r'plunge|tumble|sink|slump|falls?|drops?|slides?|dips?': .9,
  r'price target (cut|lowered)|cuts (price )?target': 1.8, r'underperform|sell rating|underweight': 1.5, r'bankrupt|default|going concern': 3.0, r'short seller|fraud': 2.5,
 }
 
@@ -104,7 +104,7 @@ def main():
         final = sc + .6 * mom - hot
         if sc <= .8 or pos_n == 0: continue
         heads.sort(key=lambda h: (-(h['s'] > 0), h['d']), reverse=False)
-        heads = sorted(heads, key=lambda h: (h['s'] > 0, h['d']), reverse=True)[:4]
+        heads = sorted(heads, key=lambda h: (h['s'], h['d']), reverse=True)[:4]
         res.append({'k': k, 'y': y, 'score': round(final, 2), 'news': round(sc, 2), 'pos': pos_n, 'neg': neg_n, 'r1m': m1, 'r1y': y1,
                     'tags': [t for t, _ in sorted(tags.items(), key=lambda x: -x[1])][:3], 'h': heads})
     res.sort(key=lambda x: -x['score'])

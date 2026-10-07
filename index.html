@@ -571,7 +571,7 @@ body.mapmode #app.simple .right .pbody{overflow-y:auto!important;padding-bottom:
 body.mapmode #app.simple .right .phead{display:flex;align-items:center;gap:8px;padding-top:calc(14px + env(safe-area-inset-top,0px))}
 body.mapmode #app.simple .right .phead h2{flex:1}
 body.mapmode #app.simple .right[data-sec] .pbody>[data-s]{display:none!important}
-body.mapmode #app.simple .right[data-sec=pf] .pbody>[data-s=pf],body.mapmode #app.simple .right[data-sec=calc] .pbody>[data-s=calc],body.mapmode #app.simple .right[data-sec=plan] .pbody>[data-s=plan]{display:flex!important}
+body.mapmode #app.simple .right[data-sec=watch] .pbody>[data-s=watch],body.mapmode #app.simple .right[data-sec=pf] .pbody>[data-s=pf],body.mapmode #app.simple .right[data-sec=calc] .pbody>[data-s=calc],body.mapmode #app.simple .right[data-sec=plan] .pbody>[data-s=plan]{display:flex!important}
 body.mapmode #app.simple .right[data-sec=plan] .pbody>[data-s=plan]:not(.pf):not(#myPlan){display:block!important}
 body.mapmode #app.simple .right .pf{border-bottom:0}
 body.mapmode #app.simple .mapctl{bottom:calc(92px + env(safe-area-inset-bottom,0px))!important;right:12px!important}
@@ -587,6 +587,39 @@ body.mapmode #mcard{z-index:66}
 #toast{position:fixed;z-index:120;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translate(-50%,-30px);opacity:0;transition:.3s;padding:10px 16px;border-radius:999px;background:#e9fbff;color:#0a0a1a;font:600 13px Inter,system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.4);pointer-events:none;white-space:nowrap}#toast.on{opacity:1;transform:translate(-50%,0)}
 .live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#4cd8a0;box-shadow:0 0 0 0 rgba(76,216,160,.6);animation:livep 1.6s infinite;vertical-align:middle;margin-right:2px}@keyframes livep{70%{box-shadow:0 0 0 7px rgba(76,216,160,0)}}
 body.mapmode .right[data-sec=pf] #myPf .pf-head h3,body.mapmode .right[data-sec=calc] #calc .pf-head{display:none}body.mapmode .right[data-sec=pf] #myPf .pf-head{justify-content:flex-end}
+.pv-h{display:flex;justify-content:space-between;align-items:baseline;margin:2px 0 6px}.pv-h b{font-size:14px}.pv-h span{font-size:11px;color:var(--dim)}
+.pv-opts{display:flex!important;overflow-x:auto;gap:8px!important;scroll-snap-type:x mandatory;padding-bottom:4px;scrollbar-width:none}.pv-opts::-webkit-scrollbar{display:none}.pv-opt{flex:0 0 116px;scroll-snap-align:start;position:relative}
+.pv-new{position:absolute;top:-1px;right:-1px;font-style:normal;font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:0 12px 0 8px;background:#ffb35a;color:#1a1020}
+.bt-cards{display:flex!important;overflow-x:auto;scrollbar-width:none}.bt-cards::-webkit-scrollbar{display:none}.bt-c{flex:0 0 112px}
+
+/* ===== barra inferior con menú ☰ + franja de mercado ===== */
+body.mapmode #app.simple .mapbar{top:calc(8px + env(safe-area-inset-top,0px))!important;left:0!important;right:0!important;width:auto!important;padding:0 10px}
+body.mapmode #app.simple .mapbar .mb-row,body.mapmode #app.simple .mapbar .mb-hint,body.mapmode #app.simple .mapbar .mb-res,body.mapmode #app.simple .mapbar .mb-leg{max-width:600px}
+.tick{pointer-events:auto;overflow:hidden;margin:0 -10px 2px;padding:2px 0;-webkit-mask:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent);mask:linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent)}
+.tk-run{display:flex;gap:6px;width:max-content;animation:tkrun 60s linear infinite}.tick:hover .tk-run,.tick:active .tk-run{animation-play-state:paused}@keyframes tkrun{to{transform:translateX(-50%)}}
+.tk{flex:none;display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(12,12,30,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#dfe6ff;font:600 12px Inter,system-ui,sans-serif;cursor:pointer;white-space:nowrap}
+.tk span{font-size:14px}.tk b{font-family:var(--mono);font-size:11.5px}.tk b.up{color:#4cd8a0}.tk b.dn{color:#ff6b8a}.tk-pf{border-color:rgba(192,132,252,.55);background:linear-gradient(135deg,rgba(192,132,252,.3),rgba(12,12,30,.8))}.tk-load{font-size:12px;color:var(--dim);padding:6px 12px}
+#dock{display:none!important}
+#bbar{position:fixed;z-index:65;left:50%;transform:translateX(-50%);bottom:calc(12px + env(safe-area-inset-bottom,0px));width:min(560px,calc(100% - 20px));display:flex;gap:8px;align-items:center;padding:7px;border-radius:24px;background:rgba(10,10,28,.86);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.14);box-shadow:0 14px 44px rgba(0,0,0,.6)}
+#bbar button{border:0;cursor:pointer;color:#e9f0ff}
+.bb-menu{width:48px;height:48px;border-radius:17px;background:linear-gradient(135deg,#c084fc,#35e0ff);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;flex:none}.bb-menu i{display:block;width:20px;height:2.5px;border-radius:2px;background:#0b0b1e;transition:.25s}
+.bb-menu[aria-expanded=true] i:nth-child(1){transform:translateY(6.5px) rotate(45deg)}.bb-menu[aria-expanded=true] i:nth-child(2){opacity:0}.bb-menu[aria-expanded=true] i:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+.bb-search{flex:1;min-width:0;height:48px;border-radius:17px;background:rgba(255,255,255,.07)!important;display:flex;align-items:center;gap:9px;padding:0 14px;text-align:left;font:500 14px Inter,system-ui,sans-serif;color:#b9c6e8!important}.bb-search span{font-size:18px;color:#9ff8ff}.bb-search b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bb-ref{width:48px;height:48px;border-radius:17px;background:rgba(255,255,255,.07)!important;font-size:20px;flex:none}.bb-ref.spin{animation:spin .9s linear infinite}
+#menu{position:fixed;inset:0;z-index:64;background:rgba(2,3,10,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;padding:0 10px calc(84px + env(safe-area-inset-bottom,0px))}#menu[hidden]{display:none}
+.mn-box{width:min(560px,100%);padding:16px;border-radius:24px;background:rgba(12,12,32,.96);border:1px solid rgba(255,255,255,.12);box-shadow:0 20px 60px rgba(0,0,0,.6);animation:mnin .22s cubic-bezier(.2,.8,.2,1)}@keyframes mnin{from{opacity:0;transform:translateY(16px) scale(.98)}}
+.mn-h{display:flex;justify-content:space-between;align-items:baseline;margin:0 4px 12px}.mn-h b{font-size:16px;letter-spacing:.18em;background:linear-gradient(90deg,#c084fc,#35e0ff);-webkit-background-clip:text;background-clip:text;color:transparent}.mn-h span{font-size:12px;color:var(--dim);text-transform:capitalize}
+.mn-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.mn-grid button{display:grid;grid-template-columns:42px 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:center;text-align:left;padding:11px;border-radius:16px;border:1px solid color-mix(in srgb,var(--c) 30%,transparent);background:linear-gradient(135deg,color-mix(in srgb,var(--c) 16%,transparent),rgba(255,255,255,.02));color:#fff;cursor:pointer;font:inherit}
+.mn-i{grid-row:1/3;width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;background:color-mix(in srgb,var(--c) 22%,transparent)}.mn-grid b{font-size:13.5px}.mn-grid small{font-size:11px;color:var(--mid)}
+.mn-grid button:last-child:nth-child(odd){grid-column:1/-1}
+body.ov-open #bbar,body.dt-open #bbar{display:none!important}@media (max-width:899px){body.hub-open #bbar{display:none}}@media (min-width:900px){body.hub-open #bbar{left:calc((100% - 460px)/2)}}
+body.mapmode #mcard{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+.watch .wt{border:1px solid var(--edge);border-left:3px solid var(--c);border-radius:14px;background:rgba(255,255,255,.03);padding:10px;display:flex;flex-direction:column;gap:7px}
+.wt-top{display:grid;grid-template-columns:20px 44px 1fr auto;gap:9px;align-items:center;background:none;border:0;color:var(--fg);font:inherit;text-align:left;cursor:pointer;padding:0}.wt-n{font-weight:700;color:var(--dim);text-align:center}
+.wt-nm{min-width:0;display:flex;flex-direction:column;gap:3px}.wt-nm b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.wt-nm small{display:flex;gap:4px;flex-wrap:wrap}.wt-nm em{font-style:normal;font-size:10px;padding:2px 7px;border-radius:999px;background:rgba(76,216,160,.13);color:#7ff0c0}
+.wt-r{display:flex;flex-direction:column;align-items:flex-end;gap:5px}.wt-sig{display:flex;gap:2px}.wt-sig i{width:5px;height:12px;border-radius:2px;background:rgba(255,255,255,.12)}.wt-sig i.on{background:linear-gradient(#35e0ff,#4cd8a0)}
+.wt-h{display:grid;grid-template-columns:16px 1fr;column-gap:6px;font-size:12px;line-height:1.35;color:#cfd8f5;text-decoration:none;padding:7px 9px;border-radius:10px;background:rgba(255,255,255,.04)}.wt-h small{grid-column:2;color:var(--dim);font-size:10.5px;margin-top:2px}
+.wt-f{font-size:11px;color:var(--dim)}.wt-meta{font-size:11.5px;color:var(--mid);margin:-4px 0 4px}.watch{gap:9px}
 </style>
 </head>
 <body>
@@ -900,12 +933,17 @@ function coreFundE(pk){const t=CORE_F[pk];if(_coreE[t])return _coreE[t];const f=
   const r10=full.length>=3?(Math.pow(full.reduce((p,x)=>p*(1+x/100),1),1/full.length)-1)*100:tpl.r10;
   return _coreE[t]={...tpl,t,n:f.full,ter:f.ter,u:U(f.tk,f.full,f.isin),iss:f.iss,issHq:f.sede,node:f.node,w:f.w,fund:true,ann:an,r10:+r10.toFixed(2),vol:an?+an.sd.toFixed(2):tpl.vol,vol1y:tpl.vol1y}}
 let planVar=(()=>{try{return localStorage.getItem('atlas_var')||'bal'}catch(_){return 'bal'}})();
-const PVAR={bal:['⚖️','Equilibrada','La mejor relación entre lo que suele ganar y lo que se mueve.'],mom:['🔥','Tendencia','Elige lo que más está subiendo estos meses: cambia con los rankings de cada día.'],def:['🛡️','Tranquila','Dentro de tu perfil, lo que menos se mueve y menos cobra.']};
+const PVAR={bal:['⚖️','Equilibrada','La mejor relación entre lo que suele ganar y lo que se mueve.'],mom:['🔥','Tendencia','Elige lo que más está subiendo estos meses: cambia con los rankings de cada día.'],def:['🛡️','Tranquila','Dentro de tu perfil, lo que menos se mueve y menos cobra.'],
+  tech:['🤖','Tecnología e IA','Chips, software y robótica: lo que mueve la IA. Dentro del tema, lo que mejor va estos meses.'],real:['⚡','Energía e infra','Redes eléctricas, nuclear, uranio, renovables e infraestructuras: la economía física.'],
+  world:['🌍','Fuera de EE. UU.','Europa, Japón, India, emergentes y pequeñas empresas: para no depender solo de Wall Street.'],health:['🧬','Salud','Biotecnología, farmacéuticas y tecnología médica.'],shield:['🏰','Refugio','Defensa, oro, consumo básico y eléctricas: lo que suele aguantar cuando el mercado cae.']};
+const PTHEME={tech:new Set(['semis','usbig','sw','robo','fintech']),real:new Set(['infra','pave','grid','util','nucl','uran','renov']),world:new Set(['eu','em','jp','cn','in','latam','small','div']),health:new Set(['health','biotech','medtech']),shield:new Set(['def','spnew','gold','staples','util'])};
+const weekNo=()=>{const d=new Date(),y=new Date(d.getFullYear(),0,1);return Math.floor((d-y)/6048e5)};
+const PFEAT=()=>Object.keys(PTHEME)[weekNo()%Object.keys(PTHEME).length];
 const momOf=e=>{const r=RANK&&RANK[priceKey('e',e)];if(!r)return null;const a=r.r6m,b=r.r1y;return a==null&&b==null?null:(a??b)*.55+(b??a)*.45};
 function buildPlan(pk,b=basis,pv=planVar){
   const key=pk+b+RF+planCore+pv+(RANK?'r':'');if(planCache[key])return planCache[key];
   const P=PROFILES[pk],all=UNIV.filter(e=>!e.x).map(e=>etfInfo(e,b));
-  const vScore=pv==='mom'?(x=>{const m=momOf(x.e);return m==null?rankE(x)*10-50:m}):pv==='def'?(x=>-(x.e.vol+(x.e.ter||0)*20)):rankE;
+  const vScore=PTHEME[pv]?(x=>(PTHEME[pv].has(x.e.grp)?1000:0)+(momOf(x.e)??rankE(x)*10)):pv==='mom'?(x=>{const m=momOf(x.e);return m==null?rankE(x)*10-50:m}):pv==='def'?(x=>-(x.e.vol+(x.e.ter||0)*20)):rankE;
   const inBand=all.filter(x=>x.band===pk),eligible=inBand.filter(x=>x.ok).sort((x,y)=>vScore(y)-vScore(x));
   let pool=eligible;if(pv!=='bal'){const bi=BANDS.indexOf(pk),nb=bi>0?all.filter(x=>x.ok&&x.band===BANDS[bi-1]):[];pool=[...eligible,...nb].sort((x,y)=>vScore(y)-vScore(x))}
   const picked=[],grps=new Set(),maxN=pv==='bal'?5:4;let lev=0;
@@ -1772,7 +1810,7 @@ function renderMyPlan(o){
   const cur=vars.find(v=>v.k===planVar);let chg='';if(planVar==='mom'&&RANK){try{const pv=JSON.parse(localStorage.getItem('atlas_mom_'+profile)||'null');
     if(pv&&pv.d!==RANK_U){const inn=cur.ts.filter(t=>!pv.ts.includes(t)),out=pv.ts.filter(t=>!cur.ts.includes(t));if(inn.length||out.length)chg=`🔄 Desde tu última visita: ${inn.length?'entra '+inn.join(', '):''}${inn.length&&out.length?' · ':''}${out.length?'sale '+out.join(', '):''}`}
     if(!pv||pv.d!==RANK_U)localStorage.setItem('atlas_mom_'+profile,JSON.stringify({d:RANK_U,ts:cur.ts}))}catch(_){}}
-  el.innerHTML=`<div class="pv-opts">${vars.map(v=>`<button class="pv-opt${v.k===planVar?' on':''}" data-pv="${v.k}"><span class="pv-i">${PVAR[v.k][0]}</span><b>${PVAR[v.k][1]}</b><span class="pv-g">${p1(v.g,0)}<small>/año</small></span><i class="pl-meter">${[1,2,3,4,5].map(i=>`<i style="${i<=v.lvl?'background:'+['#4cd8a0','#9be15d','#ffd24a','#ff9a3c','#ff4d6d'][v.lvl-1]:''}"></i>`).join('')}</i></button>`).join('')}</div>
+  el.innerHTML=`<div class="pv-h"><b>💡 Ideas de cartera</b><span>${RANK_U?'actualizadas '+relWhen(RANK_U):''}</span></div><div class="pv-opts">${vars.map(v=>`<button class="pv-opt${v.k===planVar?' on':''}" data-pv="${v.k}">${v.k===PFEAT()?'<em class="pv-new">⭐ Esta semana</em>':''}<span class="pv-i">${PVAR[v.k][0]}</span><b>${PVAR[v.k][1]}</b><span class="pv-g">${p1(v.g,0)}<small>/año</small></span><i class="pl-meter">${[1,2,3,4,5].map(i=>`<i style="${i<=v.lvl?'background:'+['#4cd8a0','#9be15d','#ffd24a','#ff9a3c','#ff4d6d'][v.lvl-1]:''}"></i>`).join('')}</i></button>`).join('')}</div>
     <p class="pv-why">${PVAR[planVar][2]}${planVar==='mom'&&RANK_U?` <span>↻ ${relWhen(RANK_U)}</span>`:''}</p>${chg?`<p class="pv-chg">${esc(chg)}</p>`:''}
     <div class="core-seg"><span>Base del plan</span><div class="seg"><button data-core="fund" aria-pressed="${planCore==='fund'}">Fondo indexado</button><button data-core="etf" aria-pressed="${planCore==='etf'}">Solo ETFs</button></div></div>`+planHero(P,s.g,gLo,gHi,s.sig,s.dd,s.bt?s.bt.worstY:null)+
     ringChart(o.items.map((x,i)=>({w:x.w,c:col[i]})),monthly>0?`<b>${fmtN(monthly)} €</b><span>al mes</span>`:'<b>Tu plan</b>')+`
@@ -1829,7 +1867,7 @@ async function backtestOpts(){const box=$('#btBox');if(!box||!window.Chart)retur
     // peor caída (sobre el valor de la cartera ya formada, sin contar aportaciones nuevas)
     let idx=1;for(let k=1;k<val.length;k++){const r=(val[k]-(inv[k]-inv[k-1]))/val[k-1];idx*=r;peak=Math.max(peak,idx);dd=Math.min(dd,idx/peak-1)}
     res[v]={val,inv,fin,put,dd:dd*100,early:sers.some(z=>z[0][0]>months[0])}}
-  const lbl=months.map(d=>d.slice(5,7)+'/'+d.slice(2,4)).concat(['hoy']),col={bal:'#ffb35a',mom:'#ff5d8f',def:'#4cd8a0'};
+  const lbl=months.map(d=>d.slice(5,7)+'/'+d.slice(2,4)).concat(['hoy']),col=OPT_C;
   const ok=Object.entries(res).filter(([,r])=>r);if(!ok.length){box.innerHTML='<p class="mp-note">Faltan precios para simularlo.</p>';return}
   box.innerHTML=`<div class="bt-cards">${ok.map(([v,r])=>`<div class="bt-c${v===planVar?' on':''}" style="--c:${col[v]}"><span>${PVAR[v][0]} ${PVAR[v][1]}</span><b>${eur(r.fin)}</b><small>${r.fin>=r.put?'+':''}${eur(r.fin-r.put)} · peor caída ${p1(r.dd,0)}</small></div>`).join('')}</div>
     <div class="bt-ch"><canvas id="btCv"></canvas></div><p class="mp-note">Aportando ${fmtN(m)} €/mes desde ${months[0].split('-').reverse().join('/').slice(3)} (has puesto ${eur(ok[0][1].put)}), en euros, con los precios reales y el reparto de hoy de cada opción. ⚠️ Tendencia sale favorecida: elige lo que ya ha subido, y eso no se sabía hace 5 años.${ok.some(([,r])=>r.early)?' Algún ETF tiene menos de 5 años de precios: hasta entonces se usa su primer precio.':''}</p>`;
@@ -2381,7 +2419,8 @@ function updateMap(first){if(!mapReady)return;const list=mapEntities(),gj=mapGeo
     else map.fitBounds(b,{padding:{...mapPad(),top:mapPad().top+30,left:40,bottom:40,right:mapPad().right+40},maxZoom:5,duration:1200})}
   if(!on)closePlace()}
 function renderMapBar(nPts,nEnt){const b=$('#mapBar');if(!b)return;const chip=(g,v,l,on)=>`<button class="mb-chip${on?' on':''}" data-g="${g}" data-v="${v}">${l}</button>`,a=filterActive();
-  b.innerHTML=`<div class="mb-top"><button class="mb-search" data-g="open">⌕ <span>${sq.q?esc(sq.q):'Buscar empresa, ETF o fondo'}</span></button><button class="mb-ico" data-g="ref" aria-label="Actualizar mercado">↻</button><button class="mb-ico" data-g="set" aria-label="Ajustes">⚙</button></div>
+  const bs=$('#bbarQ');if(bs)bs.textContent=sq.q||'Buscar empresa, ETF o fondo';
+  b.innerHTML=`<div class="tick" id="tick">${tickHTML()}</div>
    <div class="mb-row">${chip('type','etf','ETFs',a&&sq.type==='etf')}${chip('type','fnd','Fondos',a&&sq.type==='fnd')}${chip('type','stk','Acciones',a&&sq.type==='stk')}${chip('type','all','Todo',a&&sq.type==='all')}${PF.length?chip('mine','1','★ Mi cartera',a&&sq.mine):''}${chip('fit','1','✓ Para mí',a&&sq.fit)}${chip('sec','pick',sq.sec!=='all'&&a?`${SEC_ICON[sq.sec]||''} ${esc(sq.sec)} ▾`:'Sector ▾',a&&sq.sec!=='all')}</div>
    ${a?`<div class="mb-leg"><span><i class="lg e"></i>ETF</span><span><i class="lg f"></i>Fondo</span><span><i class="lg s"></i>Acción</span></div>`:''}${a?`<div class="mb-res"><span><b>${nEnt}</b> resultado${nEnt===1?'':'s'} encendido${nEnt===1?'':'s'}</span><button data-g="list">Ver lista</button><button data-g="clear" aria-label="Quitar filtros">✕</button></div>`:`<div class="mb-hint">Elige qué quieres ver y se encenderán en el mapa</div>`}`}
 function mapBarClick(e){const b=e.target.closest('button[data-g]');if(!b)return;const g=b.dataset.g,v=b.dataset.v;
@@ -2453,13 +2492,13 @@ function liveHTML(rows,cur,label,color,note){const last=rows[rows.length-1],prev
 function fmtN(x){return Math.round(x).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')}
 const CUR_SYM={USD:'$',EUR:'€',GBp:'p',GBP:' £',DKK:' kr',JPY:'¥',HKD:' HK$',INR:'₹',CHF:' CHF'};
 async function refreshMarket(btn){if(refreshMarket.busy)return;refreshMarket.busy=true;document.querySelectorAll('[data-g=ref],.hub-ref').forEach(b=>b.classList.add('spin'));
-  try{await loadLiveQ();for(const k in _pcache)delete _pcache[k];for(const k in _eurSer)delete _eurSer[k];for(const k in _simC)delete _simC[k];_btKey='';await loadRank();renderCalc();
+  try{await loadLiveQ();for(const k in _pcache)delete _pcache[k];for(const k in _eurSer)delete _eurSer[k];for(const k in _simC)delete _simC[k];_btKey='';await loadRank();renderCalc();renderTick();WATCH=null;if(hubSec==='watch')renderWatch();
     const d=$('#detail');if(d&&!d.hidden&&d.dataset.k)openDetail(d.dataset.k,d.dataset.t,d.dataset.n);
     toast(LIVE&&LIVE.u?`↻ Mercado actualizado · precios de ${relWhen(LIVE.u)}`:'↻ Datos recargados')}catch(_){toast('No se pudo actualizar. Revisa la conexión.')}
   refreshMarket.busy=false;refreshMarket.at=Date.now();document.querySelectorAll('.spin').forEach(b=>b.classList.remove('spin'))}
 function toast(t){let el=$('#toast');if(!el){el=document.createElement('div');el.id='toast';document.body.appendChild(el)}el.textContent=t;el.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('on'),2600)}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-(refreshMarket.at||performance.timeOrigin)>15*60e3)refreshMarket()});
-let LIVE=null,_liveP=null;function loadLiveQ(){return _liveP=fetch('data/live.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{LIVE=j;return j}).catch(()=>null)}
+let LIVE=null,_liveP=null;function loadLiveQ(){return _liveP=fetch('data/live.json?t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{LIVE=j;setTimeout(()=>{try{renderTick()}catch(_){}},0);return j}).catch(()=>null)}
 function applyLive(pk,p){if(!p||!LIVE||!LIVE.d)return p;const q=LIVE.d[pk];if(!q||!p.o||!p.o.length)return p;const dt=new Date(q[2]*1000).toISOString().slice(0,10),d0=new Date(p.d0+'T00:00:00Z').getTime(),off=Math.round((new Date(dt+'T00:00:00Z').getTime()-d0)/864e5),lo=p.o[p.o.length-1];
   if(off>lo){p.o.push(off);p.c.push(q[0])}else if(off===lo)p.c[p.c.length-1]=q[0];else return p;p.u=new Date(q[2]*1000).toISOString().slice(0,16)+'Z';p.live=true;return p}
 const _pcache={};const priceKey=(k,o)=>o.x?`${k}:x:${o.y}`:k+':'+o.t;
@@ -2554,6 +2593,7 @@ async function renderPf(){const el=$('#myPf');if(!el)return;const _pfKeep=el.que
     $('#pfQuick').addEventListener('click',()=>{const f=$('#pfFrom').value||ymNow();PF.push({id:Date.now(),k:'f',t:'F_FIDW',mode:'m',amt:260,from:f},{id:Date.now()+1,k:'s',t:'TSM',mode:'m',amt:40,from:f});pfSave();renderPf();updateMapSoon()});return}
   el.innerHTML=`<div class="pf-head"><h3>Mi cartera</h3><span class="mp-note">calculando…</span></div>`;
   const rs=await Promise.all(PF.map(pfValue)),ok=rs.filter(r=>!r.err),inv=ok.reduce((a,r)=>a+r.inv,0),val=ok.reduce((a,r)=>a+r.val,0),g=val-inv,gp=inv?(val/inv-1)*100:0;
+  {let prev=0;ok.forEach(r=>{const q=r.ent&&LIVE&&LIVE.d&&LIVE.d[priceKey(r.ent.k,r.ent.obj)];prev+=q&&q[1]&&q[0]?r.val*q[1]/q[0]:r.val});_pfDay=val>0?{v:val,c:prev?(val/prev-1)*100:0}:null;try{renderTick()}catch(_){}}
   const o=buildPlan(profile),pw={};o.items.forEach(x=>pw[(x.e.fund?'f':'e')+x.e.t]=x.w);
   // agrupar por inversión (varias aportaciones del mismo activo = una porción del donut)
   const grp={};ok.forEach(r=>{const key=r.ent?r.ent.k+r.ent.t:'x'+r.pos.t;(grp[key]=grp[key]||{name:r.ent?r.ent.name:r.pos.t,c:r.ent?KIND_C[r.ent.k]:'#8a93a8',val:0,ent:r.ent}).val+=r.val});
@@ -2594,7 +2634,7 @@ async function renderPf(){const el=$('#myPf');if(!el)return;const _pfKeep=el.que
   $('#pfMap').addEventListener('click',()=>{sq.active=true;sq.mine=true;sq.type='all';sq.sec='all';sq.fit=false;sq.q='';closePlace();updateMap();const st=$('#stage');if(st&&mobile())st.scrollIntoView({behavior:'smooth'})})}
 
 let pfTab='res',pfOptSel='me',_simC={};
-const OPT_C={me:'#c084fc',bal:'#ffb35a',mom:'#ff5d8f',def:'#4cd8a0',msci:'#35e0ff'};
+const OPT_C={me:'#c084fc',bal:'#ffb35a',mom:'#ff5d8f',def:'#4cd8a0',msci:'#35e0ff',tech:'#7aa2ff',real:'#ffd24a',world:'#9be15d',health:'#ff7ab6',shield:'#b9c6e8'};
 async function simulate(items,m,months,init=0){const key=JSON.stringify(items.map(x=>[x.k,x.obj.t,+x.w.toFixed(3)]))+m+months[0]+'|'+init;if(_simC[key])return _simC[key];
   const sers=await Promise.all(items.map(x=>eurSeries(x.k,x.obj)));if(sers.some(z=>!z||!z.length))return null;
   const today=new Date().toISOString().slice(0,10),units=items.map(()=>0),val=[],inv=[];let put=0;
@@ -2680,25 +2720,64 @@ let _calcSeq=0;async function calcRun(){const tok=++_calcSeq;if(!$('#calcOut'))r
     options:{responsive:true,maintainAspectRatio:false,animation:{duration:400},interaction:{mode:'index',intersect:false},plugins:{legend:{labels:{color:'#b9c6e8',boxWidth:12,font:{size:11}}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${eur(c.raw)}`}}},
       scales:{x:{ticks:{color:'#7f8bab',maxTicksLimit:5,font:{size:10}},grid:{display:false}},y:{ticks:{color:'#7f8bab',font:{size:10},maxTicksLimit:4,callback:v=>fmtN(v)+' €'},grid:{color:'rgba(255,255,255,.05)'}}}}})}
 
+
+/* ---- franja de mercado en vivo (pantalla principal) ---- */
+const TICK=[['e:URTH','🌍','Mundo'],['e:SPY','🇺🇸','S&P 500'],['e:QQQ','💻','Nasdaq'],['e:VGK','🇪🇺','Europa'],['e:EWJ','🇯🇵','Japón'],['e:EEM','🌏','Emergentes'],['e:GLD','🥇','Oro'],['x:EURUSD','💶','EUR/USD']];
+let _pfDay=null;
+function tickHTML(){const L=LIVE&&LIVE.d;if(!L)return '<span class="tk-load">Cargando mercado…</span>';
+  const ch=k=>{const q=L[k];return q&&q[1]?(q[0]/q[1]-1)*100:null};
+  const movers=Object.entries(L).filter(([k,q])=>k.startsWith('s:')&&q[1]).map(([k,q])=>[k,(q[0]/q[1]-1)*100]).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,3);
+  const ent=k=>searchEntities().find(x=>priceKey(x.k,x.obj)===k);
+  const chip=(k,ic,l,c)=>c==null?'':`<button class="tk" data-tk="${esc(k)}"><span>${ic}</span>${esc(l)}<b class="${c<0?'dn':'up'}">${c<0?'▼':'▲'}${p1(Math.abs(c),1)}</b></button>`;
+  const items=(_pfDay?`<button class="tk tk-pf" data-hubk="pf"><span>★</span>Mi cartera<b>${eur(_pfDay.v)}</b><b class="${_pfDay.c<0?'dn':'up'}">${_pfDay.c<0?'▼':'▲'}${p1(Math.abs(_pfDay.c),1)}</b></button>`:'')+
+    TICK.map(([k,ic,l])=>chip(k,ic,l,ch(k))).join('')+movers.map(([k,c])=>{const e=ent(k);return e?chip(k,'🔥',e.name.split(' ').slice(0,2).join(' '),c):''}).join('');
+  return `<div class="tk-run">${items}${items}</div>`}
+function renderTick(){const t=$('#tick');if(t)t.innerHTML=tickHTML()}
+document.addEventListener('click',e=>{const b=e.target.closest('.tk');if(!b)return;if(b.dataset.hubk){openHub(b.dataset.hubk);return}const k=b.dataset.tk;if(!k||k.startsWith('x:'))return;const x=searchEntities().find(z=>priceKey(z.k,z.obj)===k);if(x)openDetail(x.k,x.t,x.node)});
+/* ---- ONES TO WATCH: noticias recientes que pueden mover el precio ---- */
+let WATCH=null;
+async function renderWatch(){const el=$('#watch');if(!el)return;if(!WATCH||Date.now()-WATCH._t>10*60e3){el.innerHTML='<p class="mp-note">Leyendo noticias…</p>';try{WATCH=await (await fetch('data/watch.json?t='+Date.now(),{cache:'no-store'})).json();WATCH._t=Date.now()}catch(_){el.innerHTML='<p class="mp-note">Aún no hay señales. Se generan cada 2 horas en días de mercado.</p>';return}}
+  const ents=searchEntities(),byPk=k=>ents.find(x=>priceKey(x.k,x.obj)===k),L=LIVE&&LIVE.d,ago=d=>{const h=(Date.now()-new Date(d).getTime())/36e5;return h<1?'hace '+Math.max(1,Math.round(h*60))+' min':h<24?'hace '+Math.round(h)+' h':'hace '+Math.round(h/24)+' d'};
+  const list=(WATCH.d||[]).map(w=>({w,e:byPk(w.k)})).filter(x=>x.e),mx=Math.max(...list.map(x=>x.w.score),1);
+  const card=({w,e},i)=>{const q=L&&L[w.k],dc=q&&q[1]?(q[0]/q[1]-1)*100:null,lv=Math.max(1,Math.min(5,Math.round(w.score/mx*5))),h=w.h[0];
+    return `<div class="wt" style="--c:${KIND_C[e.k]}"><button class="wt-top" data-k="${e.k}" data-t="${esc(e.t)}" data-n="${e.node}"><span class="wt-n">${i+1}</span><span class="sr-logo" style="--c:${KIND_C[e.k]}">${esc(String(e.tk).slice(0,4))}</span>
+      <span class="wt-nm"><b>${esc(e.name)}</b><small>${w.tags.map(t=>`<em>${esc(t)}</em>`).join('')}</small></span>
+      <span class="wt-r">${dc!=null?`<b class="pf-chip ${dc<0?'dn':'up'}">${dc<0?'▼':'▲'} ${p1(Math.abs(dc),1)} hoy</b>`:''}<i class="wt-sig">${[1,2,3,4,5].map(k=>`<i class="${k<=lv?'on':''}"></i>`).join('')}</i></span></button>
+      ${h?`<a class="wt-h" href="${esc(h.l)}" target="_blank" rel="noopener"><span>${h.s>0?'🟢':h.s<0?'🔴':'⚪'}</span>${esc(h.t)}<small>${ago(h.d)} ↗</small></a>`:''}
+      <div class="wt-f">📰 ${w.pos} buena${w.pos===1?'':'s'}${w.neg?` · ${w.neg} mala${w.neg===1?'':'s'}`:''} en 5 días${w.r1m!=null?` · ${w.r1m>=0?'+':''}${p1(w.r1m,0)} este mes`:''}</div></div>`};
+  el.innerHTML=`<p class="pf-lead">Empresas y ETFs con <b>noticias recientes favorables</b> (mejoras de recomendación, contratos, resultados por encima de lo esperado…) que todavía no se han disparado. Se recalcula cada 2 horas.</p>
+    <div class="wt-meta">📡 ${list.length} señales · ${relWhen(WATCH.u)}</div>
+    ${list.length?list.slice(0,20).map(card).join(''):'<p class="mp-note">Hoy no hay señales claras.</p>'}
+    <details class="mp-why"><summary>ℹ️ Cómo se elige</summary><p>Se leen los titulares de Yahoo Finance de cada valor de los últimos 5 días y se puntúan por su tono (mejora de recomendación, supera previsiones, nuevo contrato, aprobación… suman; rebajas, demandas, previsiones a la baja… restan), dando más peso a lo más reciente. Se suma un poco si el mes va bien y se resta si ya ha subido más de un 35 %. Es una señal automática, no una recomendación: muchas noticias ya están en el precio cuando las lees.</p></details>`;
+  el.querySelectorAll('.wt-top').forEach(b=>b.addEventListener('click',()=>openDetail(b.dataset.k,b.dataset.t,b.dataset.n)))}
 /* ================= MENÚ: el globo a pantalla completa y cada sección en su panel ================= */
-let hubSec=null;const HUB={pf:['★','Mi cartera'],plan:['🧭','Mi plan'],calc:['🧮','Calculadora']};
+let hubSec=null;const HUB={pf:['★','Mi cartera'],plan:['💡','Ideas y plan'],calc:['🧮','Calculadora'],watch:['👀','Ones to watch']};
 function initHub(){if(!MAPMODE||$('#dock'))return;const R=$('.right');if(!R)return;
-  R.querySelectorAll('.pbody>*').forEach(c=>c.dataset.s=c.id==='myPf'?'pf':c.id==='calc'?'calc':'plan');
+  R.querySelector('.pbody').insertAdjacentHTML('afterbegin','<div id="watch" class="pf watch"></div>');
+  R.querySelectorAll('.pbody>*').forEach(c=>c.dataset.s=c.id==='myPf'?'pf':c.id==='calc'?'calc':c.id==='watch'?'watch':'plan');
   const ph=R.querySelector('.phead');ph.insertAdjacentHTML('beforeend','<button class="mb-ico hub-ref" aria-label="Actualizar mercado">↻</button><button class="x-close hub-x" aria-label="Cerrar">✕</button>');
   ph.querySelector('.hub-x').addEventListener('click',()=>closeHub());ph.querySelector('.hub-ref').addEventListener('click',e=>refreshMarket(e.currentTarget));
-  const d=document.createElement('nav');d.id='dock';d.setAttribute('aria-label','Menú');
-  d.innerHTML=[['search','🔍','Buscar'],['pf','★','Cartera'],['plan','🧭','Plan'],['calc','🧮','Calcular'],['rank','🏆','Rankings'],['db','🗄','Datos']].map(([k,i,l])=>`<button data-hub="${k}"><span>${i}</span>${l}</button>`).join('');
-  document.body.appendChild(d);
-  d.addEventListener('click',e=>{const b=e.target.closest('[data-hub]');if(!b)return;const k=b.dataset.hub;
-    if(HUB[k]){hubSec===k?closeHub():openHub(k);return}closeHub();closePlace&&closePlace();
-    if(k==='search')openSearch();else if(k==='rank'){sq.rk=sq.rk||'r1y';openSearch();setTimeout(()=>{const t=document.querySelector('.rk-tabs');if(t)t.scrollIntoView({block:'start'})},120)}
-    else if(k==='db'&&typeof showPole==='function'&&mapReady)showPole()})}
+  const bb=document.createElement('nav');bb.id='bbar';bb.setAttribute('aria-label','Menú');
+  bb.innerHTML=`<button class="bb-menu" aria-label="Menú" aria-expanded="false"><i></i><i></i><i></i></button><button class="bb-search"><span>⌕</span><b id="bbarQ">Buscar empresa, ETF o fondo</b></button><button class="bb-ref" data-g="ref" aria-label="Actualizar mercado">↻</button>`;
+  const MENU=[['pf','★','Mi cartera','Lo que tienes y cómo va'],['plan','💡','Ideas de cartera','8 carteras para tu perfil'],['watch','👀','Ones to watch','Noticias que pueden moverlas'],['calc','🧮','Calculadora','¿Cuánto tendrías hoy?'],
+    ['rank','🏆','Rankings','Lo que más sube hoy'],['db','🗄','Base de datos','Explorar la ciudad 3D'],['set','⚙','Ajustes','Vista experta y conexiones']];
+  const mn=document.createElement('div');mn.id='menu';mn.hidden=true;
+  mn.innerHTML=`<div class="mn-box"><div class="mn-h"><b>ATLAS</b><span>${new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})}</span></div><div class="mn-grid">${MENU.map(([k,i,l,sub])=>`<button data-hub="${k}" style="--c:${({pf:'#c084fc',plan:'#ffb35a',watch:'#35e0ff',calc:'#4cd8a0',rank:'#ffd24a',db:'#7aa2ff',set:'#b9c6e8'})[k]}"><span class="mn-i">${i}</span><b>${l}</b><small>${sub}</small></button>`).join('')}</div></div>`;
+  document.body.appendChild(mn);document.body.appendChild(bb);
+  const menu=on=>{mn.hidden=!on;bb.querySelector('.bb-menu').setAttribute('aria-expanded',String(on));document.body.classList.toggle('menu-open',on)};
+  bb.querySelector('.bb-menu').addEventListener('click',()=>menu(mn.hidden));mn.addEventListener('click',e=>{if(e.target===mn)menu(false)});
+  bb.querySelector('.bb-search').addEventListener('click',()=>{menu(false);closeHub();openSearch()});bb.querySelector('.bb-ref').addEventListener('click',e=>refreshMarket(e.currentTarget));
+  mn.addEventListener('click',e=>{const b=e.target.closest('[data-hub]');if(!b)return;const k=b.dataset.hub;menu(false);
+    if(HUB[k]){openHub(k);return}closeHub();closePlace&&closePlace();
+    if(k==='rank'){sq.rk=sq.rk||'r1y';openSearch();setTimeout(()=>{const t=document.querySelector('.rk-tabs');if(t)t.scrollIntoView({block:'start'})},120)}
+    else if(k==='db'&&typeof showPole==='function'&&mapReady)showPole();else if(k==='set')$('#settings').hidden=false});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!mn.hidden)menu(false)});
+  $('#tick')&&($('#tick').innerHTML=tickHTML())}
 function openHub(sec){const R=$('.right');if(!R)return;if(!hubSec)sheetPush();hubSec=sec;R.dataset.sec=sec;R.classList.add('open');document.body.classList.add('hub-open');
   const h=R.querySelector('.phead h2 .sp');if(h)h.textContent=HUB[sec][0]+' '+HUB[sec][1];R.querySelector('.pbody').scrollTop=0;
-  document.querySelectorAll('#dock [data-hub]').forEach(b=>b.classList.toggle('on',b.dataset.hub===sec));
-  if(sec==='calc'&&!$('#calcOut'))renderCalc();if(sec==='pf')renderPf()}
+  if(sec==='calc'&&!$('#calcOut'))renderCalc();if(sec==='pf')renderPf();if(sec==='watch')renderWatch()}
 function closeHub(fromPop){if(!hubSec)return;if(fromPop!==true&&sheetPop())return;hubSec=null;const R=$('.right');R.classList.remove('open');document.body.classList.remove('hub-open');
-  document.querySelectorAll('#dock [data-hub]').forEach(b=>b.classList.remove('on'))}
+}
 let _pfCh=null;
 let pfPer=null;
 async function pfChart(ok){const cv=$('#pfChart');if(!cv||!window.Chart)return;const box=cv.parentElement;box.hidden=false;
