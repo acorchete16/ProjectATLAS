@@ -1,77 +1,85 @@
 crumb ok
-screener iShares: 526 productos
-  índice world csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239696/ishares-msci-world-etf/1467271812596.ajax?fileType=csv&fileName=URTH_holdings&dataType=
-  índice world json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239696/ishares-msci-world-etf/1467271812596.ajax?tab=all&fileType=json
-  índice world csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239696/ishares-msci-world-etf/1395165510754.ajax?fileType=csv&fileName=URTH_holdings&dataType=
-  índice world csv falló: sin cabecera: '<!doctype html>\n<html lang="en-GB">\n  <head>\n    <meta charset="UTF-8" />\n    <meta name="viewport" content="width=device-width, initial-scal · https://www.ishares.com/uk/individual/en/products/251882/ishares-msci-world-ucits-etf-acc-fund/1506575576011.ajax?fileType=csv&fil
-  índice world json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/uk/individual/en/products/251882/ishares-msci-world-ucits-etf-acc-fund/1506575576011.ajax?tab=all&fileType
-  índice sp500 csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf/1467271812596.ajax?fileType=csv&fileName=IVV_holdings&dataType=
-  índice sp500 json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf/1467271812596.ajax?tab=all&fileType=json
-  índice sp500 csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239726/ishares-core-sp-500-etf/1395165510754.ajax?fileType=csv&fileName=IVV_holdings&dataType=
-  índice sp500 csv falló: sin cabecera: '<!doctype html>\n<html lang="en-GB">\n  <head>\n    <meta charset="UTF-8" />\n    <meta name="viewport" content="width=device-width, initial-scal · https://www.ishares.com/uk/individual/en/products/253743/ishares-sp-500-b-ucits-etf-acc-fund/1506575576011.ajax?fileType=csv&fileN
-  índice sp500 json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/uk/individual/en/products/253743/ishares-sp-500-b-ucits-etf-acc-fund/1506575576011.ajax?tab=all&fileType=j
-  índice acwi csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239600/ishares-msci-acwi-etf/1467271812596.ajax?fileType=csv&fileName=ACWI_holdings&dataType=f
-  índice acwi json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239600/ishares-msci-acwi-etf/1467271812596.ajax?tab=all&fileType=json
-  índice acwi csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239600/ishares-msci-acwi-etf/1395165510754.ajax?fileType=csv&fileName=ACWI_holdings&dataType=f
-  índice acwi csv falló: sin cabecera: '<!doctype html>\n<html lang="en-GB">\n  <head>\n    <meta charset="UTF-8" />\n    <meta name="viewport" content="width=device-width, initial-scal · https://www.ishares.com/uk/individual/en/products/251850/ishares-msci-acwi-ucits-etf/1506575576011.ajax?fileType=csv&fileName=SSAC
-  índice acwi json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/uk/individual/en/products/251850/ishares-msci-acwi-ucits-etf/1506575576011.ajax?tab=all&fileType=json
-  índice em csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239637/ishares-msci-emerging-markets-etf/1467271812596.ajax?fileType=csv&fileName=EEM_holdings
-  índice em json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239637/ishares-msci-emerging-markets-etf/1467271812596.ajax?tab=all&fileType=json
-  índice em csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239637/ishares-msci-emerging-markets-etf/1395165510754.ajax?fileType=csv&fileName=EEM_holdings
-  índice em csv falló: sin cabecera: '<!doctype html>\n<html lang="en-GB">\n  <head>\n    <meta charset="UTF-8" />\n    <meta name="viewport" content="width=device-width, initial-scal · https://www.ishares.com/uk/individual/en/products/264659/ishares-msci-emerging-markets-imi-ucits-etf/1506575576011.ajax?fileType=c
-  índice em json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/uk/individual/en/products/264659/ishares-msci-emerging-markets-imi-ucits-etf/1506575576011.ajax?tab=all&fi
-  índice eafe csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239623/ishares-msci-eafe-etf/1467271812596.ajax?fileType=csv&fileName=EFA_holdings&dataType=fu
-  índice eafe json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239623/ishares-msci-eafe-etf/1467271812596.ajax?tab=all&fileType=json
-  índice eafe csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239623/ishares-msci-eafe-etf/1395165510754.ajax?fileType=csv&fileName=EFA_holdings&dataType=fu
-  índice europe csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/264617/ishares-core-msci-europe-etf/1467271812596.ajax?fileType=csv&fileName=IEUR_holdings&dat
-  índice europe json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/264617/ishares-core-msci-europe-etf/1467271812596.ajax?tab=all&fileType=json
-  índice europe csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/264617/ishares-core-msci-europe-etf/1395165510754.ajax?fileType=csv&fileName=IEUR_holdings&dat
-  índice europe csv falló: sin cabecera: '<!doctype html>\n<html lang="en-GB">\n  <head>\n    <meta charset="UTF-8" />\n    <meta name="viewport" content="width=device-width, initial-scal · https://www.ishares.com/uk/individual/en/products/251861/ishares-msci-europe-ucits-etf-acc-fund/1506575576011.ajax?fileType=csv&fi
-  índice europe json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/uk/individual/en/products/251861/ishares-msci-europe-ucits-etf-acc-fund/1506575576011.ajax?tab=all&fileTyp
-  índice emu csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239644/ishares-msci-emu-etf/1467271812596.ajax?fileType=csv&fileName=EZU_holdings&dataType=fun
-  índice emu json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239644/ishares-msci-emu-etf/1467271812596.ajax?tab=all&fileType=json
-  índice emu csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239644/ishares-msci-emu-etf/1395165510754.ajax?fileType=csv&fileName=EZU_holdings&dataType=fun
-  índice japan csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239665/ishares-msci-japan-etf/1467271812596.ajax?fileType=csv&fileName=EWJ_holdings&dataType=f
-  índice japan json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239665/ishares-msci-japan-etf/1467271812596.ajax?tab=all&fileType=json
-  índice japan csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239665/ishares-msci-japan-etf/1395165510754.ajax?fileType=csv&fileName=EWJ_holdings&dataType=f
-  índice japan csv falló: HTTP Error 500: Internal Server Error · https://www.ishares.com/uk/individual/en/products/251852/ishares-msci-japan-ucits-etf-acc-fund/1506575576011.ajax?fileType=csv&fil
-  índice japan json falló: HTTP Error 500: Internal Server Error · https://www.ishares.com/uk/individual/en/products/251852/ishares-msci-japan-ucits-etf-acc-fund/1506575576011.ajax?tab=all&fileType
-  índice small csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239710/ishares-russell-2000-etf/1467271812596.ajax?fileType=csv&fileName=IWM_holdings&dataType
-  índice small json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239710/ishares-russell-2000-etf/1467271812596.ajax?tab=all&fileType=json
-  índice small csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239710/ishares-russell-2000-etf/1395165510754.ajax?fileType=csv&fileName=IWM_holdings&dataType
-  índice wsmall csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239594/ishares-msci-acwi-ex-us-etf/1467271812596.ajax?fileType=csv&fileName=ACWX_holdings&data
-  índice wsmall json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239594/ishares-msci-acwi-ex-us-etf/1467271812596.ajax?tab=all&fileType=json
-  índice wsmall csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239594/ishares-msci-acwi-ex-us-etf/1395165510754.ajax?fileType=csv&fileName=ACWX_holdings&data
-  índice india csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239659/ishares-msci-india-etf/1467271812596.ajax?fileType=csv&fileName=INDA_holdings&dataType=
-  índice india json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239659/ishares-msci-india-etf/1467271812596.ajax?tab=all&fileType=json
-  índice india csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239659/ishares-msci-india-etf/1395165510754.ajax?fileType=csv&fileName=INDA_holdings&dataType=
-  índice china csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239619/ishares-msci-china-etf/1467271812596.ajax?fileType=csv&fileName=MCHI_holdings&dataType=
-  índice china json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239619/ishares-msci-china-etf/1467271812596.ajax?tab=all&fileType=json
-  índice china csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239619/ishares-msci-china-etf/1395165510754.ajax?fileType=csv&fileName=MCHI_holdings&dataType=
-  índice semis csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239705/ishares-phlx-semiconductor-etf/1467271812596.ajax?fileType=csv&fileName=SOXX_holdings&d
-  índice semis json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239705/ishares-phlx-semiconductor-etf/1467271812596.ajax?tab=all&fileType=json
-  índice semis csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239705/ishares-phlx-semiconductor-etf/1395165510754.ajax?fileType=csv&fileName=SOXX_holdings&d
-  índice tech csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239522/ishares-us-technology-etf/1467271812596.ajax?fileType=csv&fileName=IYW_holdings&dataTyp
-  índice tech json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239522/ishares-us-technology-etf/1467271812596.ajax?tab=all&fileType=json
-  índice tech csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239522/ishares-us-technology-etf/1395165510754.ajax?fileType=csv&fileName=IYW_holdings&dataTyp
-  índice health csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239511/ishares-us-healthcare-etf/1467271812596.ajax?fileType=csv&fileName=IYH_holdings&dataTyp
-  índice health json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239511/ishares-us-healthcare-etf/1467271812596.ajax?tab=all&fileType=json
-  índice health csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239511/ishares-us-healthcare-etf/1395165510754.ajax?fileType=csv&fileName=IYH_holdings&dataTyp
-  índice biotech csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239699/ishares-biotechnology-etf/1467271812596.ajax?fileType=csv&fileName=IBB_holdings&dataTyp
-  índice biotech json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239699/ishares-biotechnology-etf/1467271812596.ajax?tab=all&fileType=json
-  índice biotech csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239699/ishares-biotechnology-etf/1395165510754.ajax?fileType=csv&fileName=IBB_holdings&dataTyp
-  índice defense csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239502/ishares-us-aerospace-defense-etf/1467271812596.ajax?fileType=csv&fileName=ITA_holdings&
-  índice defense json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239502/ishares-us-aerospace-defense-etf/1467271812596.ajax?tab=all&fileType=json
-  índice defense csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239502/ishares-us-aerospace-defense-etf/1395165510754.ajax?fileType=csv&fileName=ITA_holdings&
-  índice cleanen csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239738/ishares-global-clean-energy-etf/1467271812596.ajax?fileType=csv&fileName=ICLN_holdings&
-  índice cleanen json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239738/ishares-global-clean-energy-etf/1467271812596.ajax?tab=all&fileType=json
-  índice cleanen csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239738/ishares-global-clean-energy-etf/1395165510754.ajax?fileType=csv&fileName=ICLN_holdings&
-  índice infra csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239746/ishares-global-infrastructure-etf/1467271812596.ajax?fileType=csv&fileName=IGF_holdings
-  índice infra json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239746/ishares-global-infrastructure-etf/1467271812596.ajax?tab=all&fileType=json
-  índice infra csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239746/ishares-global-infrastructure-etf/1395165510754.ajax?fileType=csv&fileName=IGF_holdings
-  índice eufin csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239645/ishares-msci-europe-financials-etf/1467271812596.ajax?fileType=csv&fileName=EUFN_holdin
-  índice eufin json falló: Expecting value: line 1 column 1 (char 0) · https://www.ishares.com/us/products/239645/ishares-msci-europe-financials-etf/1467271812596.ajax?tab=all&fileType=json
-  índice eufin csv falló: sin cabecera: '<!DOCTYPE html>\n<html xmlns="http://www.w3.org/1999/xhtml" prefix="og: http://ogp.me/ns#" lang="en-US" xml:lang="en-US">\n<head>\n<link rel="pre · https://www.ishares.com/us/products/239645/ishares-msci-europe-financials-etf/1395165510754.ajax?fileType=csv&fileName=EUFN_holdin
-  invesco cabecera: '<!--\n* This file is created specifically to update\n* lang attribute in html tag and\n* data-language attribute body tag\n* based on the country and language\n* in SPA pages.\n-->\n<!DOCTYPE html>\n<html lang="en">\n  <head><script>\n;window.NREUM||(NREUM={});NREUM.init={session_replay:{enabled:true,block_se'
-  índice ndx (Invesco) falló: pocos datos
+SEC mapa falló: HTTP Error 403: Forbidden
+  índice world N-PORT falló: sin serie SEC
+  índice sp500 N-PORT falló: sin serie SEC
+  índice acwi N-PORT falló: sin serie SEC
+  índice em N-PORT falló: sin serie SEC
+  índice eafe N-PORT falló: sin serie SEC
+  índice europe N-PORT falló: sin serie SEC
+  índice emu N-PORT falló: sin serie SEC
+  índice japan N-PORT falló: sin serie SEC
+  índice small N-PORT falló: sin serie SEC
+  índice wsmall N-PORT falló: sin serie SEC
+  índice india N-PORT falló: sin serie SEC
+  índice china N-PORT falló: sin serie SEC
+  índice semis N-PORT falló: sin serie SEC
+  índice tech N-PORT falló: sin serie SEC
+  índice health N-PORT falló: sin serie SEC
+  índice biotech N-PORT falló: sin serie SEC
+  índice defense N-PORT falló: sin serie SEC
+  índice cleanen N-PORT falló: sin serie SEC
+  índice infra N-PORT falló: sin serie SEC
+  índice eufin N-PORT falló: sin serie SEC
+  ndx N-PORT falló: sin serie SEC
+  e:AGG: N-PORT no (sin serie SEC)
+  e:ARKG: N-PORT no (sin serie SEC)
+  e:ARKX: N-PORT no (sin serie SEC)
+  e:BOTZ: N-PORT no (sin serie SEC)
+  e:DXJ: N-PORT no (sin serie SEC)
+  e:EEM: N-PORT no (sin serie SEC)
+  e:EPI: N-PORT no (sin serie SEC)
+  e:EUFN: N-PORT no (sin serie SEC)
+  e:EWJ: N-PORT no (sin serie SEC)
+  e:EWW: N-PORT no (sin serie SEC)
+  e:EWZ: N-PORT no (sin serie SEC)
+  e:FINX: N-PORT no (sin serie SEC)
+  e:FXI: N-PORT no (sin serie SEC)
+  e:GLD: N-PORT no (sin serie SEC)
+  e:GRID: N-PORT no (sin serie SEC)
+  e:IAI: N-PORT no (sin serie SEC)
+  e:IBB: N-PORT no (sin serie SEC)
+  e:ICLN: N-PORT no (sin serie SEC)
+  e:IGF: N-PORT no (sin serie SEC)
+  e:IGV: N-PORT no (sin serie SEC)
+  e:IHI: N-PORT no (sin serie SEC)
+  e:ILF: N-PORT no (sin serie SEC)
+  e:INDA: N-PORT no (sin serie SEC)
+  e:ITA: N-PORT no (sin serie SEC)
+  e:IWM: N-PORT no (sin serie SEC)
+  e:KBE: N-PORT no (sin serie SEC)
+  e:KWEB: N-PORT no (sin serie SEC)
+  e:MCHI: N-PORT no (sin serie SEC)
+  e:NLR: N-PORT no (sin serie SEC)
+  e:PAVE: N-PORT no (sin serie SEC)
+  e:PPA: N-PORT no (sin serie SEC)
+  e:QCLN: N-PORT no (sin serie SEC)
+  e:QLD: N-PORT no (sin serie SEC)
+  e:QQQ: N-PORT no (sin serie SEC)
+  e:SCJ: N-PORT no (sin serie SEC)
+  e:SHY: N-PORT no (sin serie SEC)
+  e:SMH: N-PORT no (sin serie SEC)
+  e:SMIN: N-PORT no (sin serie SEC)
+  e:SOXL: N-PORT no (sin serie SEC)
+  e:SOXX: N-PORT no (sin serie SEC)
+  e:SPY: N-PORT no (sin serie SEC)
+  e:SSO: N-PORT no (sin serie SEC)
+  e:TAN: N-PORT no (sin serie SEC)
+  e:TIP: N-PORT no (sin serie SEC)
+  e:TQQQ: N-PORT no (sin serie SEC)
+  e:UFO: N-PORT no (sin serie SEC)
+  e:URA: N-PORT no (sin serie SEC)
+  e:URNM: N-PORT no (sin serie SEC)
+  e:URTH: N-PORT no (sin serie SEC)
+  e:VCR: N-PORT no (sin serie SEC)
+  e:VGK: N-PORT no (sin serie SEC)
+  e:VIG: N-PORT no (sin serie SEC)
+  e:VT: N-PORT no (sin serie SEC)
+  e:XAR: N-PORT no (sin serie SEC)
+  e:XBI: N-PORT no (sin serie SEC)
+  e:XLF: N-PORT no (sin serie SEC)
+  e:XLK: N-PORT no (sin serie SEC)
+  e:XLP: N-PORT no (sin serie SEC)
+  e:XLU: N-PORT no (sin serie SEC)
+  e:XLV: N-PORT no (sin serie SEC)
+  e:XLY: N-PORT no (sin serie SEC)
 OK · 0 índices completos · 153 ETFs/fondos (0 por índice, 152 con datos de Yahoo)
