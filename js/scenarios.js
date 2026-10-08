@@ -108,7 +108,7 @@ const TXT={
   iAdd:'Explorar otras exposiciones (añadir un 10 %)',iAddW:'Elige una categoría y después el criterio con el que quieres ver los candidatos. Sin criterio no se muestra ninguna lista.',
   iAlt:'Explorar alternativas de la misma categoría',iAltW:'Productos de la misma categoría (no necesariamente del mismo índice). Elige el criterio de orden.',
   iKeep:'Mantener sin cambios',iKeepW:'Referencia: la cartera actual tal como está.',
-  iAll:'Toda la cartera',
+  iAll:'Toda la cartera',iAsset:'Explorar cambios sobre {x}',iAssetW:'Operaciones de tamaño fijo sobre el producto que has elegido; el resto de la cartera se ajusta pro-rata.',
   cSec:'{x} pp de {s}',cCty:'{x} pp en {s}',cComp:'≥ {x} % de tu cartera en {s}',cW:'{x} % de la cartera',cVol:'volatilidad propia {x} %',cTer:'TER {x} %',
   oRed:'−10 pp',oRem:'Quitar'
 };
@@ -397,29 +397,17 @@ function pareto(results,objectives){const ok=(results||[]).filter(r=>r&&r.valid)
 const nrm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/€/g,' eur ').replace(/%/g,' % ').replace(/[¿?¡!;:]+/g,' ').replace(/\.(?!\d)/g,' ').replace(/,(?!\d)/g,' ').replace(/\s+/g,' ').trim();
 const num=s=>{const v=parseFloat(String(s).replace(/\./g,'').replace(',','.'));return isFinite(v)?v:null};
 const pnum=s=>{const v=parseFloat(String(s).replace(',','.'));return isFinite(v)?v:null};
-const ALIAS=[[/^(el |la |los |las )?(nasdaq( ?100)?|nasdaq-100|ndx)$/,'nasdaq'],[/^(el |la )?(s ?& ?p( ?500)?|sp ?500|s and p 500)$/,'sp'],[/^(el |la )?(world|mundo|mundial|msci world|all ?world|acwi|global|indice mundial)$/,'world'],
-  [/^(los |las )?(emergentes|mercados emergentes|emerging( markets)?|em)$/,'em'],[/^(los |la )?(bonos|renta fija|bond|bonds)$/,'bond'],[/^(el )?(oro|gold)$/,'gold'],[/^(las |los )?(small ?caps?|pequenas( empresas)?|empresas pequenas)$/,'small'],
-  [/^(europa|europe)$/,'europe'],[/^(japon|japan)$/,'japan'],[/^(los )?(semis|semiconductores)$/,'semis']];
-const SECW=[[/tecnolog/,'Tecnología'],[/salud|sanidad/,'Salud'],[/financ|banca|bancos/,'Finanzas'],[/energia/,'Energía'],[/industria/,'Industria'],[/consumo basico/,'Consumo básico'],[/consumo/,'Consumo discrecional'],[/inmobiliar/,'Inmobiliario'],[/materiales/,'Materiales'],[/comunicacion/,'Comunicaciones'],[/servicios publicos|utilities/,'Servicios públicos']];
-const ALIAS_LBL={nasdaq:'Nasdaq',sp:'S&P 500',world:'World',em:'emergentes',bond:'bonos',gold:'oro',small:'small caps',europe:'Europa',japan:'Japón',semis:'semiconductores'};
-function matchKey(e,key,strict){const n=(e.name+' '+(e.obj.n||'')).toLowerCase(),tg=key==='nasdaq'||key==='sp'||key==='semis'?[]:A().tagsOf(e);
-  if(key==='nasdaq')return /nasdaq/.test(n);if(key==='sp')return /s&p 500|s&p500|sp 500/.test(n)&&!(strict&&(e.obj.lev||/equal|equipond|leveraged|ultra|×|\b[23]x\b/.test(n)));if(key==='semis')return /semicond/.test(n);if(key==='gold')return tg.includes('gold')&&/\b(gold|oro)\b/.test(n);
-  if(key==='world')return tg.includes('world')||/\b(world|all-world|all world|acwi)\b/.test(n);return tg.includes(key)}
+/* P1.1: la resolución de activos vive en ATLASI.assets (única fuente de verdad). Esto es solo un envoltorio que conserva
+   el formato y los textos del parser de escenarios. Los alias se movieron a js/assets.js. */
 function clean(p){return String(p||'').replace(/^(todo el |todo |el peso de |la exposicion a |mi |mis |el |la |los |las |un |una )+/,'').replace(/^(etf|fondo)s? (de |del |en )?/,'').replace(/\s+(etf|fondo)$/,'').trim()}
 function resolveAsset(phrase,P0,mode){/* mode 'held' (debe estar en cartera) | 'any' */
-  const p=clean(phrase);if(!p)return{error:T('eAsset',{p:phrase})};const held=P0.map(x=>({id:x.id,e:entOf(x.id)})).filter(x=>x.e);const P=p.toUpperCase();
-  const tk=held.filter(x=>String(x.e.tk).toUpperCase()===P||x.e.t.toUpperCase()===P);if(tk.length===1)return{id:tk[0].id};
-  const key=(ALIAS.find(([rx])=>rx.test(p))||[])[1];
-  if(key){const h=held.filter(x=>matchKey(x.e,key));if(h.length===1)return{id:h[0].id};if(h.length>1)return{ask:{question:T('qWhich',{p:ALIAS_LBL[key]}),options:h.sort((a,b)=>byId(a.id,b.id)).map(x=>({label:nameOf(x.id)+' · '+x.e.name,value:x.id}))}}}
-  const hn=held.filter(x=>p.length>=4&&nrm(x.e.name).includes(p));if(hn.length===1)return{id:hn[0].id};if(hn.length>1)return{ask:{question:T('qWhich',{p}),options:hn.sort((a,b)=>byId(a.id,b.id)).map(x=>({label:nameOf(x.id)+' · '+x.e.name,value:x.id}))}};
-  if(mode==='held')return{error:T('vNotHeld',{a:/\s/.test(p)?p:p.toUpperCase()})};
-  const E=searchEntities(),ex=E.filter(e=>String(e.tk).toUpperCase()===P||e.t.toUpperCase()===P);const exF=ex.filter(e=>e.k!=='s');if(exF.length===1)return{id:idOf(exF[0])};if(!exF.length&&ex.length===1)return{id:idOf(ex[0])};
-  if(/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(P)){const r=A().resolveTok&&A().resolveTok(P);if(r)return{id:idOf(r)}}
-  const ter=e=>{const t=A().terOf(e);return t==null?9:t};
-  const pickAsk=(list,q)=>({ask:{question:q,options:list.sort((a,b)=>ter(a)-ter(b)||byId(idOf(a),idOf(b))).slice(0,8).map(e=>({label:nameOf(idOf(e))+' · '+e.name+(A().terOf(e)!=null?' · TER '+fmt(A().terOf(e),2)+' %':''),value:idOf(e)})),order:'ter'}});
-  if(key){const L=searchEntities().filter(e=>(e.k==='e'||e.k==='f')&&!e.obj.lev&&matchKey(e,key,true)&&!/\b[23]x\b|×|ultra|leveraged/i.test(e.name));if(L.length===1)return{id:idOf(L[0])};if(L.length)return pickAsk(L,T('qPick',{p:ALIAS_LBL[key]}))}
-  const nm=p.length>=3?E.filter(e=>nrm(e.name).includes(p)):[];if(nm.length===1)return{id:idOf(nm[0])};if(nm.length)return pickAsk(nm,T('qPickName',{p}));
-  return{error:T('eAsset',{p:phrase})}}
+  const p=clean(phrase);if(!p)return{error:T('eAsset',{p:phrase})};const AS=A().assets;
+  const r=AS.resolve(p,{P:P0,mode:mode==='held'?'held':'any',kinds:AS.PRODUCT,concept:'product'});
+  if(r.match)return{id:r.match.id};
+  if(r.ask){const cn=r.ask.concept?AS.nameOf(r.ask.concept):p,lab=o=>nameOf(o.id)+' · '+o.name+(r.ask.order==='ter'&&A().terOf(entOf(o.id))!=null?' · TER '+fmt(A().terOf(entOf(o.id)),2)+' %':'');
+    const q=r.ask.reason==='concept-universe'?T('qPick',{p:cn}):r.ask.reason==='concept-held'||P0.some(x=>r.ask.options.every(o=>P0.some(y=>y.id===o.id)))?T('qWhich',{p:cn}):T('qPickName',{p});
+    return{ask:{question:q,options:r.ask.options.map(o=>({label:lab(o),value:o.id})),order:r.ask.order}}}
+  return{error:mode==='held'?T('vNotHeld',{a:/\s/.test(p)?p:p.toUpperCase()}):T('eAsset',{p:phrase})}}
 const HOLE={$hole:true};
 function finishDraft(d,queue){if(queue.length)return{ask:{...queue[0].ask,pending:{draft:d,queue}}};
   d.type=d.type||typeFor(d.changes);const v=validate(d);if(!v.ok)return{error:T('eVerb'),details:v.errors};return{scenario:canonical(d)}}
@@ -485,7 +473,7 @@ function parse(text,P0in){const s=nrm(text).replace(/^(y |que pasa si |que ocurr
   /* reducir / aumentar / fijar */
   const VR=/^(reduc\w*|reduz\w*|baj[aeo]\w*|recort\w*|disminu\w*|aument\w*|sub[eio]\w*|increment\w*|pon\w*|dej[aeo]\w*)\s+(.+)$/;
   if((m=s.match(VR))){const verb=m[1],rest=m[2],dir=/^(reduc|reduz|baj|recort|disminu)/.test(verb)?-1:/^(aument|sub|increment)/.test(verb)?1:0;let mm;
-    const sec=SECW.find(([rx])=>rx.test(rest));
+    const secR=A().assets.resolve(rest.replace(/^(la |mi |el )?(exposicion (a|en) )?/,'').replace(/\s+(al?|hasta|en)\s+\d.*$/,'').trim(),{mode:'any',kinds:['sector']}),sec=secR.match?[null,A().assets.nameOf(secR.match.id)]:null;
     const isSectorPhrase=/^(la |mi |el )?(exposicion (a|en) )?(tecnolog\w*|salud|sanidad|financ\w*|banca|bancos|energia|industria|consumo( basico)?|inmobiliario|materiales|comunicaciones|servicios publicos|utilities)\b/.test(rest);
     if(isSectorPhrase&&sec){/* objetivo sectorial: pregunta, sin asumir porcentaje */
       const L=A().lookThrough(P0.map(x=>({e:entOf(x.id),w:x.w}))),curS=L.S[sec[1]]||0;const tg=(mm=rest.match(/(?:al?|hasta el?|hasta)\s+(\d+(?:[.,]\d+)?)\s*%?/))?pnum(mm[1])/100:null;
@@ -555,6 +543,9 @@ function ideas(An,problem){const P0=normP((An&&An.P||[]).map(x=>({e:x.e,w:x.w}))
   else if(k==='ovl'||k==='corr'){const ids=(ref||[]).map(t=>P0.find(x=>x.id.endsWith(':'+t))).filter(Boolean);out.groups.push({id:'pair',title:T('iPairs'),why:T('iPairsW'),rows:rows(ids.map(x=>({id:x.id})),x=>T('cW',{x:fmt(wOf(x.id)*100,1)}))})}
   else if(k==='vol'){const sg=id=>{if(!R)return null;const i=R.assets.findIndex(e=>idOf(e)===id);return i>=0&&R.sig?R.sig[i]:null};
     out.groups.push({id:'vol',title:T('iVol'),why:T('iVolW'),rows:rows(P0.map(x=>({id:x.id})),x=>{const v=sg(x.id);return v==null?T('cW',{x:fmt(wOf(x.id)*100,1)}):T('cVol',{x:fmt(v*100,1)})})})}
+  else if(k==='asset'){/* cambios sobre un producto concreto elegido por el usuario (desde Analizar / Hoy) */const x=P0.find(y=>y.id===ref);
+    if(x)out.groups.push({id:'asset',title:T('iAsset',{x:nameOf(ref)}),why:T('iAssetW'),rows:rows([{id:ref}],y=>T('cW',{x:fmt(wOf(y.id)*100,1)}))});
+    const e=entOf(ref),tg=e&&A().tagsOf(e)[0];if(e&&tg&&ref[0]!=='s')out.groups.push({id:'alt',title:T('iAlt'),why:T('iAltW'),alts:[{id:ref,label:nameOf(ref),tag:tg,info:A().terOf(e)==null?'':T('cTer',{x:fmt(A().terOf(e),2)})}]})}
   else if(k==='cost'){out.groups.push({id:'alt',title:T('iAlt'),why:T('iAltW'),alts:P0.filter(x=>x.id[0]!=='s').sort(alpha).map(x=>{const e=entOf(x.id),tg=A().tagsOf(e)[0]||null,t=A().terOf(e);return{id:x.id,label:nameOf(x.id),tag:tg,info:t==null?'':T('cTer',{x:fmt(t,2)})}}).filter(a=>a.tag)})}
   if(!k||k==='bets'||k==='em'||k==='cost'||k==='vol')out.groups.push({id:'rel',title:T('iRel'),why:T('iRelW'),rows:rows(P0.filter(x=>x.w>=.05).map(x=>({id:x.id})),x=>T('cW',{x:fmt(wOf(x.id)*100,1)}))});
   out.groups.push({id:'add',title:T('iAdd'),why:T('iAddW'),explore:{fn:'additions',w:.10,tags:ADD_TAGS.map(([t,l])=>({tag:t,label:l}))}});

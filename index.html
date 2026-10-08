@@ -2432,8 +2432,8 @@ function updateMap(first){if(!mapReady)return;const list=mapEntities(),gj=mapGeo
 function renderMapBar(nPts,nEnt){const b=$('#mapBar');if(!b)return;const chip=(g,v,l,on)=>`<button class="mb-chip${on?' on':''}" data-g="${g}" data-v="${v}">${l}</button>`,a=filterActive();
   const bs=$('#bbarQ');if(bs)bs.textContent=sq.q||'Buscar empresa, ETF o fondo';
   b.innerHTML=`<div class="tick" id="tick">${tickHTML()}</div>
-   <div class="mb-ft"><button class="mb-flt${a?' on':''}" data-g="flt" aria-expanded="${b.classList.contains('flt-open')}">${a?esc([{etf:'ETFs',fnd:'Fondos',stk:'Acciones',all:'Todo'}[sq.type],sq.mine?'Mi cartera':'',sq.fit?'Para mí':'',sq.sec!=='all'?sq.sec:''].filter(Boolean).join(' · ')):'Mostrar en el mapa'} ▾</button></div>
-   <div class="mb-row">${chip('type','etf','ETFs',a&&sq.type==='etf')}${chip('type','fnd','Fondos',a&&sq.type==='fnd')}${chip('type','stk','Acciones',a&&sq.type==='stk')}${chip('type','all','Todo',a&&sq.type==='all')}${PF.length?chip('mine','1','★ Mi cartera',a&&sq.mine):''}${chip('fit','1','✓ Para mí',a&&sq.fit)}${chip('sec','pick',sq.sec!=='all'&&a?`${SEC_ICON[sq.sec]||''} ${esc(sq.sec)} ▾`:'Sector ▾',a&&sq.sec!=='all')}</div>
+   <div class="mb-ft"><button class="mb-flt${a?' on':''}" data-g="flt" aria-expanded="${b.classList.contains('flt-open')}">${a?esc([{etf:'ETFs',fnd:'Fondos',stk:'Acciones',all:'Todo'}[sq.type],sq.mine?'Mi cartera':'',sq.fit?'En tu perfil de volatilidad':'',sq.sec!=='all'?sq.sec:''].filter(Boolean).join(' · ')):'Mostrar en el mapa'} ▾</button></div>
+   <div class="mb-row">${chip('type','etf','ETFs',a&&sq.type==='etf')}${chip('type','fnd','Fondos',a&&sq.type==='fnd')}${chip('type','stk','Acciones',a&&sq.type==='stk')}${chip('type','all','Todo',a&&sq.type==='all')}${PF.length?chip('mine','1','★ Mi cartera',a&&sq.mine):''}${chip('fit','1','En tu perfil de volatilidad',a&&sq.fit)}${chip('sec','pick',sq.sec!=='all'&&a?`${SEC_ICON[sq.sec]||''} ${esc(sq.sec)} ▾`:'Sector ▾',a&&sq.sec!=='all')}</div>
    ${a?`<div class="mb-leg"><span><i class="lg e"></i>ETF</span><span><i class="lg f"></i>Fondo</span><span><i class="lg s"></i>Acción</span></div>`:''}${a?`<div class="mb-res"><span><b>${nEnt}</b> resultado${nEnt===1?'':'s'} encendido${nEnt===1?'':'s'}</span><button data-g="list">Ver lista</button><button data-g="clear" aria-label="Quitar filtros">✕</button></div>`:''}`}
 function mapBarClick(e){const b=e.target.closest('button[data-g]');if(!b)return;const g=b.dataset.g,v=b.dataset.v;
   const MB=$('#mapBar');if(g==='flt'){const on=MB.classList.toggle('flt-open');b.setAttribute('aria-expanded',String(on));return}if(MB&&g!=='sec')MB.classList.remove('flt-open');
@@ -2584,10 +2584,8 @@ function pfDates(pos){if(pos.mode==='u'||pos.mode==='v')return[pos.date];const o
   const [ty,tm]=(pos.to||'9999-12').split('-').map(Number);while((y<ny||(y===ny&&m<=nm))&&(y<ty||(y===ty&&m<=tm))){out.push(`${y}-${String(m).padStart(2,'0')}-01`);m++;if(m>12){m=1;y++}}return out}
 let _isinMap=null;async function isinMap(){if(_isinMap)return _isinMap;try{_isinMap=await (await fetch('data/isin_map.json?'+Date.now(),{cache:'no-store'})).json()}catch(_){_isinMap={}}return _isinMap}
 const isinOf=e=>((e.obj&&(e.obj.isin||(e.obj.u&&e.obj.u.isin)))||'').toUpperCase();
-async function findInvest(q){q=String(q||'').trim().toUpperCase().replace(/\s+/g,'');if(!q)return null;const ents=searchEntities();
-  let e=ents.find(x=>isinOf(x)===q);if(e)return e;const m=(await isinMap())[q];
-  if(m&&!m.err){e=m.k==='f'?ents.find(x=>x.k==='f'&&isinOf(x)===(m.isin||q)):ents.find(x=>x.k===m.k&&x.t===m.t);if(e)return e}
-  return ents.find(x=>x.t.toUpperCase()===q||String(x.tk||'').toUpperCase()===q)||null}
+/* P1.1: alta de cartera → ATLASI.assets (única fuente de verdad). Solo devuelve una entidad si la coincidencia es única. */
+async function findInvest(q){q=String(q||'').trim();if(!q)return null;await isinMap();const AS=ATLASI.assets,r=AS.resolve(q,{mode:'any',kinds:AS.PRODUCT,concept:'product'});return r.match?AS.entity(r.match.id):null}
 const isinIssue=q=>`https://github.com/acorchete16/ProjectATLAS/issues/new?title=${encodeURIComponent('ISIN '+q)}&body=${encodeURIComponent('Añadir esta inversión a ATLAS para tener precios diarios. (No pongas importes aquí: este repositorio es público.)')}`;
 async function pfValue(pos){if(pos.k==='x'){const e=await findInvest(pos.t);if(e){pos.k=e.k;pos.t=e.t;pfSave()}
     else{const inv=pos.mode==='v'?(pos.cost||pos.amt):0,val=pos.mode==='v'?pos.amt:0;return{pos,pending:true,inv,val,gain:val-inv,pct:inv?(val/inv-1)*100:0}}}
@@ -2854,7 +2852,7 @@ function pfOldForm(){const sec=document.createElement('div');sec.className='pf-a
   const $q=x=>sec.querySelector(x),hit=$q('[data-hit]');let found=null,tm;
   $q('[data-o]').addEventListener('click',e=>{e.target.hidden=true;$q('.pf-form').hidden=false;$q('[data-isin]').focus()});
   $q('[data-isin]').addEventListener('input',e=>{clearTimeout(tm);tm=setTimeout(async()=>{const v=e.target.value.trim();if(v.length<2){hit.textContent='';found=null;return}
-    found=await findInvest(v);hit.innerHTML=found?`✓ ${esc(found.name)} <span style="color:${KIND_C[found.k]}">· ${({e:'ETF',f:'Fondo',s:'Acción'})[found.k]}</span>`:(/^[A-Z]{2}[A-Z0-9]{9}\d$/i.test(v)?'No está aún en ATLAS: lo guardo y puedes activar sus precios diarios con un toque.':'No lo encuentro: revisa el ISIN.')},250)});
+    found=await findInvest(v);const rr=found?null:ATLASI.assets.resolve(v,{mode:'any',kinds:ATLASI.assets.PRODUCT,concept:'product'});hit.innerHTML=found?`✓ ${esc(found.name)} <span style="color:${KIND_C[found.k]}">· ${({e:'ETF',f:'Fondo',s:'Acción'})[found.k]}</span>`:(rr&&rr.ask?`Varios productos coinciden: ${esc(rr.ask.options.slice(0,4).map(o=>(o.atlasTicker||o.id)+' ('+o.name+')').join(', '))}. Escribe el ISIN o el ticker exacto.`:/^[A-Z]{2}[A-Z0-9]{9}\d$/i.test(v)?'No está aún en ATLAS: lo guardo y puedes activar sus precios diarios con un toque.':'No lo encuentro: revisa el ISIN.')},250)});
   $q('[data-s]').addEventListener('click',async()=>{const q=$q('[data-isin]').value.trim().toUpperCase().replace(/\s+/g,''),val=+$q('[data-val]').value,cost=+$q('[data-cost]').value||0,mon=+$q('[data-mon]').value||0;
     if(!q||!(val>0)){hit.textContent='Pon el ISIN y cuánto vale hoy.';return}found=found||await findInvest(q);
     if(!found&&!/^[A-Z]{2}[A-Z0-9]{9}\d$/.test(q)){hit.textContent='No lo encuentro: revisa el ISIN.';return}
@@ -2921,31 +2919,49 @@ function renderSearch(){
   res=sortEnts(res,sq.sort);if(words.length){const ex=res.filter(exact);if(ex.length)res=ex.concat(res.filter(x=>!exact(x)))}
   if(sq.top)res=res.slice(0,sq.top);
   const chip=(grp,val,lbl,on,cls='')=>`<button class="sc-chip${cls}${on?' on':''}" data-g="${grp}" data-v="${esc(val)}">${lbl}</button>`;
-  if(!d.querySelector('.sbox')){d.innerHTML=`<div class="sbox"><div class="shead"><span class="sic">⌕</span><input id="sQ" type="search" placeholder="Busca NVIDIA, Fidelity, Cobas, IWDA…" autocomplete="off" enterkeyhint="search"><button class="x-close" data-sclose aria-label="Cerrar">✕</button></div>
-    <div class="sbar" id="sBar"></div><div class="sfil" id="sFil" hidden></div><div class="scount" id="sCount"></div><div class="slistr" id="sList"></div></div>`;
-    $('#sQ').addEventListener('input',e=>{sq.q=e.target.value;if(sq.q.trim())sq.active=true;renderSearch()});
+  if(!d.querySelector('.sbox')){d.innerHTML=`<div class="sbox"><p class="s-ask">¿Qué quieres investigar?</p><div class="shead"><span class="sic">⌕</span><input id="sQ" type="search" placeholder="QQQ · NVIDIA · VWCE · IE00… · ¿Qué pasa si…?" autocomplete="off" enterkeyhint="search"><button class="x-close" data-sclose aria-label="Cerrar">✕</button></div>
+    <div class="s-quick" id="sQuick"></div><div class="s-ans" id="sAns" hidden></div><div class="sbar" id="sBar"></div><div class="sfil" id="sFil" hidden></div><div class="scount" id="sCount"></div><div class="slistr" id="sList"></div></div>`;
+    $('#sQ').addEventListener('input',e=>{delete $('#sAns').dataset.keep;sq.q=e.target.value;if(sq.q.trim())sq.active=true;renderSearch()});
+    /* Analizar: Intro ejecuta la consulta (ATLASI.query); los accesos rápidos también */
+    $('#sQ').addEventListener('keydown',e=>{if(e.key!=='Enter')return;e.preventDefault();const v=e.target.value.trim();if(!v)return;const b=$('#sAns');b.hidden=false;ATLASI.azRun(b,v)});
+    $('#sQuick').addEventListener('click',e=>{const b=e.target.closest('[data-sq]');if(!b)return;const v=b.dataset.sq;$('#sQ').value=v;const a=$('#sAns');a.hidden=false;ATLASI.azRun(a,v)});
     d.querySelector('[data-sclose]').addEventListener('click',closeSearch);
     d.addEventListener('click',e=>{if(e.target===d)closeSearch()});
     const onChip=e=>{const b=e.target.closest('.sc-chip');if(!b)return;const g=b.dataset.g,v=b.dataset.v;
       if(g!=='open')sq.active=true;if(g==='fit')sq.fit=!sq.fit;else if(g==='open')sq.open=!sq.open;else if(g==='sec')sq.sec=sq.sec===v&&v!=='all'?'all':v;else if(g==='top')sq.top=+v;else if(g==='rk'){sq.rk=v;renderSearch();return}else if(g==='rkall'){sq.sort=sq.rk||'r1y';sq.top=25;sq.active=true;sq.open=false;renderSearch();return}else sq[g]=v;renderSearch();if(g==='sec'&&b.classList.contains('stile'))$('#sList').scrollTop=0};
     ['#sBar','#sFil','#sList'].forEach(s=>$(s).addEventListener('click',onChip));
     $('#sList').addEventListener('click',e=>{const b=e.target.closest('.sr');if(!b)return;const nd=b.dataset.n;if(MAPMODE&&mapReady){const k=b.dataset.k,t=b.dataset.t;closeSearch();setTimeout(()=>{if(!focusEntOnMap(k,t))openDetail(k,t,nd)},80);return}if(gl_ok){const ll=hubLL(nd);flyTo({lat:ll.lat,lon:ll.lon,dist:NODES[nd].sty==='generic'?30:42,heading:0},1400)}openDetail(b.dataset.k,b.dataset.t,nd)})}
-  if($('#sQ').value!==sq.q)$('#sQ').value=sq.q;
+  if($('#sQ').value!==sq.q&&!/^Analiza /.test($('#sQ').value))$('#sQ').value=sq.q;
+  /* resolución (ATLASI.assets, única fuente de verdad) antes que la lista: exacta → alias → cartera → parcial → otros */
+  const qq=sq.q.trim(),AS=window.ATLASI&&ATLASI.assets,heldP=[...PF.map(p=>({id:p.k+':'+p.t,w:1})),...((ATLASI.DOC&&ATLASI.DOC.rows)||[]).filter(r=>r.k).map(r=>({id:r.k+':'+r.t,w:+r.w||1}))];
+  sq.res=qq&&AS?AS.resolve(qq,{P:heldP,mode:'auto'}):null;
+  $('#sQuick').innerHTML=qq?'':['QQQ','NVIDIA','VWCE','¿Qué me mueve hoy?','¿Qué podría cambiar?'].map(x=>`<button class="sc-chip" data-sq="${esc(x)}">${esc(x)}</button>`).join('');
+  {const A2=$('#sAns');if(A2.dataset.keep){}else if(!qq){A2.hidden=true;A2.innerHTML=''}else if(sq.res&&sq.res.match&&!A2.dataset.keep){const d=AS.describe(sq.res.match.id);A2.hidden=false;
+    A2.innerHTML=`<div class="az az-m"><span class="az-k">${sq.res.match.confidence==='exact'?'Coincidencia exacta':sq.res.match.confidence==='alias'?'Coincidencia por concepto':'Coincidencia parcial'} · ${esc(sq.res.match.how)}</span><p><b>${esc(d.atlasTicker||'')}</b> ${esc(d.name||'')}${d.isin?` · ISIN ${esc(d.isin)}`:''}</p><button class="btn sm" data-sgo>Analizar →</button></div>`;
+    A2.querySelector('[data-sgo]').onclick=()=>ATLASI.azRun(A2,{intent:/^(sector|country|index|concept)$/.test(sq.res.match.kind)?(sq.res.match.kind==='sector'?'sectorHoldings':sq.res.match.kind==='country'?'countryDependence':'exposure'):'asset',args:{id:sq.res.match.id}})}
+   else if(sq.res&&sq.res.ask){A2.hidden=false;A2.innerHTML=`<div class="az az-m"><span class="az-k">${esc(sq.res.ask.question)}</span><div class="az-opts">${sq.res.ask.options.slice(0,6).map(o=>`<button data-sid="${esc(o.id)}"><b>${esc(o.atlasTicker||o.id)}</b><span>${esc(o.name||'')}</span><small>${o.isin?'ISIN '+esc(o.isin):'ISIN: dato no disponible'}${o.weight!=null?' · '+o.weight+' % de tu cartera':''}</small></button>`).join('')}</div></div>`;
+    A2.querySelectorAll('[data-sid]').forEach(b=>b.onclick=()=>ATLASI.analyze(b.dataset.sid))}
+   else if(sq.res&&sq.res.none&&!/\s/.test(qq)){A2.hidden=false;A2.innerHTML=`<div class="az az-m"><span class="az-k">${esc(sq.res.none.text)}</span>${sq.res.none.hint?`<p class="az-w">${esc(sq.res.none.hint)}</p>`:''}</div>`}}
   const nAdv=(sq.sec!=='all')+(sq.sort!=='mean')+(sq.top>0);
   $('#sBar').innerHTML=`<div class="sseg">${chip('type','all','Todo',sq.type==='all')}${chip('type','etf','ETFs',sq.type==='etf')}${chip('type','fnd','Fondos',sq.type==='fnd')}${chip('type','stk','Acciones',sq.type==='stk')}</div>
-    ${chip('fit','1','✓ Para mí',sq.fit,' sfit')}${chip('open','1',`Filtros${nAdv?` <em>${nAdv}</em>`:''}`,sq.open,' sfbtn')}`;
+    ${chip('fit','1','En tu perfil de volatilidad',sq.fit,' sfit')}${chip('open','1',`Filtros${nAdv?` <em>${nAdv}</em>`:''}`,sq.open,' sfbtn')}`;
   const f=$('#sFil');f.hidden=!sq.open;
   f.innerHTML=`<div class="sgrp"><span class="slbl">Sector</span><div class="srow2">${chip('sec','all','Todos',sq.sec==='all')}${secs.map(x=>chip('sec',x,`${SEC_ICON[x]||'◆'} ${esc(x)}`,sq.sec===x)).join('')}</div></div>
     <div class="sgrp"><span class="slbl">Ordenar por</span><div class="srow2">${Object.entries(SORTS).map(([k,v])=>chip('sort',k,v[0],sq.sort===k)).join('')}</div></div>
-    <div class="sgrp"><span class="slbl">Mostrar</span><div class="srow2">${[[0,'Todos'],[10,'🏆 Top 10'],[25,'Top 25'],[50,'Top 50']].map(([n,l])=>chip('top',String(n),l,sq.top===n)).join('')}</div></div>`;
+    <div class="sgrp"><span class="slbl">Mostrar</span><div class="srow2">${[[0,'Todos'],[10,'10 primeros'],[25,'25 primeros'],[50,'50 primeros']].map(([n,l])=>chip('top',String(n),l,sq.top===n)).join('')}</div></div>`;
   const L=$('#sList');
   if(home){const bestAll=entEnrich(ents.filter(ofType)).filter(x=>x.fit||x.inPlan).sort((a,b)=>(b.inPlan-a.inPlan)||((b.an?b.an.mean:-99)-(a.an?a.an.mean:-99)));
     $('#sCount').innerHTML='';updateMapSoon();sheetBtn();
     L.innerHTML=`<h5 class="shd">Explora por sector</h5><div class="stiles">${secs.map(x=>`<button class="sc-chip stile" data-g="sec" data-v="${esc(x)}"><span class="sti">${SEC_ICON[x]||'◆'}</span><b>${esc(x)}</b><small>${secCount[x]}</small></button>`).join('')}</div>
       ${rankBlock(ents.filter(ofType))}
-      ${bestAll.length?`<h5 class="shd">✓ Lo mejor para tu perfil ${esc(P.label)} <span>media anual</span></h5>${typeGroups(bestAll,sq.type==='all'?3:6,(x,i)=>entRow(x,true,0,'mean'))}`:''}`;return}
-  $('#sCount').innerHTML=`<span>${sq.top?`🏆 Top ${res.length}`:`${res.length} resultado${res.length===1?'':'s'}`}${sq.sec!=='all'?` en ${esc(sq.sec)}`:''}${sq.sort!=='mean'&&sq.sort!=='az'?` · ${SORTS[sq.sort][0].replace(/^\S+ /,'')}`:''}</span><span>${(SORTS[sq.sort]||SORTS.mean)[2]||'media anual'}</span>`;
+      ${bestAll.length?`<h5 class="shd">En tu perfil de volatilidad (${esc(P.label)}) <span>media anual histórica</span></h5>${typeGroups(bestAll,sq.type==='all'?3:6,(x,i)=>entRow(x,true,0,'mean'))}`:''}`;return}
+  $('#sCount').innerHTML=`<span>${sq.top?`${res.length} primeros según el orden elegido`:`${res.length} resultado${res.length===1?'':'s'}`}${sq.sec!=='all'?` en ${esc(sq.sec)}`:''}${sq.sort!=='mean'&&sq.sort!=='az'?` · ${SORTS[sq.sort][0].replace(/^\S+ /,'')}`:''}</span><span>${(SORTS[sq.sort]||SORTS.mean)[2]||'media anual'}</span>`;
   updateMapSoon();sheetBtn();
+  /* orden: entidades resueltas → en tu cartera → nombre/ticker → solo descripción (al final, separadas). No se elimina ningún resultado. */
+  if(qq&&!sq.top&&AS){const ids=new Set(sq.res&&sq.res.match?[sq.res.match.id,...(sq.res.match.held||[])]:sq.res&&sq.res.ask?sq.res.ask.options.map(o=>o.id):[]),hs=new Set(heldP.map(p=>p.id)),nq=norm(qq),UQ=qq.toUpperCase().replace(/\s+/g,'');
+    const grp=x=>{const id=x.k+':'+x.t;if(ids.has(id))return 0;if(hs.has(id))return 1;const nm=norm([x.name,x.obj.n,x.obj.full,x.obj.u&&x.obj.u.n].filter(Boolean).join(' '));if(nm.includes(nq)||[x.t,x.tk,x.obj.u&&x.obj.u.t,isinOf(x)].some(t=>t&&String(t).toUpperCase().startsWith(UQ)))return 2;return 3};
+    const G=res.map((x,i)=>({x,i,g:grp(x)})).sort((a,b)=>a.g-b.g||a.i-b.i);const n3=G.filter(o=>o.g===3).length;
+    L.innerHTML=G.map((o,k)=>(o.g===3&&(k===0||G[k-1].g!==3)?`<h5 class="shd">Otros resultados <span>coinciden solo en la descripción (${n3})</span></h5>`:'')+entRow(o.x,true,0)).join('')||`<p class="sempty">Nada con esos filtros.<br>Prueba otra palabra o quita alguno.</p>`;return}
   L.innerHTML=res.length?res.map((x,i)=>entRow(x,true,sq.top?i+1:0)).join(''):`<p class="sempty">Nada con esos filtros.<br>Prueba otra palabra o quita alguno.</p>`;
 }
 const KGRP=[['f','Fondos','■'],['e','ETFs','⬢'],['s','Acciones','●']];
@@ -3247,10 +3263,12 @@ stream('sys',apiKey?'Uplink Gemini configurado: misión LIVE.':'Sin clave Gemini
 setTimeout(()=>{if(EXPERT())run()},3600);
 </script>
 <link rel="stylesheet" href="css/intel.css?v=11">
-<script src="js/intel.js?v=16"></script>
-<script src="js/scenarios.js?v=2"></script>
+<script src="js/intel.js?v=17"></script>
+<script src="js/assets.js?v=1"></script>
+<script src="js/scenarios.js?v=3"></script>
+<script src="js/query.js?v=1"></script>
 <link rel="stylesheet" href="css/vault.css?v=1">
-<link rel="stylesheet" href="css/ui.css?v=7">
+<link rel="stylesheet" href="css/ui.css?v=8">
 <script src="js/vault.js?v=1"></script>
 <script src="js/kauai.js?v=3"></script>
 <script>if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
