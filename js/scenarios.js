@@ -94,7 +94,23 @@ const TXT={
   eShares:'Los porcentajes de reparto deben sumar 100 %.',
   eNum:'No he podido leer el porcentaje. Prueba: «reduce QQQ al 15 %».',
   eUnsupported:'Este tipo de escenario aún no está disponible. Prueba: «reduce QQQ al 15 %».',
-  oOther:'Otro valor',oYes:'Sí, sin vender',oNo:'No, se puede vender'
+  oOther:'Otro valor',oYes:'Sí, sin vender',oNo:'No, se puede vender',
+  /* lectura (narrate) */
+  nMoves:'Escenario: {m}.',nSpread:'El peso se reparte: {m}.',nUp:'Este escenario aumenta {l}.',nDown:'Este escenario reduce {l}.',nBoth:'Este escenario reduce {d}; a cambio, aumenta {u}.',
+  nFlat:'Apenas cambia las apuestas efectivas ({b} → {a})',nMech:': el peso liberado pasa sobre todo a {to}, cuya correlación histórica con {from} es {c}',nMechO:' y que comparte al menos un {o} % de su composición conocida',
+  nNone:'No se observa un cambio material en ninguna de las métricas comparadas.',nLB:'Las cifras de empresas y solapamiento son cotas inferiores.',
+  /* ideas */
+  iHead:'Explora modificaciones y compara su impacto. ATLAS no selecciona una opción ganadora.',
+  iContrib:'Explorar reducciones de productos que contribuyen a esta exposición',iContribW:'Productos de tu cartera que aportan {x}, en orden alfabético. El orden no indica preferencia.',
+  iPairs:'Explorar reducciones de los productos implicados',iPairsW:'Los dos productos señalados por el Doctor, en orden alfabético.',
+  iRel:'Explorar reducciones de posiciones relevantes',iRelW:'Posiciones con al menos un 5 % de la cartera, en orden alfabético. El orden no indica preferencia.',
+  iVol:'Explorar escenarios de menor volatilidad',iVolW:'Reducciones de cada posición, en orden alfabético; junto a cada una, su volatilidad histórica propia como información. No todas reducen la volatilidad de la cartera: el escenario lo muestra.',
+  iAdd:'Explorar otras exposiciones (añadir un 10 %)',iAddW:'Elige una categoría y después el criterio con el que quieres ver los candidatos. Sin criterio no se muestra ninguna lista.',
+  iAlt:'Explorar alternativas de la misma categoría',iAltW:'Productos de la misma categoría (no necesariamente del mismo índice). Elige el criterio de orden.',
+  iKeep:'Mantener sin cambios',iKeepW:'Referencia: la cartera actual tal como está.',
+  iAll:'Toda la cartera',
+  cSec:'{x} pp de {s}',cCty:'{x} pp en {s}',cComp:'≥ {x} % de tu cartera en {s}',cW:'{x} % de la cartera',cVol:'volatilidad propia {x} %',cTer:'TER {x} %',
+  oRed:'−10 pp',oRem:'Quitar'
 };
 const T=(k,o={})=>TXT[k].replace(/\{(\w+)\}/g,(_,x)=>o[x]==null?'':String(o[x]));
 
@@ -213,16 +229,20 @@ function clearCache(){_sim.clear();_res.clear()}
 function qCov(cov,full=99.5){return cov>=full?'DATA':cov>=60?'ESTIMATE':'INCOMPLETE'}
 function gapsOf(S,dim){/* productos sin desglose en esa dimensión, con su peso */
   return S.P.filter(x=>x.e.k!=='s'&&A().expOf(x.e).q[dim]==='none').map(x=>({id:idOf(x.e),w:r4(x.w*100)})).sort((a,b)=>byId(a.id,b.id))}
-const DIR={bets:'up',health:'up',topPos:'down',topCo:'down',top10Co:'down',ovl:'down',ter:'down'};      // fija; el resto solo «cambia»
-const THR={bets:.15,health:2,sec:3,cty:3,ac:3,em:3,ovl:3,vol:.5,dd:1,ter:.02,topPos:3,topCo:1,top10Co:3,n:1};
+/* Dirección fija. P1: «Salud» (total) y «Mayor posición» pasan a ser neutras (solo «cambia»): la salud mezcla riesgo con diversificación y un ETF mundial
+   grande no es concentración económica. Direccionales: diversificación, concentración en productos sueltos/sectoriales/temáticos, empresas, solapamiento y coste. */
+const DIR={bets:'up',narrow:'down',topCo:'down',top10Co:'down',ovl:'down',ter:'down','dim:dv':'up','dim:cn':'up','dim:co':'up'};
+const THR={bets:.15,health:2,narrow:3,dim:3,sec:3,cty:3,ac:3,em:3,ovl:3,vol:.5,dd:1,ter:.02,topPos:3,topCo:1,top10Co:3,n:1};
 const thrOf=id=>THR[id]!=null?THR[id]:THR[id.split(':')[0]];
-const LBL={bets:'Apuestas efectivas',health:'Salud de la cartera',topPos:'Mayor posición',n:'Número de productos',topCo:'Mayor empresa',top10Co:'10 mayores empresas',ovl:'Solapamiento medio entre ETFs',
+const LBL={bets:'Apuestas efectivas',health:'Salud de la cartera (total)',narrow:'Productos sueltos, sectoriales o temáticos',topPos:'Mayor posición (dependencia de un producto)',n:'Número de productos',topCo:'Mayor empresa',top10Co:'10 mayores empresas',ovl:'Solapamiento medio entre ETFs',
   ter:'TER medio ponderado',vol:'Volatilidad histórica anual',dd:'Caída máxima histórica',em:'Mercados emergentes'};
-const UNIT={bets:'',health:'',n:'',ter:'%'};
+const UNIT={bets:'',health:'',n:'',ter:'%','dim:dv':'','dim:cn':'','dim:rk':'','dim:co':''};
 const METH={
   bets:'Ratio de diversificación al cuadrado sobre rentabilidades semanales en euros de 5 años (correlaciones negativas a 0). Mide comportamiento de precios, no clasificación económica.',
   health:'Media de las dimensiones de salud de ATLAS (diversificación, concentración, sectores, países, correlación, riesgo, solapamiento y coste).',
-  topPos:'Peso del mayor producto de la cartera.',n:'Número de productos con peso.',
+  topPos:'Peso del mayor producto. Mide dependencia de un solo producto y su gestora, no concentración económica: un ETF mundial grande puede estar muy diversificado.',
+  narrow:'Peso en acciones individuales y ETFs con más del 60 % en un sector (misma lógica que «Concentración por producto» del Doctor).',
+  dim:'Dimensión de la salud de ATLAS (media de sus componentes, 0–100). Diversificación, concentración y coste tienen dirección; riesgo solo «cambia» porque menos volatilidad no es por sí misma una cartera mejor.',n:'Número de productos con peso.',
   topCo:'Suma del peso de la empresa en cada ETF (posiciones publicadas) más la posición directa. Cota inferior si el ETF no publica toda su cartera.',
   top10Co:'Suma de las 10 mayores empresas por dentro de la cartera (posiciones publicadas). Cota inferior.',
   ovl:'Media ponderada del solapamiento entre cada par de ETFs: Σ mín(peso en A, peso en B) de las empresas comunes publicadas. Cota inferior.',
@@ -235,6 +255,8 @@ function metricsOf(S){/* vector de métricas de una cartera simulada (reutiliza 
   M.bets={v:m.bets,q:pxOk?'MODEL':'INCOMPLETE',cov:r2(pxCov),conf:SC.bets&&SC.bets.rob?SC.bets.rob.conf:null,cls:SC.bets&&SC.bets.rob?SC.bets.rob.cls:null};
   M.health={v:m.health,q:SC.miss&&SC.miss.length>=3?'INCOMPLETE':'MODEL',cov:null,missing:(SC.miss||[]).slice().sort()};
   M.topPos={v:top?top.w*100:null,q:'DATA',cov:100,name:top?idOf(top.e):null};
+  M.narrow={v:SC.narrow,q:'DATA',cov:100};
+  (A().DIMS||[]).forEach(([id,,,keys])=>{const v=A().dimOf(SC,keys);M['dim:'+id]={v,q:v==null?'INCOMPLETE':'MODEL',cov:null}});
   M.n={v:S.P.length,q:'DATA',cov:100};
   M.topCo={v:c0?c0.w:null,q:c0&&c0.exact?'DATA':L.cover<60?'INCOMPLETE':'ESTIMATE',cov:r2(L.cover),bound:c0&&c0.exact?null:'lower',name:c0?c0.name:null};
   M.top10Co={v:SC.top10,q:L.cover<60?'INCOMPLETE':'ESTIMATE',cov:r2(L.cover),bound:'lower'};
@@ -246,13 +268,14 @@ function metricsOf(S){/* vector de métricas de una cartera simulada (reutiliza 
   Object.keys(L.C).filter(k=>k!=='XX').forEach(k=>{M['cty:'+k]={v:L.C[k],q:qCov(ccCov),cov:r2(ccCov),bound:ccCov<99.5?'lower':null}});
   Object.keys(L.AC).forEach(k=>{M['ac:'+k]={v:L.AC[k],q:'DATA',cov:100}});
   return M}
-function labelOf(id){if(LBL[id])return LBL[id];const [p,k]=[id.slice(0,id.indexOf(':')),id.slice(id.indexOf(':')+1)];
+const DIML={dv:'Diversificación',cn:'Concentración',rk:'Riesgo',co:'Coste'};
+function labelOf(id){if(LBL[id])return LBL[id];if(id.startsWith('dim:'))return 'Salud · '+DIML[id.slice(4)];const [p,k]=[id.slice(0,id.indexOf(':')),id.slice(id.indexOf(':')+1)];
   if(p==='sec')return 'Sector · '+k;if(p==='cty'){const n=(A().CNAME&&A().CNAME[k])||k;return 'País · '+n}if(p==='ac')return 'Clase de activo · '+k;return id}
 const unitOf=id=>id in UNIT?UNIT[id]:'%';
 const QRANK={DATA:0,ESTIMATE:1,MODEL:2,INCOMPLETE:3};
 function pickIds(M0,M1){/* qué métricas se comparan: las fijas + 3 mayores sectores/países/clases de P0 ∪ P1 (orden determinista) */
   const top=(pre,M)=>Object.keys(M).filter(k=>k.startsWith(pre)).sort((a,b)=>(M[b].v-M[a].v)||byId(a,b)).slice(0,3);
-  const fixed=['bets','health','topPos','n','topCo','top10Co','ovl','ter','vol','dd','em'];const dyn=[];
+  const fixed=['bets','narrow','topPos','n','topCo','top10Co','ovl','ter','vol','dd','em','dim:dv','dim:cn','dim:rk','dim:co','health'];const dyn=[];
   ['sec:','cty:','ac:'].forEach(pre=>{const s=new Set([...top(pre,M0),...top(pre,M1)]);[...s].sort((a,b)=>((M0[b]?M0[b].v:0)-(M0[a]?M0[a].v:0))||byId(a,b)).forEach(k=>dyn.push(k))});return fixed.concat(dyn)}
 function compareM(M0,M1,objectives){
   const obj=new Map((objectives||[]).map(o=>[o.metric,o]));const ids=pickIds(M0,M1);const metrics=[],improves=[],changes=[],worsens=[];
@@ -269,7 +292,7 @@ function compareM(M0,M1,objectives){
   if(improves.length&&worsens.length){materiality='mixed';direction='both'}else if(improves.length||worsens.length){materiality='oneSided';direction=improves.length?'improves':'worsens'}
   else if(changes.length){materiality='oneSided';direction='neutral'}
   return{metrics,improves,changes,worsens,materiality,direction}}
-function vtxt(row,x){if(x==null)return '—';const u=row.unit,d=row.id==='bets'?1:row.id==='ter'?2:row.id==='n'||row.id==='health'?0:1;return (row.bound==='lower'&&u==='%'?'≥ ':'')+fmt(x,d)+(u==='%'?' %':'')}
+function vtxt(row,x){if(x==null)return '—';const u=row.unit,d=row.id==='bets'?(Math.abs(row.delta||0)<.05?2:1):row.id==='ter'?2:row.id==='n'||row.id==='health'||row.id.startsWith('dim:')?0:1;return (row.bound==='lower'&&u==='%'?'≥ ':'')+fmt(x,d)+(u==='%'?' %':'')}
 function whyText(row){const base=METH[row.id]||METH[row.id.split(':')[0]]||'';
   const q={DATA:'Dato publicado',ESTIMATE:'Estimación',MODEL:'Modelo estadístico',INCOMPLETE:'Información incompleta'}[row.quality];
   const cov=row.coverage&&row.coverage.after!=null&&row.coverage.after<99.5?` Cobertura del dato en el escenario: ${fmt(row.coverage.after,0)} % del peso.`:'';
@@ -302,9 +325,15 @@ async function simulate(P0in,s,ctx={}){
     /* restricción de riesgo (necesita la simulación) */
     const viol=[];const rt=s.constraints&&s.constraints.riskTol;if(rt!=null&&S0.R&&S1.R&&S1.R.vol>S0.R.vol*(1+rt)+1e-9)viol.push({code:'RISK',text:T('vRisk',{b:fmt(S0.R.vol,1),a:fmt(S1.R.vol,1),x:fmt(rt*100,0)})});
     const summary=summaryOf(s,cmp,S0,S1,b.P1,P0);
+    /* mecanismo: de dónde sale y adónde va la mayor parte del peso, con su correlación histórica y solapamiento conocido */
+    const mv=movesTxt(P0,b.P1),src=mv.filter(x=>x.delta<0).sort((a,b)=>a.delta-b.delta||byId(a.id,b.id))[0],dst=mv.filter(x=>x.delta>0).sort((a,b)=>b.delta-a.delta||byId(a.id,b.id))[0];
+    let mechanism=null;if(src&&dst){const RR=S1.R&&S1.R.assets.some(e=>idOf(e)===src.id)?S1.R:S0.R,i=RR?RR.assets.findIndex(e=>idOf(e)===src.id):-1,j=RR?RR.assets.findIndex(e=>idOf(e)===dst.id):-1;
+      const RR2=(i<0||j<0)&&S1.R?S1.R:RR,i2=RR2?RR2.assets.findIndex(e=>idOf(e)===src.id):-1,j2=RR2?RR2.assets.findIndex(e=>idOf(e)===dst.id):-1;
+      const c=i2>=0&&j2>=0?RR2.M[i2][j2]:null,o=A().overlap(entOf(src.id),entOf(dst.id));
+      mechanism={from:src.id,to:dst.id,fromDelta:src.delta,toDelta:dst.delta,toShare:r4(dst.delta/mv.filter(x=>x.delta>0).reduce((a,x)=>a+x.delta,0)),corr:r4(c),overlap:r2(o),overlapBound:'lower'}}
     const gaps={country:gapsOf(S1,'country'),sector:gapsOf(S1,'sector'),prices:b.P1.filter(x=>!pxIds.has(x.id)).map(x=>x.id)};
     const res={...head,valid:!viol.length,P0,P1:b.P1,moves:movesTxt(P0,b.P1),violations:viol,warnings:[...new Set(warn)],assumptions:b.assumptions,
-      metrics:cmp.metrics,improves:cmp.improves,changes:cmp.changes,worsens:cmp.worsens,materiality:cmp.materiality,direction:cmp.direction,summary,gaps,
+      metrics:cmp.metrics,improves:cmp.improves,changes:cmp.changes,worsens:cmp.worsens,materiality:cmp.materiality,direction:cmp.direction,summary,gaps,mechanism,
       history:historyOf(S0,S1),tax:taxOf(b,cx),values:b.values1?{before:b.values0,after:b.values1}:null};
     return JSON.parse(cjson(res))})();
   _res.set(key,pr);if(_res.size>200)_res.delete(_res.keys().next().value);return pr}
@@ -485,7 +514,67 @@ async function ctxFromPortfolio(){if(typeof PF==='undefined'||!PF.length||typeof
   const rs=await Promise.all(PF.map(pfValue)),val={},inv={};rs.forEach(r=>{if(!r.ent||r.err||r.pending||!(r.val>0))return;const id=idOf(r.ent);val[id]=(val[id]||0)+r.val;inv[id]=(inv[id]||0)+(r.inv||0)});
   return{mode:'amounts',values:canon(val),inv:canon(inv),P:Object.keys(val).sort().map(id=>({id,w:val[id]}))}}
 
+/* ───────────── lectura determinista de un escenario (sin IA) ───────────── */
+const NL={bets:'las apuestas efectivas',narrow:'el peso en productos sueltos, sectoriales o temáticos',topPos:'la dependencia del mayor producto',topCo:'el peso de la mayor empresa (cota inferior)',
+  top10Co:'el peso de las 10 mayores empresas (cota inferior)',ovl:'el solapamiento entre ETFs (cota inferior)',ter:'el coste (TER)',vol:'la volatilidad histórica',dd:'la caída máxima histórica',em:'la exposición a emergentes',
+  health:'la salud total','dim:dv':'la dimensión de diversificación','dim:cn':'la dimensión de concentración (más alta = menos concentrada)','dim:rk':'la dimensión de riesgo','dim:co':'la dimensión de coste'};
+function nlOf(id){if(NL[id])return NL[id];const p=id.split(':')[0],k=id.slice(p.length+1);if(p==='sec')return 'la exposición a '+k;if(p==='cty')return 'la exposición a '+((A().CNAME&&A().CNAME[k])||k);if(p==='ac')return 'el peso en '+k.toLowerCase();return id}
+const joinY=L=>L.length<2?L.join(''):L.slice(0,-1).join(', ')+' y '+L[L.length-1];
+function narrate(res){if(!res||!res.valid||!res.metrics)return[];const out=[],mv=res.moves||[];
+  const dn=mv.filter(x=>x.delta<0),up=mv.filter(x=>x.delta>0).sort((a,b)=>b.delta-a.delta||byId(a.id,b.id));
+  if(mv.length)out.push(T('nMoves',{m:joinY(dn.concat(up.filter(x=>x.from===0)).map(x=>`${nameOf(x.id)} ${fmt(x.from*100,1)} % → ${fmt(x.to*100,1)} %`))||joinY(up.slice(0,3).map(x=>`${nameOf(x.id)} ${fmt(x.from*100,1)} % → ${fmt(x.to*100,1)} %`))}));
+  if(dn.length&&up.length)out.push(T('nSpread',{m:joinY(up.slice(0,3).map(x=>`${nameOf(x.id)} +${fmt(x.delta*100,1)} pp`))}));
+  const mat=res.metrics.filter(r=>r.material&&r.id!=='n'&&r.id!=='health'&&!r.id.startsWith('dim:')&&r.id!=='bets');
+  const ph=r=>{const mag=r.id==='dd'?(Math.abs(r.after)<Math.abs(r.before)?-1:1):Math.sign(r.delta);return{mag,t:`${nlOf(r.id)} (${vtxt(r,r.before)} → ${vtxt(r,r.after)})`}};
+  const P=mat.map(ph),D=P.filter(x=>x.mag<0).map(x=>x.t).slice(0,3),U=P.filter(x=>x.mag>0).map(x=>x.t).slice(0,3);
+  if(D.length&&U.length)out.push(T('nBoth',{d:joinY(D),u:joinY(U)}));else if(D.length)out.push(T('nDown',{l:joinY(D)}));else if(U.length)out.push(T('nUp',{l:joinY(U)}));
+  const b=res.metrics.find(r=>r.id==='bets');
+  if(b&&b.delta!=null&&!b.material){let t=T('nFlat',{b:fmt(b.before,2),a:fmt(b.after,2)});const m=res.mechanism;
+    if(m&&m.corr!=null&&m.corr>=.8&&mv.length){t+=T('nMech',{to:nameOf(m.to),from:nameOf(m.from),c:fmt(m.corr,2)});if(m.overlap!=null&&m.overlap>=20)t+=T('nMechO',{o:fmt(m.overlap,0)})}out.push(t+'.')}
+  else if(b&&b.material)out.push((b.delta>0?T('nUp',{l:`${nlOf('bets')} (${fmt(b.before,2)} → ${fmt(b.after,2)})`}):T('nDown',{l:`${nlOf('bets')} (${fmt(b.before,2)} → ${fmt(b.after,2)})`})));
+  if(!mat.length&&!(b&&b.material))out.push(T('nNone'));
+  if(res.metrics.some(r=>r.material&&r.bound==='lower'&&/^(topCo|top10Co|ovl)$/.test(r.id)))out.push(T('nLB'));
+  return out}
+
+/* ───────────── ideas(): posibilidades a explorar a partir de un problema del Doctor ─────────────
+   No simula, no puntúa y no elige: devuelve grupos de escenarios candidatos en orden alfabético y operaciones de tamaño fijo (−10 pp / quitar),
+   más accesos a exploraciones con criterio explícito. «Mantener sin cambios» siempre está. */
+const ADD_TAGS=[['em','Emergentes'],['europe','Europa'],['japan','Japón'],['exus','Fuera de EE. UU.'],['small','Pequeñas empresas'],['value','Value'],['bond','Renta fija'],['gold','Oro']];
+function opsFor(id,w,n,base){const o=[];if(w>.10+1e-9)o.push({label:T('oRed'),scenario:{...emptyScenario(),type:'reduce',base,changes:[{op:'shift',from:id,amt:.10,to:'prorata'}],source:{text:'',parsedBy:'ideas@1'}}});
+  if(n>1)o.push({label:T('oRem'),scenario:{...emptyScenario(),type:'remove',base,changes:[{op:'remove',asset:id,to:'prorata'}],source:{text:'',parsedBy:'ideas@1'}}});return o}
+function fromDoctor(An){return((An&&An.D)||[]).filter(d=>d.kind).map(d=>({kind:d.kind,ref:d.ref==null?null:d.ref,title:d.t,metric:d.metric,sev:d.sev}))}
+function ideas(An,problem){const P0=normP((An&&An.P||[]).map(x=>({e:x.e,w:x.w}))),n=P0.length,base={sig:sigP(P0),mode:'weights'},L=An&&An.L,R=An&&An.R;
+  const out={problem:problem||null,head:T('iHead'),groups:[],keep:{label:T('iKeep'),why:T('iKeepW'),scenario:{...emptyScenario(),base,source:{text:'',parsedBy:'ideas@1'}}}};if(!n||!L)return out;
+  const wOf=id=>(P0.find(x=>x.id===id)||{w:0}).w,alpha=(a,b)=>byId(nameOf(a.id),nameOf(b.id));
+  const rows=(list,info)=>list.sort(alpha).map(x=>({id:x.id,label:nameOf(x.id),name:(entOf(x.id)||{}).name||'',weight:r4(wOf(x.id)*100),info:info(x),ops:opsFor(x.id,wOf(x.id),n,base)})).filter(r=>r.ops.length);
+  const agg=(arr,key)=>{const m=new Map();(arr||[]).forEach(o=>{const id=idOf(o.e);m.set(id,(m.get(id)||0)+o[key])});return[...m.entries()].map(([id,v])=>({id,v}))};
+  const k=problem&&problem.kind,ref=problem&&problem.ref;
+  if(k==='sec'||k==='cty'){const by=agg((k==='sec'?L.byS:L.byC)[ref],'p').filter(x=>x.v>=1);const nm=k==='sec'?ref:((A().CNAME&&A().CNAME[ref])||ref);
+    out.groups.push({id:'contrib',title:T('iContrib'),why:T('iContribW',{x:k==='sec'?ref:nm}),rows:rows(by,x=>T(k==='sec'?'cSec':'cCty',{x:fmt(x.v,1),s:nm}))})}
+  else if(k==='comp'){const c=L.comps.find(x=>x.key===ref);if(c){const by=c.by.map(b=>({id:idOf(b.e),v:b.w}));out.groups.push({id:'contrib',title:T('iContrib'),why:T('iContribW',{x:c.name}),rows:rows(by,x=>T('cComp',{x:fmt(x.v,1),s:c.name}))})}}
+  else if(k==='ovl'||k==='corr'){const ids=(ref||[]).map(t=>P0.find(x=>x.id.endsWith(':'+t))).filter(Boolean);out.groups.push({id:'pair',title:T('iPairs'),why:T('iPairsW'),rows:rows(ids.map(x=>({id:x.id})),x=>T('cW',{x:fmt(wOf(x.id)*100,1)}))})}
+  else if(k==='vol'){const sg=id=>{if(!R)return null;const i=R.assets.findIndex(e=>idOf(e)===id);return i>=0&&R.sig?R.sig[i]:null};
+    out.groups.push({id:'vol',title:T('iVol'),why:T('iVolW'),rows:rows(P0.map(x=>({id:x.id})),x=>{const v=sg(x.id);return v==null?T('cW',{x:fmt(wOf(x.id)*100,1)}):T('cVol',{x:fmt(v*100,1)})})})}
+  else if(k==='cost'){out.groups.push({id:'alt',title:T('iAlt'),why:T('iAltW'),alts:P0.filter(x=>x.id[0]!=='s').sort(alpha).map(x=>{const e=entOf(x.id),tg=A().tagsOf(e)[0]||null,t=A().terOf(e);return{id:x.id,label:nameOf(x.id),tag:tg,info:t==null?'':T('cTer',{x:fmt(t,2)})}}).filter(a=>a.tag)})}
+  if(!k||k==='bets'||k==='em'||k==='cost'||k==='vol')out.groups.push({id:'rel',title:T('iRel'),why:T('iRelW'),rows:rows(P0.filter(x=>x.w>=.05).map(x=>({id:x.id})),x=>T('cW',{x:fmt(wOf(x.id)*100,1)}))});
+  out.groups.push({id:'add',title:T('iAdd'),why:T('iAddW'),explore:{fn:'additions',w:.10,tags:ADD_TAGS.map(([t,l])=>({tag:t,label:l}))}});
+  return out}
+
+/* título legible de un escenario (para la interfaz y los tests de lenguaje) */
+function title(scn,P0in){const P0=normP(P0in||[]),w=id=>(P0.find(x=>x.id===id)||{w:0}).w,pc=x=>fmt(x*100,1)+' %';const ch=(scn&&scn.changes)||[];if(!ch.length)return T('iKeep');
+  return ch.map(c=>c.op==='set'?`${nameOf(c.asset)} ${pc(w(c.asset))} → ${pc(c.to)}`:c.op==='adjust'?`${nameOf(c.asset)} ${c.pp!=null?(c.pp>0?'+':'−')+fmt(Math.abs(c.pp)*100,1)+' pp':(c.rel>0?'+':'−')+fmt(Math.abs(c.rel)*100,0)+' % relativo'}`
+    :c.op==='shift'?`${nameOf(c.from)} −${fmt(c.amt*100,1)} pp${c.to==='prorata'?' (al resto, pro-rata)':' → '+c.to.map(t=>nameOf(t.asset)).join(' + ')}`:c.op==='remove'?`Quitar ${nameOf(c.asset)}${c.to==='prorata'?' (pro-rata)':' → '+c.to.map(t=>nameOf(t.asset)).join(' + ')}`
+    :c.op==='add'?`Añadir ${nameOf(c.asset)} ${pc(c.w)}`:c.op==='replace'?`Sustituir ${nameOf(c.from)} por ${nameOf(c.to)}`:c.op==='contrib'?`${fmt(c.monthly,0)} €/mes × ${c.months} a ${c.alloc.map(t=>nameOf(t.asset)).join(' + ')}`:c.op).join(' · ')}
+/* alternativas: sustituir un producto por otro de su misma categoría (lista ordenada solo por el criterio elegido) */
+async function alternatives(P0in,ctx={},opt={}){if(!opt||!SORTS[opt.sortKey]||!opt.from)throw new Error('explore.alternatives necesita from y sortKey explícito');
+  const P0=normP(P0in),held=new Set(P0.map(x=>x.id)),e0=entOf(opt.from),tag=opt.tag||(e0&&A().tagsOf(e0)[0]);const U=tag?universe(tag).map(idOf).filter(id=>!held.has(id)).sort(byId):[];
+  const items=[];for(const id of U){const r=await simulate(P0,mkScn('replace',[{op:'replace',from:opt.from,to:id}]),ctx);const mb=r.metrics.find(x=>x.id==='bets');
+    items.push({asset:id,ter:A().terOf(entOf(id)),overlap:r2(A().overlap(entOf(id),e0)),dBets:mb?mb.delta:null,vol:(r.metrics.find(x=>x.id==='vol')||{}).after,materiality:r.materiality,result:r})}
+  const S=SORTS[opt.sortKey],val=it=>it[opt.sortKey==='bets'?'dBets':opt.sortKey];
+  items.sort((a,b)=>{const x=val(a),y=val(b);if(x==null&&y==null)return byId(a.asset,b.asset);if(x==null)return 1;if(y==null)return -1;return (S.dir==='asc'?x-y:y-x)||byId(a.asset,b.asset)});
+  return{from:opt.from,tag,sortKey:opt.sortKey,sortDir:S.dir,orderLabel:S.label,note:'Misma categoría, no necesariamente el mismo índice. El orden refleja solo el criterio elegido; no es una recomendación.',items}}
+
 window.ATLASI.scenarios={v:V,TXT,TYPES,OPS,SORTS,schema:{emptyScenario,validate,canonical,keyOf},parse,resolveAsk,validate,canonical,build,simulate,
-  quality:{metricsOf,qCov},compare:{compare:compareM,DIR,THR},explain,explore:{removals,reductions,additions,pareto},contrib:{monthsTo},
+  quality:{metricsOf,qCov},compare:{compare:compareM,DIR,THR},explain,explore:{removals,reductions,additions,alternatives,pareto},ideas,fromDoctor,narrate,title,nameOf,ADD_TAGS,contrib:{monthsTo},
   cache:{clear:clearCache,size:()=>({results:_res.size,sims:_sim.size})},dataVersion,dataEnd,endFrom,normP,ctxFromPortfolio};
 })();

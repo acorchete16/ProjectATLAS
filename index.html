@@ -765,6 +765,7 @@ body.mapmode #app .right[data-sec=term] .pbody>[data-s=term]{display:flex!import
     <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn2" id="testBtn">Probar</button><button class="btn" id="saveUp">Guardar</button></div>
     </div></details>
     <button class="btn" id="setDone" style="align-self:stretch">Listo</button>
+    <details class="set-use" id="setUse"><summary>Uso local de ATLAS</summary><p>Contadores guardados solo en este dispositivo (sin red, sin importes ni carteras).</p><div id="useStats"></div><button type="button" class="lnk" id="useClr">Borrar contadores</button></details>
     <button class="set-ver" id="setVer" type="button">ATLAS · datos de justETF, Yahoo Finance y Natural Earth</button>
   </div>
 </div>
@@ -3213,7 +3214,7 @@ $('#clearLog').addEventListener('click',()=>{$('#stream').innerHTML=''});
 $('#zIn').addEventListener('click',()=>flyTo({...cam,dist:Math.max(30,cam.dist/1.7)},500));$('#zOut').addEventListener('click',()=>flyTo({...cam,dist:Math.min(700,cam.dist*1.7)},500));
 $('#zHome').addEventListener('click',()=>{closeCard();flyTo(HOME,1400)});
 $('#uplinkBtn').addEventListener('click',()=>{$('#settings').hidden=false;$('#apiKey').focus()});
-$('#settings').addEventListener('click',e=>{if(e.target.id==='settings')$('#settings').hidden=true});$('#setVer').addEventListener('click',()=>{$('#settings').hidden=true;if(window.__kxGo)window.__kxGo()});['#setClose','#setDone'].forEach(q=>$(q).addEventListener('click',()=>{$('#settings').hidden=true}));
+$('#settings').addEventListener('click',e=>{if(e.target.id==='settings')$('#settings').hidden=true});$('#setUse').addEventListener('toggle',()=>{const u=window.ATLASI&&ATLASI.usage?ATLASI.usage():{},c=u.c||{},t=u.t||{},L={today_open:'Hoy abierto',today_return:'Vuelta a Hoy tras un escenario',xray_open:'Rayos X abierto',exposure_click:'«Ver exposición»',explore_open:'Explorar cambios abierto',scenario_open:'Escenarios abiertos'};$('#useStats').innerHTML=Object.keys(L).map(k=>`<div><span>${L[k]}</span><b>${c[k]||0}</b></div>`).join('')+(Object.keys(t).length?`<div><span>Tipos de escenario</span><b>${Object.entries(t).map(([k,v])=>k+' '+v).join(' · ')}</b></div>`:'')+(u.since?`<p>Desde ${u.since}</p>`:'')});$('#useClr').addEventListener('click',()=>{try{localStorage.removeItem('atlas_ev')}catch(_){}$('#useStats').innerHTML='<p>Borrado.</p>'});$('#setVer').addEventListener('click',()=>{$('#settings').hidden=true;if(window.__kxGo)window.__kxGo()});['#setClose','#setDone'].forEach(q=>$(q).addEventListener('click',()=>{$('#settings').hidden=true}));
 $('#saveUp').addEventListener('click',()=>{syncMode();$('#settings').hidden=true;renderSources();stream('sys',apiKey?'Clave Gemini cargada: la próxima misión usará datos LIVE.':'Sin clave: misión en simulación.',apiKey?'lv':'')});
 $('#testBtn').addEventListener('click',async()=>{syncMode();if(!apiKey){$('#upMsg').textContent='Pega primero tu API key.';return}setUp('run','Probando');$('#upMsg').textContent='Probando conexión…';
   try{const r=await gemini('Responde solo con el JSON {"ok":true}');setUp('done','Online');$('#upMsg').textContent='Conexión correcta: '+r.text.slice(0,80)}catch(e){setUp('err',e.blocked?'Bloqueado':'Fallo');$('#upMsg').textContent=e.message}});
@@ -3246,10 +3247,10 @@ stream('sys',apiKey?'Uplink Gemini configurado: misión LIVE.':'Sin clave Gemini
 setTimeout(()=>{if(EXPERT())run()},3600);
 </script>
 <link rel="stylesheet" href="css/intel.css?v=11">
-<script src="js/intel.js?v=15"></script>
-<script src="js/scenarios.js?v=1"></script>
+<script src="js/intel.js?v=16"></script>
+<script src="js/scenarios.js?v=2"></script>
 <link rel="stylesheet" href="css/vault.css?v=1">
-<link rel="stylesheet" href="css/ui.css?v=6">
+<link rel="stylesheet" href="css/ui.css?v=7">
 <script src="js/vault.js?v=1"></script>
 <script src="js/kauai.js?v=3"></script>
 <script>if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
