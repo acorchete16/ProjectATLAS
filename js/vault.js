@@ -231,7 +231,8 @@ function camFor(i){const fd=new THREE.Vector3(F.fx,0,F.fz);switch(i){
   case 4:{return{p:hallP(8.5,1.7,-7.5),t:hallP(8.5,1.6,-18.5),fov:50}}
   default:return camFor(4)}}
 let anim=null;
-function go(i){i=Math.max(0,Math.min(STATES.length-1,i));if(anim)return;if(i===5){finish();return}const from=SV.state,a=camFor(from),b=camFor(i);
+function go(i){i=Math.max(0,Math.min(STATES.length-1,i));if(anim)return;if(i===5){finish();return}const from=SV.state,b=camFor(i);
+  const a=C?{p:C.position.clone(),t:C.position.clone().add(C.getWorldDirection(new THREE.Vector3()).multiplyScalar(12)),fov:C.fov}:camFor(from);FREE.a=FREE.b=FREE.yaw=FREE.pitch=FREE.push=0;
   // trayectorias que respetan la arquitectura: exterior→puerta→vestíbulo→túnel→sala→bóveda
   let way=[a.p];if(from<=1&&i>=2){way.push(L(0,1.7,6),L(0,1.7,-2),L(0,1.7,-PLEN+2),tunnelP(2,1.7))}
   if(from<=2&&i>=3){way.push(tunnelP(TUN.len-4,1.7),hallP(0,1.7,1.5),hallP(-8.5,1.7,-3))}
@@ -239,11 +240,31 @@ function go(i){i=Math.max(0,Math.min(STATES.length-1,i));if(anim)return;if(i===5
   if(i<from){way=[a.p,b.p]}else way.push(b.p);
   const curve=new THREE.CatmullRomCurve3(way,false,'centripetal'),dur=i<from?1600:Math.min(6200,900+curve.getLength()*(from===0?1.6:55));
   anim={t0:performance.now(),dur,curve,a,b,from,to:i};if(from<=1&&i>=2)openDoors(true);setInside(i>=2||from>=2);caption(i,true);needs()}
-function stepAnim(now){if(!anim)return false;const k=Math.max(0,Math.min(1,(now-anim.t0)/anim.dur)),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
+function stepAnim(now){if(!anim){freeCam();return !!doorsAnim}const k=Math.max(0,Math.min(1,(now-anim.t0)/anim.dur)),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;
   const p=anim.curve.getPoint(e);C.position.copy(p);const ahead=anim.curve.getPoint(Math.min(1,e+.02)),look=new THREE.Vector3().lerpVectors(ahead.add(new THREE.Vector3(0,-.05,0)),anim.b.t,Math.pow(e,2.2));
   if(anim.to<anim.from)look.lerpVectors(anim.a.t,anim.b.t,e);C.lookAt(look);C.fov=anim.a.fov+(anim.b.fov-anim.a.fov)*e;C.updateProjectionMatrix();
   if(doorsAnim)stepDoors(now);if(interior.coreLine)interior.coreLine.material.color.setHSL(.52,.9,.62+.08*Math.sin(now/900));
-  if(k>=1){SV.state=anim.to;setInside(SV.state>=2);anim=null;caption(SV.state);return !!doorsAnim}return true}
+  if(k>=1){SV.state=anim.to;setInside(SV.state>=2);anim=null;caption(SV.state);freeCam();return !!doorsAnim}return true}
+/* ---------- modo libre: arrastrar para mirar, rueda / pellizco / W-S para avanzar; al llegar al límite pasa a la zona siguiente ---------- */
+const FREE={a:0,b:0,yaw:0,pitch:0,push:0};
+const LIM=[[-160,420,260],[-14,14,10],[-4,30,.9],[-5,12,.45],[-4,6,2.4]]; // [atrás, adelante, lateral] en metros, por zona
+function axes(i){const c=camFor(i),f=new THREE.Vector3().subVectors(c.t,c.p);f.y=0;f.normalize();return{c,f,r:new THREE.Vector3(-f.z,0,f.x)}}
+function freeCam(){if(!C||!F.fx&&F.fx!==0)return;const {c,f,r}=axes(SV.state),off=f.clone().multiplyScalar(FREE.a).add(r.clone().multiplyScalar(FREE.b));
+  C.position.copy(c.p).add(off);if(SV.state===0&&(FREE.a||FREE.b))C.position.y=Math.max(C.position.y,terrainH(C.position.x,C.position.z)+25);
+  C.lookAt(c.t.clone().add(off));C.rotateOnWorldAxis(new THREE.Vector3(0,1,0),FREE.yaw);C.rotateX(FREE.pitch);C.fov=c.fov;C.updateProjectionMatrix()}
+function move(fw,st){if(anim||!SV.ready)return;st=st||0;const L=LIM[SV.state]||LIM[4],cy=Math.cos(FREE.yaw),sy=Math.sin(FREE.yaw); // se avanza hacia donde miras
+  const da=fw*cy+st*sy,na=FREE.a+da,nb=Math.max(-L[2],Math.min(L[2],FREE.b-fw*sy+st*cy));
+  if(na>L[1]){FREE.a=L[1];FREE.push+=na-L[1];if(FREE.push>(L[1]-L[0])*.12){FREE.push=0;go(SV.state+1);return}}
+  else if(na<L[0]){FREE.a=L[0];FREE.push-=L[0]-na;if(FREE.push<-(L[1]-L[0])*.12&&SV.state>0){FREE.push=0;go(SV.state-1);return}}
+  else{FREE.a=na;FREE.push=0}FREE.b=nb;hint(false);needs()}
+function look(dx,dy){if(anim)return;FREE.yaw-=dx*.0035;FREE.pitch=Math.max(-1,Math.min(1,FREE.pitch-dy*.003));hint(false);needs()}
+function step(){const L=LIM[SV.state]||LIM[4];return (L[1]-L[0])/40}
+let _hintT=0;function hint(on){const h=ov&&ov.querySelector('.sv-hint');if(!h)return;if(on){h.classList.add('on');clearTimeout(_hintT);_hintT=setTimeout(()=>h.classList.remove('on'),6000)}else h.classList.remove('on')}
+function bindFree(){const cv=$('#svvC'),P=new Map();let pinch=0;
+  cv.addEventListener('pointerdown',e=>{cv.setPointerCapture&&cv.setPointerCapture(e.pointerId);P.set(e.pointerId,{x:e.clientX,y:e.clientY});if(P.size===2){const [p1,p2]=[...P.values()];pinch=Math.hypot(p1.x-p2.x,p1.y-p2.y)}});
+  cv.addEventListener('pointermove',e=>{const o=P.get(e.pointerId);if(!o)return;const dx=e.clientX-o.x,dy=e.clientY-o.y;o.x=e.clientX;o.y=e.clientY;
+    if(P.size===1)look(dx,dy);else if(P.size===2){const [p1,p2]=[...P.values()],d=Math.hypot(p1.x-p2.x,p1.y-p2.y);move((d-pinch)*step()/12);pinch=d}});
+  const up=e=>{P.delete(e.pointerId);pinch=0};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up)}
 let doorsAnim=null;function openDoors(o){doorsAnim={t0:performance.now(),o}}
 function stepDoors(now){const k=Math.max(0,Math.min(1,(now-doorsAnim.t0)/1400)),e=1-Math.pow(1-k,3);doors.forEach(d=>d.piv.rotation.y=d.sg*(doorsAnim.o?e:1-e)*1.45);if(k>=1)doorsAnim=null}
 function setInside(v){if(interior.grp)interior.grp.visible=v||SV.state<=1;if(sky)sky.visible=true;if(water)water.visible=!v;S.fog.density=v?.018:.00005;S.environment=v?null:ENV;S.fog.color.set(v?0x0a0e13:0xc6d2df);hemi.intensity=v?.12:.38;sun.intensity=v?0:3.1;sun.castShadow=!v;R.toneMappingExposure=v?1.25:.52;camL.intensity=v?.9:0}
@@ -253,18 +274,20 @@ function caption(i,moving){if(!capEl)return;const s=STATES[i];capEl.innerHTML=`<
 /* ---------- ciclo de vida ---------- */
 async function openVault(){if(SV.on)return;SV.on=true;try{closePlace()}catch(_){}
   ov=$('#svv');if(!ov){ov=document.createElement('div');ov.id='svv';document.body.appendChild(ov)}
-  ov.innerHTML=`<canvas id="svvC"></canvas><div class="sv-top"><div class="sv-br"><b>ATLAS</b><span>Base de datos · Svalbard</span></div><button data-sv="x" class="sv-skip">Ir al panel ✕</button></div>
+  ov.innerHTML=`<canvas id="svvC"></canvas><div class="sv-top"><div class="sv-br"><b>ATLAS</b><span>Base de datos · Svalbard</span></div><div class="sv-tb"><button data-sv="db" class="sv-skip">▦ Ver los datos</button><button data-sv="x" class="sv-skip">Ir al panel ✕</button></div></div><div class="sv-hint">${mobile()?'Arrastra para mirar · pellizca para avanzar o retroceder':'Arrastra para mirar · rueda, flechas o W/S para avanzar'}</div>
     <div class="sv-cap"></div><div class="sv-nav"><div class="sv-dots">${STATES.map(()=>'<i></i>').join('')}</div><button data-sv="prev" aria-label="Anterior">←</button><button data-sv="next" class="sv-next">Siguiente →</button></div>
     <div class="sv-load"><i></i><span>Cargando el relieve real de Svalbard…</span></div><p class="sv-cred">Relieve: Copernicus DEM GLO-30 (ESA) · Texturas: Poly Haven (CC0) · Recreación de ATLAS, no fotografía</p>`;
   ov.hidden=false;document.body.classList.add('sv-open');try{sheetPush()}catch(_){}
   capEl=ov.querySelector('.sv-cap');dotsEl=ov.querySelector('.sv-dots');
-  ov.querySelector('[data-sv=x]').onclick=()=>finish();ov.querySelector('[data-sv=next]').onclick=()=>go(SV.state+1);ov.querySelector('[data-sv=prev]').onclick=()=>go(SV.state-1);
+  ov.querySelector('[data-sv=x]').onclick=()=>finish();ov.querySelector('[data-sv=db]').onclick=()=>{finish();setTimeout(()=>{try{window.openDB&&openDB()}catch(_){}},480)};ov.querySelector('[data-sv=next]').onclick=()=>go(SV.state+1);ov.querySelector('[data-sv=prev]').onclick=()=>go(SV.state-1);
   dotsEl.querySelectorAll('i').forEach((d,k)=>d.onclick=()=>go(k));
   try{await libs();await loadDEM()}catch(e){ov.querySelector('.sv-load span').textContent='No se pudo cargar la escena 3D. Comprueba la conexión.';return}
   if(!SV.on)return;init();SV.ready=true;ov.querySelector('.sv-load').remove();SV.state=0;const c=camFor(0);C.position.copy(c.p);C.lookAt(c.t);C.fov=c.fov;C.updateProjectionMatrix();setInside(false);caption(0);needs();
-  ov.addEventListener('wheel',onWheel,{passive:true});window.addEventListener('keydown',onKey);let ty=null;ov.addEventListener('touchstart',e=>ty=e.touches[0].clientY,{passive:true});ov.addEventListener('touchend',e=>{if(ty==null)return;const dy=ty-e.changedTouches[0].clientY;if(Math.abs(dy)>50)go(SV.state+(dy>0?1:-1));ty=null},{passive:true})}
-let _wt=0;function onWheel(e){const n=performance.now();if(n-_wt<900||anim)return;_wt=n;go(SV.state+(e.deltaY>0?1:-1))}
-function onKey(e){if(!SV.on)return;if(e.key==='Escape')finish();if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' ')go(SV.state+1);if(e.key==='ArrowLeft'||e.key==='ArrowUp')go(SV.state-1)}
+  ov.addEventListener('wheel',onWheel,{passive:true});window.addEventListener('keydown',onKey);bindFree();hint(true)}
+function onWheel(e){if(anim)return;move(Math.max(-120,Math.min(120,e.deltaY))*step()/60)}
+function onKey(e){if(!SV.on)return;const k=e.key.toLowerCase();if(k==='escape')finish();else if(k===' '||k==='enter'||k==='pagedown')go(SV.state+1);else if(k==='pageup')go(SV.state-1);
+  else if(k==='w'||k==='arrowup')move(step());else if(k==='s'||k==='arrowdown')move(-step());else if(k==='a')move(0,-step()/2);else if(k==='d')move(0,step()/2);
+  else if(k==='arrowleft')look(-40,0);else if(k==='arrowright')look(40,0)}
 function init(){const cv=$('#svvC');frame();
   R=new THREE.WebGLRenderer({canvas:cv,antialias:!LOWEND(),powerPreference:'high-performance'});R.setPixelRatio(Math.min(devicePixelRatio||1,LOWEND()?1.25:1.75));R.setSize(innerWidth,innerHeight);
   R.outputEncoding=THREE.sRGBEncoding;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=.52;R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;

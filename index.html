@@ -420,8 +420,8 @@ body.mapmode #searchFab{display:none!important}
 .lv-top{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}.lv-l{display:block;font-size:11.5px;color:var(--dim)}.lv-p{font-size:26px;font-weight:700;font-family:var(--mono)}
 .lv-ch{display:flex;flex-direction:column;align-items:flex-end;font-family:var(--mono);font-size:12.5px;gap:2px}.lv-svg{width:100%;height:auto;margin-top:8px}.lv-off{margin:0;font-size:12.5px;color:var(--mid)}
 .mb-leg{display:flex;gap:12px;align-self:flex-start;font-size:11.5px;color:var(--mid);padding:5px 12px;border-radius:999px;background:rgba(16,14,36,.8)}
-.mb-leg span{display:flex;align-items:center;gap:5px}.lg{display:inline-block;width:11px;height:11px;border:2px solid;background:#0d0b22}
-.lg.e{border-color:#35e0ff;clip-path:polygon(25% 3%,75% 3%,100% 50%,75% 97%,25% 97%,0 50%);background:#35e0ff}.lg.f{border-color:#c084fc;border-radius:3px}.lg.s{border-color:#ffb020;border-radius:50%}
+.mb-leg span{display:flex;align-items:center;gap:5px}.lg{display:inline-block;width:10px;height:10px;border-radius:50%;box-shadow:0 0 6px currentColor}
+.lg.e{background:#35e0ff;color:#35e0ff}.lg.f{background:#c084fc;color:#c084fc}.lg.s{background:#ffb020;color:#ffb020}
 .atlas-tip .maplibregl-popup-content{background:rgba(16,14,36,.95);color:var(--fg);border:1px solid var(--edge2);border-radius:10px;padding:8px 11px;font:12.5px Inter,system-ui,sans-serif;display:flex;flex-direction:column;gap:2px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
 .atlas-tip .maplibregl-popup-content span{color:var(--mid);font-size:11.5px}.atlas-tip .maplibregl-popup-tip{display:none}
 .hq-pin i{height:140px!important;width:3px!important;left:11.5px!important;background:linear-gradient(to top,#ffffff,#b9f6ff 30%,rgba(185,246,255,0))!important;box-shadow:0 0 18px #b9f6ff,0 0 40px rgba(185,246,255,.6)!important}
@@ -2106,9 +2106,23 @@ function mapEntities(){ // entidades que cumplen el filtro actual
   const ofType=x=>sq.type==='all'||x.k===({etf:'e',stk:'s',fnd:'f'}[sq.type]);
   let r=entEnrich(ents.filter(x=>ofType(x)&&(sq.sec==='all'||x.sec===sq.sec)&&words.every(w=>x.txt.includes(w))));
   if(sq.fit)r=r.filter(x=>x.fit||x.inPlan);if(sq.mine){const m=new Set(PF.map(p=>p.k+p.t));r=r.filter(x=>m.has(x.k+x.t))}if(sq.top)r=sortEnts(r,sq.sort).slice(0,sq.top);return r}
-function mapGeoJSON(list){const fs=[];list.forEach(x=>{const g=entGeo(x);if(!g)return;const c=geoCached(g[4]);const lat=c?c[0]:g[0],lon=c?c[1]:g[1];
-  fs.push({type:'Feature',geometry:{type:'Point',coordinates:[lon,lat]},properties:{k:x.k,t:x.t,tk:String(x.tk),name:x.name,node:x.node,c:KIND_C[x.k],gk:g[4],fit:x.fit||x.inPlan?1:0}})});
+function mapGeoJSON(list){ // un punto de color por ubicación (varias inversiones en la misma sede = un punto con su número)
+  const by=new Map();list.forEach(x=>{const g=entGeo(x);if(!g)return;let f=by.get(g[4]);
+    if(!f){const c=geoCached(g[4]);f={type:'Feature',geometry:{type:'Point',coordinates:[c?c[1]:g[1],c?c[0]:g[0]]},properties:{k:x.k,t:x.t,tk:String(x.tk),name:x.name,who:g[5]||x.name,node:x.node,c:KIND_C[x.k],gk:g[4],fit:0,n:0,ne:0,nf:0,ns:0}};by.set(g[4],f)}
+    const P=f.properties;P.n++;P['n'+x.k]++;if(x.fit||x.inPlan)P.fit=1});
+  const fs=[...by.values()];fs.forEach(f=>{const P=f.properties,k=P.ne>=P.nf&&P.ne>=P.ns?'e':P.nf>=P.ns?'f':'s';if(P.n>1){P.k=k;P.c=KIND_C[k];P.tk=String(P.n)}P.lbl=P.n>1?P.who:P.tk});
   return{type:'FeatureCollection',features:fs}}
+function mapFit(fs){ // encuadra donde está la mayoría de puntos (descarta los extremos) y acerca
+  if(!fs.length)return;const dk=!mobile()&&innerWidth>=900,pad=dk?{top:90,left:400,right:60,bottom:100}:{top:70,left:30,right:30,bottom:190};
+  if(fs.length===1){map.flyTo({center:fs[0].geometry.coordinates,zoom:Math.max(map.getZoom(),10),duration:1100,padding:mapPad()});return}
+  const xs=fs.map(f=>f.geometry.coordinates[0]).sort((a,b)=>a-b),ys=fs.map(f=>f.geometry.coordinates[1]).sort((a,b)=>a-b);
+  const q=(a,p)=>a[Math.min(a.length-1,Math.max(0,Math.round(p*(a.length-1))))],cut=fs.length>=8?.1:0;
+  let b=[[q(xs,cut),q(ys,cut)],[q(xs,1-cut),q(ys,1-cut)]];
+  if(b[1][0]-b[0][0]>100||b[1][1]-b[0][1]>60){ // repartidos por todo el mundo: acerca a la zona con más puntos (el resto sigue encendido)
+    const P=fs.map(f=>f.geometry.coordinates),near=(c,o)=>Math.abs(o[0]-c[0])<=25&&Math.abs(o[1]-c[1])<=18;
+    const best=P.map(c=>[c,P.filter(o=>near(c,o))]).sort((u,v)=>v[1].length-u[1].length)[0][1];
+    b=[[Math.min(...best.map(c=>c[0])),Math.min(...best.map(c=>c[1]))],[Math.max(...best.map(c=>c[0])),Math.max(...best.map(c=>c[1]))]]}
+  map.fitBounds(new GL.LngLatBounds(b[0],b[1]),{padding:pad,maxZoom:11,duration:1200})}
 function kindIcon(k){const S=64,c=document.createElement('canvas');c.width=c.height=S;const x=c.getContext('2d'),col=KIND_C[k],m=S/2;
   x.shadowColor=col;x.shadowBlur=10;x.fillStyle='#0d0b22';x.strokeStyle=col;x.lineWidth=5;x.beginPath();
   if(k==='e'){for(let i=0;i<6;i++){const a=Math.PI/3*i-Math.PI/6;x.lineTo(m+19*Math.cos(a),m+19*Math.sin(a))}x.closePath()}
@@ -2139,7 +2153,7 @@ function fxSetup(){
   map.addLayer({id:'hq-ring',type:'circle',source:'hq',paint:{'circle-color':'rgba(0,0,0,0)','circle-stroke-color':'#b9f6ff','circle-stroke-width':2,'circle-radius':10,'circle-stroke-opacity':0,'circle-pitch-alignment':'map'}});
   // tooltip al pasar el ratón
   const tip=new GL.Popup({closeButton:false,closeOnClick:false,offset:14,className:'atlas-tip'});
-  map.on('mousemove','pt',e=>{const f=e.features[0].properties,x=searchEntities().find(y=>y.k===f.k&&y.t===f.t);if(!x)return;const an=annStats(x.t);
+  map.on('mousemove','pt',e=>{const f=e.features[0].properties;if(f.n>1){tip.setLngLat(e.lngLat).setHTML(`<b>${esc(f.who)}</b><span>${f.n} inversiones aquí · pulsa para verlas</span>`).addTo(map);return}const x=searchEntities().find(y=>y.k===f.k&&y.t===f.t);if(!x)return;const an=annStats(x.t);
     tip.setLngLat(e.lngLat).setHTML(`<b>${esc(x.name)}</b><span>${KIND_L[x.k]} · ${an?p1(an.mean,0)+' media anual':'sin historial'}</span>`).addTo(map)});
   map.on('mouseleave','pt',()=>tip.remove());
   ['mousedown','touchstart','wheel','dragstart'].forEach(ev=>map.on(ev,()=>{fxOrbit=false}));
@@ -2337,13 +2351,14 @@ function showPole(){const p=$('#mcard'),ents=searchEntities(),n={s:0,e:0,f:0};en
    <div class="pg-card"><div class="pg-n"><div><b style="color:${KIND_C.s}">${n.s}</b><span>acciones</span></div><div><b style="color:${KIND_C.e}">${n.e}</b><span>ETFs</span></div><div><b style="color:${KIND_C.f}">${n.f}</b><span>fondos</span></div></div>
    <p>↻ Precios actualizados <b>${up?relWhen(up):'—'}</b>. Se actualizan solos cada día laborable, al cierre de la bolsa europea y de la americana.</p>
    <details class="mp-why"><summary>ℹ️ De dónde salen los datos</summary><p>Yahoo Finance (precios, cifras y rentabilidades), OpenStreetMap (sedes), EODHD (respaldo de fondos), fichas de las gestoras, Mapbox (mapa) y TradingView (gráfico interactivo).</p></details>
-   <button class="av-go" data-pg="3d">Entrar en la bóveda de Svalbard</button><div class="pg-act"><button class="btn" data-pg="all">Encender todo el mapa</button><button class="btn2" data-pg="plan">Ver mi plan</button></div></div>`;
+   <button class="btn" data-pg="db" style="width:100%;margin-bottom:8px">▦ Ver toda la base de datos</button><button class="av-go" data-pg="3d">Entrar en la bóveda de Svalbard</button><div class="pg-act"><button class="btn" data-pg="all">Encender todo el mapa</button><button class="btn2" data-pg="plan">Ver mi plan</button></div></div>`;
   p.hidden=false;requestAnimationFrame(()=>p.classList.add('on'));mapFocus='pole';
   p.querySelector('[data-mclose]').addEventListener('click',closePlace);
+  p.querySelector('[data-pg="db"]').addEventListener('click',()=>{closePlace();openDB()});
   p.querySelector('[data-pg="3d"]').addEventListener('click',()=>{if(window.ATLAS_VAULT)ATLAS_VAULT.open();else openAtlantis3D()});
   p.querySelector('[data-pg=all]').addEventListener('click',()=>{sq.active=true;sq.type='all';sq.sec='all';sq.fit=false;sq.q='';closePlace();updateMap()});
   p.querySelector('[data-pg=plan]').addEventListener('click',()=>{closePlace();const r=$('.right');if(r)r.scrollIntoView({behavior:'smooth'})});
-  fxOrbit=false;map.flyTo({center:ATL,zoom:mobile()?11.2:12,pitch:58,bearing:200,duration:2400,curve:1.5,essential:true,padding:mobile()?{...mapPad(),bottom:Math.round(innerHeight*.12)}:{...mapPad(),left:430}});map.once('moveend',()=>{if(mapFocus==='pole'&&!mobile())fxOrbit=!reduced})}
+  fxOrbit=false;map.flyTo({center:ATL,zoom:mobile()?11.2:12,pitch:58,bearing:200,duration:2400,curve:1.5,essential:true,padding:mobile()?{...mapPad(),bottom:Math.round(innerHeight*.12)}:{...mapPad(),left:430}})}
 function fxData(gj){ // flujos desde cada sede encendida hacia la base de datos del Polo Norte
   const seen=new Map();gj.features.forEach(f=>{const k=f.properties.gk;if(!seen.has(k))seen.set(k,f)});
   fxFlows=[...seen.values()].slice(0,60).map((f,i)=>({c:f.properties.c,line:slerpLine(f.geometry.coordinates,POLE,60),ph:Math.random()}));
@@ -2354,7 +2369,8 @@ let _dashI=-1,_lastNow=performance.now();
 let _pktT=0,_ringT=0;
 let _mapTouch=false;
 function fxTick(now){fxRaf=requestAnimationFrame(fxTick);if(!mapReady||document.hidden||!$('#detail').hidden||!$('#search').hidden)return;const dt=Math.min(.05,(now-_lastNow)/1000);_lastNow=now;
-  if(fxFlows.length&&!map.isMoving()&&!_mapTouch&&map.getZoom()<9&&now-_pktT>(mobile()?600:160)){   // no recalcular capas mientras el usuario arrastra (en móvil se notaba «pegajoso»)const sdt=(now-_pktT)/1000;_pktT=now;const di=Math.floor(now/260)%DASH.length;if(di!==_dashI){_dashI=di;map.setPaintProperty('flows','line-dasharray',DASH[di])}
+  if(fxFlows.length&&!map.isMoving()&&!_mapTouch&&map.getZoom()<9&&now-_pktT>(mobile()?600:160)){   // no recalcular capas mientras el usuario arrastra (en móvil se notaba «pegajoso»)
+    const sdt=(now-_pktT)/1000;_pktT=now;const di=Math.floor(now/260)%DASH.length;if(di!==_dashI){_dashI=di;map.setPaintProperty('flows','line-dasharray',DASH[di])}
     fxPackets.forEach(p=>{p.t+=p.v*Math.min(.5,sdt);if(p.t>=1){p.t-=1;poleBlip(p.f.c)}});
     map.getSource('packets').setData({type:'FeatureCollection',features:fxPackets.map(p=>{const L=p.f.line,i=Math.min(L.length-1,Math.floor(p.t*(L.length-1)));return{type:'Feature',geometry:{type:'Point',coordinates:L[i]},properties:{c:p.f.c}}})})}
 
@@ -2398,38 +2414,37 @@ function buildMap(useMbx){
     if(!MBX)try{map.setLight({anchor:'map',position:[1.3,200,35],color:'#ffffff',intensity:.5})}catch(_){}
     map.addSource('hq',{type:'geojson',data:{type:'FeatureCollection',features:[]}});
     map.addLayer({id:'hq-glow',type:'circle',source:'hq',paint:{'circle-color':'#cfe8ff','circle-radius':['interpolate',['exponential',2],['zoom'],12,20,17,320],'circle-blur':1,'circle-opacity':.0,'circle-opacity-transition':{duration:900},'circle-pitch-alignment':'map'}},map.getLayer('b3d')?'b3d':undefined);
-    map.addSource('ents',{type:'geojson',data:mapGeoJSON(mapEntities()),cluster:true,clusterRadius:42,clusterMaxZoom:13,
-      clusterProperties:{ne:['+',['case',['==',['get','k'],'e'],1,0]],nf:['+',['case',['==',['get','k'],'f'],1,0]],ns:['+',['case',['==',['get','k'],'s'],1,0]]}});
+    map.addSource('ents',{type:'geojson',data:mapGeoJSON(mapEntities())});
     const fade={duration:700,delay:0};
     map.addLayer({id:'cl-glow',type:'circle',source:'ents',filter:['has','point_count'],paint:{'circle-color':['case',['all',['>=',['get','ne'],['get','nf']],['>=',['get','ne'],['get','ns']]],'#35e0ff',['>=',['get','nf'],['get','ns']],'#c084fc','#ffb020'],'circle-radius':['step',['get','point_count'],20,5,26,20,34],'circle-blur':1,'circle-opacity':.0,'circle-opacity-transition':fade}});
     map.addLayer({id:'cl',type:'circle',source:'ents',filter:['has','point_count'],paint:{'circle-color':'#171338','circle-radius':['step',['get','point_count'],11,5,14,20,18],'circle-stroke-color':['case',['all',['>=',['get','ne'],['get','nf']],['>=',['get','ne'],['get','ns']]],'#35e0ff',['>=',['get','nf'],['get','ns']],'#c084fc','#ffb020'],'circle-stroke-width':2.5,'circle-opacity':0,'circle-stroke-opacity':0,'circle-opacity-transition':fade,'circle-stroke-opacity-transition':fade}});
     map.addLayer({id:'cl-n',type:'symbol',source:'ents',filter:['has','point_count'],layout:{'text-field':['get','point_count_abbreviated'],'text-font':FONT(),'text-size':12,'text-allow-overlap':true},paint:{'text-color':'#ffffff'}});
-    map.addLayer({id:'pt-glow',type:'circle',source:'ents',filter:['!',['has','point_count']],paint:{'circle-color':['get','c'],'circle-radius':16,'circle-blur':1,'circle-opacity':0,'circle-opacity-transition':fade}});
-    map.addLayer({id:'pt',type:'symbol',source:'ents',filter:['!',['has','point_count']],layout:{'icon-image':['concat','ic-',['get','k']],'icon-size':['interpolate',['linear'],['zoom'],1,.55,10,.85,16,1.1],'icon-allow-overlap':true,'icon-ignore-placement':true},paint:{'icon-opacity':0,'icon-opacity-transition':fade}});
-    map.addLayer({id:'pt-l',type:'symbol',source:'ents',minzoom:6,filter:['!',['has','point_count']],layout:{'text-field':['get','tk'],'text-font':FONT(),'text-size':11,'text-offset':[0,1.5],'text-anchor':'top'},paint:{'text-color':['get','c'],'text-halo-color':'#0b0a1c','text-halo-width':1.4}});
+    const ptR=(a,b)=>['+',a,['min',b,['*',b/3,['ln',['get','n']]]]];
+    map.addLayer({id:'pt-glow',type:'circle',source:'ents',paint:{'circle-color':['get','c'],'circle-radius':['interpolate',['linear'],['zoom'],1,ptR(9,8),10,ptR(16,10)],'circle-blur':1,'circle-opacity':0,'circle-opacity-transition':fade}});
+    map.addLayer({id:'pt',type:'circle',source:'ents',paint:{'circle-color':['get','c'],'circle-radius':['interpolate',['linear'],['zoom'],1,ptR(3.6,4),6,ptR(5.5,6),12,ptR(8,8)],'circle-stroke-color':'#0b0a1c','circle-stroke-width':1.2,'circle-opacity':0,'circle-stroke-opacity':0,'circle-opacity-transition':fade,'circle-stroke-opacity-transition':fade}});
+    map.addLayer({id:'pt-n',type:'symbol',source:'ents',minzoom:3,filter:['>',['get','n'],1],layout:{'text-field':['to-string',['get','n']],'text-font':FONT(),'text-size':10,'text-allow-overlap':true},paint:{'text-color':'#0b0a1c'}});
+    map.addLayer({id:'pt-l',type:'symbol',source:'ents',minzoom:6,layout:{'text-field':['get','lbl'],'text-font':FONT(),'text-size':11,'text-offset':[0,1.4],'text-anchor':'top','text-optional':true},paint:{'text-color':['get','c'],'text-halo-color':'#0b0a1c','text-halo-width':1.4}});
     ['cl','pt'].forEach(l=>{map.on('mouseenter',l,()=>map.getCanvas().style.cursor='pointer');map.on('mouseleave',l,()=>map.getCanvas().style.cursor='')});
     map.on('click','cl',e=>{const f=e.features[0],src=map.getSource('ents');
       promisify(cb=>src.getClusterExpansionZoom(f.properties.cluster_id,cb)).then(z=>{
         if(z>13.5||map.getZoom()>=12.5){promisify(cb=>src.getClusterLeaves(f.properties.cluster_id,200,0,cb)).then(lv=>showPlace(f.geometry.coordinates,lv.map(l=>l.properties)))}
         else map.easeTo({center:f.geometry.coordinates,zoom:Math.min(z+.3,14),duration:900,padding:mapPad()})})});
-    map.on('click','pt',e=>{const f=e.features[0],same=mapEntities().filter(x=>{const g=entGeo(x);return g&&g[4]===f.properties.gk});showPlace(f.geometry.coordinates,same.length?same.map(x=>({k:x.k,t:x.t,tk:x.tk,name:x.name,node:x.node,gk:f.properties.gk})):[f.properties],true)});
+    map.on('click','pt',e=>{const f=e.features[0],same=mapEntities().filter(x=>{const g=entGeo(x);return g&&g[4]===f.properties.gk});showPlace(f.geometry.coordinates,same.length?same.map(x=>({k:x.k,t:x.t,tk:x.tk,name:x.name,node:x.node,gk:f.properties.gk})):[f.properties],true,true)});
     map.on('click',e=>{const hit=map.queryRenderedFeatures(e.point,{layers:['cl','pt']});if(!hit.length)closePlace()});
     try{fxSetup()}catch(e){console.warn('fx',e)}
     mapReady=true;updateMap(true)});
   setTimeout(()=>{if(!styled&&!mapReady)$('#mapMsg').textContent='El mapa tarda en cargar. Comprueba la conexión.'},12000);map.once('style.load',()=>{$('#mapMsg').textContent=''});
   window.addEventListener('resize',()=>map&&map.setPadding(mapPad()));map.setPadding(mapPad());
 }
-function mapPad(){const r=$('#stage').getBoundingClientRect();return mobile()||r.width<900?{top:110,bottom:20,left:0,right:0}:{top:120,bottom:20,left:0,right:430}}
+function mapPad(){const r=$('#stage').getBoundingClientRect();return mobile()||r.width<900?{top:110,bottom:20,left:0,right:0}:{top:120,bottom:20,left:0,right:0}}
 function updateMap(first){if(!mapReady)return;const list=mapEntities(),gj=mapGeoJSON(list);map.getSource('ents').setData(gj);try{fxData(gj)}catch(_){}
   const on=gj.features.length>0;
-  ['cl-glow','pt-glow'].forEach(l=>map.setPaintProperty(l,'circle-opacity',0));map.setPaintProperty('cl','circle-opacity',0);map.setPaintProperty('cl','circle-stroke-opacity',0);map.setPaintProperty('pt','icon-opacity',0);
-  if(on)setTimeout(()=>{map.setPaintProperty('cl-glow','circle-opacity',.45);map.setPaintProperty('pt-glow','circle-opacity',.55);map.setPaintProperty('cl','circle-opacity',.95);map.setPaintProperty('cl','circle-stroke-opacity',1);map.setPaintProperty('pt','icon-opacity',1)},60);
+  ['cl-glow','pt-glow'].forEach(l=>map.setPaintProperty(l,'circle-opacity',0));map.setPaintProperty('cl','circle-opacity',0);map.setPaintProperty('cl','circle-stroke-opacity',0);map.setPaintProperty('pt','circle-opacity',0);map.setPaintProperty('pt','circle-stroke-opacity',0);
+  if(on)setTimeout(()=>{map.setPaintProperty('cl-glow','circle-opacity',.45);map.setPaintProperty('pt-glow','circle-opacity',.55);map.setPaintProperty('cl','circle-opacity',.95);map.setPaintProperty('cl','circle-stroke-opacity',1);map.setPaintProperty('pt','circle-opacity',1);map.setPaintProperty('pt','circle-stroke-opacity',.9)},60);
   renderMapBar(gj.features.length,list.length);
-  if(on&&!first&&!mapFocus){const b=new GL.LngLatBounds();gj.features.forEach(f=>b.extend(f.geometry.coordinates));
-    if(gj.features.length===1)map.flyTo({center:gj.features[0].geometry.coordinates,zoom:5,duration:1200,padding:mapPad()});
-    else map.fitBounds(b,{padding:{...mapPad(),top:mapPad().top+30,left:40,bottom:40,right:mapPad().right+40},maxZoom:5,duration:1200})}
+  if(on&&!first&&!mapFocus)mapFit(gj.features);
   if(!on)closePlace()}
-function renderMapBar(nPts,nEnt){const b=$('#mapBar');if(!b)return;const chip=(g,v,l,on)=>`<button class="mb-chip${on?' on':''}" data-g="${g}" data-v="${v}">${l}</button>`,a=filterActive();
+function renderMapBar(nPts,nEnt){const b=$('#mapBar');if(!b)return;document.body.classList.toggle('flt-on',filterActive());const chip=(g,v,l,on)=>`<button class="mb-chip${on?' on':''}" data-g="${g}" data-v="${v}">${l}</button>`,a=filterActive();
   const bs=$('#bbarQ');if(bs)bs.textContent=sq.q||'Buscar empresa, ETF o fondo';
   b.innerHTML=`<div class="tick" id="tick">${tickHTML()}</div>
    <div class="mb-ft"><button class="mb-flt${a?' on':''}" data-g="flt" aria-expanded="${b.classList.contains('flt-open')}">${a?esc([{etf:'ETFs',fnd:'Fondos',stk:'Acciones',all:'Todo'}[sq.type],sq.mine?'Mi cartera':'',sq.fit?'En tu perfil de volatilidad':'',sq.sec!=='all'?sq.sec:''].filter(Boolean).join(' · ')):'Mostrar en el mapa'} ▾</button></div>
@@ -2447,7 +2462,7 @@ function mapBarClick(e){const b=e.target.closest('button[data-g]');if(!b)return;
   if(g==='mine'){sq.mine=!sq.mine;sq.active=true}
   closePlace();updateMap()}
 let camBack=null;const camNow=()=>({center:map.getCenter(),zoom:map.getZoom(),pitch:map.getPitch(),bearing:map.getBearing()});
-function showPlace(coord,items,exact){const p=$('#mcard');if(!items.length)return;const first=items[0];if(!camBack&&p.hidden&&map)camBack=camNow();
+function showPlace(coord,items,exact,free){const p=$('#mcard');if(!items.length)return;const first=items[0];if(!free&&!camBack&&p.hidden&&map)camBack=camNow();
   const ent=searchEntities().find(x=>x.k===first.k&&x.t===first.t);const g=ent&&entGeo(ent);const ck=g&&geoCached(g[4]);
   const prec=ck?'edificio':g?g[3]:'ciudad',addr=g?g[2]:'';const who=g?g[5]:'';
   mapFocus=g?g[4]:null;
@@ -2458,6 +2473,7 @@ function showPlace(coord,items,exact){const p=$('#mcard');if(!items.length)retur
   p.hidden=false;requestAnimationFrame(()=>p.classList.add('on'));prefetchPrices(rows);
   p.querySelector('[data-mclose]').addEventListener('click',closePlace);
   p.querySelectorAll('.sr').forEach(r=>r.addEventListener('click',()=>openDetail(r.dataset.k,r.dataset.t,r.dataset.n)));
+  if(free){map.easeTo({center:coord,zoom:Math.max(map.getZoom(),Math.min(12,map.getZoom()+2)),duration:700,padding:mapPad()});return} // desde el mapa: solo centra y acerca, el usuario sigue moviéndose libre
   if(sameSpot&&g){const c=ck?[ck[1],ck[0]]:[g[1],g[0]];requestAnimationFrame(()=>{flyHQ(c);if(!ck&&prec!=='edificio')setTimeout(()=>refineGeo(g,coord),1800)})}
   else map.easeTo({center:coord,zoom:Math.max(map.getZoom(),13.2),pitch:55,duration:1100,padding:mapPad()})}
 function litCity(c){if(!mapReady)return;const src=map.getSource('hq');if(src)src.setData({type:'FeatureCollection',features:c?[{type:'Feature',geometry:{type:'Point',coordinates:c},properties:{}}]:[]});
@@ -2465,7 +2481,7 @@ function litCity(c){if(!mapReady)return;const src=map.getSource('hq');if(src)src
   try{roadsLit(!!c)}catch(_){}if(!c){fxOrbit=false;try{map.setPaintProperty('hq-ring','circle-stroke-opacity',0)}catch(_){}}}
 function flyHQ(c){if(hqMarker)hqMarker.remove();litCity(c);const el=document.createElement('div');el.className='hq-pin';el.innerHTML='<i></i><b></b>';
   hqMarker=new GL.Marker({element:el,anchor:'bottom'}).setLngLat(c).addTo(map);
-  fxOrbit=false;map.flyTo({center:c,zoom:16.2,pitch:60,bearing:-28,duration:1600,curve:1.3,essential:true,padding:{...mapPad(),bottom:mobile()?Math.round(innerHeight*.18):20}});map.once('moveend',()=>{if(mapFocus)fxOrbit=!reduced&&!mobile()})}
+  fxOrbit=false;map.flyTo({center:c,zoom:16.2,pitch:60,bearing:-28,duration:1600,curve:1.3,essential:true,padding:{...mapPad(),bottom:mobile()?Math.round(innerHeight*.18):20}});}
 async function refineGeo(g,coord){ // geocodifica la dirección en el móvil (OpenStreetMap) para afinar al edificio
   if(!g[2])return;try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(g[2].replace(/\(.*?\)/g,'')),{headers:{'Accept-Language':'es'}});
     const j=await r.json();if(!j||!j[0])return;const lat=+j[0].lat,lon=+j[0].lon;const d=Math.hypot((lat-g[0])*111,(lon-g[1])*111*Math.cos(g[0]*Math.PI/180));
@@ -2904,22 +2920,23 @@ function fundDetail(f){const info=fundInfo(f),an=annStats(f.t),color=KIND_C.f,ac
    <div class="dsec"><h4>Noticias</h4><div id="dNews"></div></div>
    ${f.doubt?`<p class="mp-note" style="color:var(--warn)">Ojo con los datos: ${esc(f.doubt)}</p>`:''}
    <p class="mp-note">Rentabilidades en euros de las fichas de la gestora, Renta 4, Quefondos y Finect (${f.src.map((u,i)=>`<a href="${esc(u)}" target="_blank" rel="noopener" style="color:inherit">${i+1}</a>`).join(', ')}), consultadas el 2 oct. 2026. Rentabilidades pasadas no garantizan las futuras. No es asesoramiento financiero.</p></div>`}
+function openDB(){sq.db=true;sq.q='';sq.sec='all';sq.fit=false;sq.top=0;if(sq.sort==='mean')sq.sort='az';closePlace&&closePlace();openSearch()}window.openDB=openDB;
 function openSearch(){const d=$('#search');if(d.hidden)sheetPush();d.hidden=false;renderSearch();setTimeout(()=>{const i=$('#sQ');if(i&&!mobile())i.focus()},50)}
-function closeSearch(fromPop){if($('#search').hidden)return;if(fromPop!==true&&sheetPop())return;$('#search').hidden=true;sheetBtn()}
+function closeSearch(fromPop){if($('#search').hidden)return;if(fromPop!==true&&sheetPop())return;$('#search').hidden=true;sq.db=false;sheetBtn()}
 function renderSearch(){
   const d=$('#search'),P=PROFILES[profile],ents=searchEntities();
   const ofType=x=>sq.type==='all'||x.k===({etf:'e',stk:'s',fnd:'f'}[sq.type]);
   const secCount={};ents.filter(ofType).forEach(x=>secCount[x.sec]=(secCount[x.sec]||0)+1);
   const secs=Object.keys(secCount).sort((a,b)=>secCount[b]-secCount[a]);
   if(sq.sec!=='all'&&!secs.includes(sq.sec))sq.sec='all';
-  const words=norm(sq.q).split(/\s+/).filter(Boolean),home=!words.length&&sq.sec==='all'&&!sq.fit;
+  const words=norm(sq.q).split(/\s+/).filter(Boolean),home=!words.length&&sq.sec==='all'&&!sq.fit&&!sq.db;
   let res=entEnrich(ents.filter(x=>ofType(x)&&(sq.sec==='all'||x.sec===sq.sec)&&words.every(w=>x.txt.includes(w))));
   if(sq.fit)res=res.filter(x=>x.fit||x.inPlan);
   const exact=x=>words.length&&(norm(x.tk)===words.join(' ')||norm(x.t)===words.join(' ')||norm(x.name).startsWith(words.join(' ')))?1:0;
   res=sortEnts(res,sq.sort);if(words.length){const ex=res.filter(exact);if(ex.length)res=ex.concat(res.filter(x=>!exact(x)))}
   if(sq.top)res=res.slice(0,sq.top);
   const chip=(grp,val,lbl,on,cls='')=>`<button class="sc-chip${cls}${on?' on':''}" data-g="${grp}" data-v="${esc(val)}">${lbl}</button>`;
-  if(!d.querySelector('.sbox')){d.innerHTML=`<div class="sbox"><p class="s-ask">¿Qué quieres investigar?</p><div class="shead"><span class="sic">⌕</span><input id="sQ" type="search" placeholder="QQQ · NVIDIA · VWCE · IE00… · ¿Qué pasa si…?" autocomplete="off" enterkeyhint="search"><button class="x-close" data-sclose aria-label="Cerrar">✕</button></div>
+  if(!d.querySelector('.sbox')){d.innerHTML=`<div class="sbox"><div class="s-top"><p class="s-ask">¿Qué quieres investigar?</p><div class="shead"><span class="sic">⌕</span><input id="sQ" type="search" placeholder="QQQ · NVIDIA · VWCE · IE00… · ¿Qué pasa si…?" autocomplete="off" enterkeyhint="search"><button class="x-close" data-sclose aria-label="Cerrar">✕</button></div></div>
     <div class="s-quick" id="sQuick"></div><div class="s-ans" id="sAns" hidden></div><div class="sbar" id="sBar"></div><div class="sfil" id="sFil" hidden></div><div class="scount" id="sCount"></div><div class="slistr" id="sList"></div></div>`;
     $('#sQ').addEventListener('input',e=>{delete $('#sAns').dataset.keep;sq.q=e.target.value;if(sq.q.trim())sq.active=true;renderSearch()});
     /* Analizar: Intro ejecuta la consulta (ATLASI.query); los accesos rápidos también */
@@ -2927,7 +2944,8 @@ function renderSearch(){
     $('#sQuick').addEventListener('click',e=>{const b=e.target.closest('[data-sq]');if(!b)return;const v=b.dataset.sq;$('#sQ').value=v;const a=$('#sAns');a.hidden=false;ATLASI.azRun(a,v)});
     d.querySelector('[data-sclose]').addEventListener('click',closeSearch);
     d.addEventListener('click',e=>{if(e.target===d)closeSearch()});
-    const onChip=e=>{const b=e.target.closest('.sc-chip');if(!b)return;const g=b.dataset.g,v=b.dataset.v;
+    const onChip=e=>{const b=e.target.closest('.sc-chip,.sdb');if(!b)return;const g=b.dataset.g,v=b.dataset.v;
+      if(g==='db'){sq.db=v==='1';renderSearch();$('#sList').scrollIntoView({block:'start'});return}
       if(g!=='open')sq.active=true;if(g==='fit')sq.fit=!sq.fit;else if(g==='open')sq.open=!sq.open;else if(g==='sec')sq.sec=sq.sec===v&&v!=='all'?'all':v;else if(g==='top')sq.top=+v;else if(g==='rk'){sq.rk=v;renderSearch();return}else if(g==='rkall'){sq.sort=sq.rk||'r1y';sq.top=25;sq.active=true;sq.open=false;renderSearch();return}else sq[g]=v;renderSearch();if(g==='sec'&&b.classList.contains('stile'))$('#sList').scrollTop=0};
     ['#sBar','#sFil','#sList'].forEach(s=>$(s).addEventListener('click',onChip));
     $('#sList').addEventListener('click',e=>{const b=e.target.closest('.sr');if(!b)return;const nd=b.dataset.n;if(MAPMODE&&mapReady){const k=b.dataset.k,t=b.dataset.t;closeSearch();setTimeout(()=>{if(!focusEntOnMap(k,t))openDetail(k,t,nd)},80);return}if(gl_ok){const ll=hubLL(nd);flyTo({lat:ll.lat,lon:ll.lon,dist:NODES[nd].sty==='generic'?30:42,heading:0},1400)}openDetail(b.dataset.k,b.dataset.t,nd)})}
@@ -2935,7 +2953,7 @@ function renderSearch(){
   /* resolución (ATLASI.assets, única fuente de verdad) antes que la lista: exacta → alias → cartera → parcial → otros */
   const qq=sq.q.trim(),AS=window.ATLASI&&ATLASI.assets,heldP=[...PF.map(p=>({id:p.k+':'+p.t,w:1})),...((ATLASI.DOC&&ATLASI.DOC.rows)||[]).filter(r=>r.k).map(r=>({id:r.k+':'+r.t,w:+r.w||1}))];
   sq.res=qq&&AS?AS.resolve(qq,{P:heldP,mode:'auto'}):null;
-  $('#sQuick').innerHTML=qq?'':['QQQ','NVIDIA','VWCE','¿Qué me mueve hoy?','¿Qué podría cambiar?'].map(x=>`<button class="sc-chip" data-sq="${esc(x)}">${esc(x)}</button>`).join('');
+  $('#sQuick').innerHTML=qq||sq.db?'':['QQQ','NVIDIA','VWCE','¿Qué me mueve hoy?','¿Qué podría cambiar?'].map(x=>`<button class="sc-chip" data-sq="${esc(x)}">${esc(x)}</button>`).join('');
   {const A2=$('#sAns');if(A2.dataset.keep){}else if(!qq){A2.hidden=true;A2.innerHTML=''}else if(sq.res&&sq.res.match&&!A2.dataset.keep){const d=AS.describe(sq.res.match.id);A2.hidden=false;
     A2.innerHTML=`<div class="az az-m"><span class="az-k">${sq.res.match.confidence==='exact'?'Coincidencia exacta':sq.res.match.confidence==='alias'?'Coincidencia por concepto':'Coincidencia parcial'} · ${esc(sq.res.match.how)}</span><p><b>${esc(d.atlasTicker||'')}</b> ${esc(d.name||'')}${d.isin?` · ISIN ${esc(d.isin)}`:''}</p><button class="btn sm" data-sgo>Analizar →</button></div>`;
     A2.querySelector('[data-sgo]').onclick=()=>ATLASI.azRun(A2,{intent:/^(sector|country|index|concept)$/.test(sq.res.match.kind)?(sq.res.match.kind==='sector'?'sectorHoldings':sq.res.match.kind==='country'?'countryDependence':'exposure'):'asset',args:{id:sq.res.match.id}})}
@@ -2952,11 +2970,17 @@ function renderSearch(){
   const L=$('#sList');
   if(home){const bestAll=entEnrich(ents.filter(ofType)).filter(x=>x.fit||x.inPlan).sort((a,b)=>(b.inPlan-a.inPlan)||((b.an?b.an.mean:-99)-(a.an?a.an.mean:-99)));
     $('#sCount').innerHTML='';updateMapSoon();sheetBtn();
-    L.innerHTML=`<h5 class="shd">Explora por sector</h5><div class="stiles">${secs.map(x=>`<button class="sc-chip stile" data-g="sec" data-v="${esc(x)}"><span class="sti">${SEC_ICON[x]||'◆'}</span><b>${esc(x)}</b><small>${secCount[x]}</small></button>`).join('')}</div>
+    const nK={s:0,e:0,f:0};ents.forEach(x=>nK[x.k]++);
+    L.innerHTML=`<button class="sdb" data-g="db" data-v="1"><span class="sdb-i">▦</span><span class="sdb-t"><b>Base de datos completa</b><small>${ents.length} inversiones · <i style="color:${KIND_C.s}">${nK.s} acciones</i> · <i style="color:${KIND_C.e}">${nK.e} ETFs</i> · <i style="color:${KIND_C.f}">${nK.f} fondos</i></small></span><span class="sdb-go">Ver tabla →</span></button>
+      <h5 class="shd">Explora por sector</h5><div class="stiles">${secs.map(x=>`<button class="sc-chip stile" data-g="sec" data-v="${esc(x)}"><span class="sti">${SEC_ICON[x]||'◆'}</span><b>${esc(x)}</b><small>${secCount[x]}</small></button>`).join('')}</div>
       ${rankBlock(ents.filter(ofType))}
       ${bestAll.length?`<h5 class="shd">En tu perfil de volatilidad (${esc(P.label)}) <span>media anual histórica</span></h5>${typeGroups(bestAll,sq.type==='all'?3:6,(x,i)=>entRow(x,true,0,'mean'))}`:''}`;return}
   $('#sCount').innerHTML=`<span>${sq.top?`${res.length} primeros según el orden elegido`:`${res.length} resultado${res.length===1?'':'s'}`}${sq.sec!=='all'?` en ${esc(sq.sec)}`:''}${sq.sort!=='mean'&&sq.sort!=='az'?` · ${SORTS[sq.sort][0].replace(/^\S+ /,'')}`:''}</span><span>${(SORTS[sq.sort]||SORTS.mean)[2]||'media anual'}</span>`;
   updateMapSoon();sheetBtn();
+  if(sq.db){const srt=(k,l)=>`<button class="sc-chip${sq.sort===k?' on':''}" data-g="sort" data-v="${k}">${l}</button>`;
+    L.innerHTML=`<div class="dbt-h"><button class="sc-chip" data-g="db" data-v="0">← Volver</button><span>Ordenar:</span>${srt('az','A–Z')}${srt('r1y','1 año')}${srt('mean','Media anual')}${srt('risk','Riesgo')}${srt('cheap','Comisión')}</div>
+      <div class="dbt"><div class="dbt-r dbt-hd"><span>Ticker</span><span>Nombre</span><span>1 año</span><span>Media</span><span class="dbt-x">Comisión</span></div>${res.map(x=>{const a=metricTxt(x,'r1y'),m=metricTxt(x,'mean'),c=metricTxt(x,'cheap');
+        return `<button class="sr dbt-r" data-k="${x.k}" data-t="${esc(x.t)}" data-n="${x.node}"><span class="dbt-tk" style="--c:${KIND_C[x.k]}"><i></i>${esc(String(x.tk))}</span><span class="dbt-nm"><b>${esc(x.name)}</b><small>${KIND_L[x.k]} · ${esc(x.sec)} · ${esc(NODES[x.node].city.split(' ·')[0])}</small></span><span style="color:${a[1]}">${a[0]}</span><span style="color:${m[1]}">${m[0]}</span><span class="dbt-x">${c[0]}</span></button>`}).join('')||'<p class="sempty">Nada con esos filtros.</p>'}</div>`;return}
   /* orden: entidades resueltas → en tu cartera → nombre/ticker → solo descripción (al final, separadas). No se elimina ningún resultado. */
   if(qq&&!sq.top&&AS){const ids=new Set(sq.res&&sq.res.match?[sq.res.match.id,...(sq.res.match.held||[])]:sq.res&&sq.res.ask?sq.res.ask.options.map(o=>o.id):[]),hs=new Set(heldP.map(p=>p.id)),nq=norm(qq),UQ=qq.toUpperCase().replace(/\s+/g,'');
     const grp=x=>{const id=x.k+':'+x.t;if(ids.has(id))return 0;if(hs.has(id))return 1;const nm=norm([x.name,x.obj.n,x.obj.full,x.obj.u&&x.obj.u.n].filter(Boolean).join(' '));if(nm.includes(nq)||[x.t,x.tk,x.obj.u&&x.obj.u.t,isinOf(x)].some(t=>t&&String(t).toUpperCase().startsWith(UQ)))return 2;return 3};
@@ -3267,9 +3291,9 @@ setTimeout(()=>{if(EXPERT())run()},3600);
 <script src="js/assets.js?v=1"></script>
 <script src="js/scenarios.js?v=3"></script>
 <script src="js/query.js?v=1"></script>
-<link rel="stylesheet" href="css/vault.css?v=1">
-<link rel="stylesheet" href="css/ui.css?v=8">
-<script src="js/vault.js?v=1"></script>
+<link rel="stylesheet" href="css/vault.css?v=2">
+<link rel="stylesheet" href="css/ui.css?v=9">
+<script src="js/vault.js?v=2"></script>
 <script src="js/kauai.js?v=3"></script>
 <script>if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>
 </body>
