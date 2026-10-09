@@ -1,5 +1,5 @@
 crumb ok
-OK acciones 173/174 · ETFs 42/43 · fondos 12/39 · sin sede 0 · 142 s
+OK acciones 173/174 · ETFs 42/43 · fondos 12/39 · sin sede 0 · 199 s
   - s ROG.SW: HTTP Error 404: Not Found
   - e ESPO.DE: HTTP Error 404: Not Found
   - f IE00BYX5M476 (Fidelity MSCI Emerging Markets Index P-ACC-EUR): Yahoo no lo identifica con seguridad
