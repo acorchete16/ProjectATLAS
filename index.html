@@ -2469,13 +2469,43 @@ function showPlace(coord,items,exact,free){const p=$('#mcard');if(!items.length)
   const rows=entEnrich(items.map(it=>searchEntities().find(x=>x.k===it.k&&x.t===it.t)).filter(Boolean)).sort((a,b)=>(b.inPlan-a.inPlan)||(b.fit-a.fit)||((b.an?b.an.mean:-99)-(a.an?a.an.mean:-99)));
   const sameSpot=new Set(rows.map(x=>{const q=entGeo(x);return q&&q[4]})).size===1;
   p.innerHTML=`<div class="mc-h"><div><h3>${sameSpot?esc(who):`${rows.length} resultados en esta zona`}</h3>${sameSpot&&addr?`<p>📍 ${esc(addr)}</p><p class="mc-prec ${prec}">${PREC_TXT[prec]||''}</p>`:''}</div><button class="x-close" data-mclose aria-label="Cerrar">✕</button></div>
-    <div class="mc-list">${rows.map(x=>entRow(x)).join('')}</div>`;
-  p.hidden=false;requestAnimationFrame(()=>p.classList.add('on'));prefetchPrices(rows);
+    ${wdHTML(rows)}`;
+  p.classList.add('wd-card');p.hidden=false;requestAnimationFrame(()=>p.classList.add('on'));prefetchPrices(rows);
   p.querySelector('[data-mclose]').addEventListener('click',closePlace);
-  p.querySelectorAll('.sr').forEach(r=>r.addEventListener('click',()=>openDetail(r.dataset.k,r.dataset.t,r.dataset.n)));
+  p.querySelectorAll('[data-k][data-t]').forEach(r=>r.addEventListener('click',()=>openDetail(r.dataset.k,r.dataset.t,r.dataset.n)));
+  wdFillAll(p,rows);
   if(free){map.easeTo({center:coord,zoom:Math.max(map.getZoom(),Math.min(12,map.getZoom()+2)),duration:700,padding:mapPad()});return} // desde el mapa: solo centra y acerca, el usuario sigue moviéndose libre
   if(sameSpot&&g){const c=ck?[ck[1],ck[0]]:[g[1],g[0]];requestAnimationFrame(()=>{flyHQ(c);if(!ck&&prec!=='edificio')setTimeout(()=>refineGeo(g,coord),1800)})}
   else map.easeTo({center:coord,zoom:Math.max(map.getZoom(),13.2),pitch:55,duration:1100,padding:mapPad()})}
+/* ---- ficha al pulsar en el mapa: panel tipo «wallet» (lista con puntos de color + resumen semanal) ---- */
+function wdPct(v,d=1){return v==null?'—':(v>0?'+':v<0?'−':'')+Math.abs(v).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d})+' %'}
+function wdHTML(rows){const one=rows.length===1,top=rows.slice(0,one?1:3);
+  const val=(x,s)=>{const f=SORTS[s]&&SORTS[s][1],v=f?f(x):null;return v};
+  const chip=(x,v,lbl)=>`<span class="wd-c"><i style="--c:${KIND_C[x.k]}"></i><b>${esc(lbl)}</b><em class="${v==null?'':v<0?'dn':'up'}">${s_v(v)}</em></span>`;
+  const s_v=v=>v==null?'—':wdPct(v,1);
+  const list=one?(()=>{const x=rows[0],t=terOf(x),vol=rkv(x,'vol')??(x.info&&x.info.vol);
+      return [['1 año',val(x,'r1y')],['Este año',val(x,'ytd')],['Media anual',x.an?x.an.mean:null],['Peor año',x.an?x.an.worst:null]].concat(x.k==='s'?[['1 mes',val(x,'r1m')]]:[]).map(([l,v])=>chip(x,v,l)).join('')
+        +(x.k==='s'?'':`<span class="wd-c"><i style="--c:${KIND_C[x.k]}"></i><b>Comisión</b><em>${t==null?'—':t.toFixed(2).replace('.',',')+' %/año'}</em></span>`)
+        +`<span class="wd-c"><i style="--c:${KIND_C[x.k]}"></i><b>Se mueve</b><em>${vol==null?'—':'±'+Math.round(vol)+' %/año'}</em></span>`})()
+    :rows.map(x=>`<button class="wd-c" data-k="${x.k}" data-t="${esc(x.t)}" data-n="${x.node}" title="${esc(x.name)}"><i style="--c:${KIND_C[x.k]}"></i><b>${esc(String(x.tk))}</b><em class="${val(x,'r1y')==null?'':val(x,'r1y')<0?'dn':'up'}">${s_v(val(x,'r1y'))}</em></button>`).join('');
+  const nK={e:0,f:0,s:0};rows.forEach(x=>nK[x.k]++);
+  return `<div class="wd"><div class="wd-nav"><span class="wd-bolt">⚡</span>${one?`<span class="on">${KIND_L[rows[0].k]}</span><span>${esc(rows[0].sec)}</span>`:Object.entries(nK).filter(([k,n])=>n).map(([k,n],i)=>`<span class="${i?'':'on'}"><i style="--c:${KIND_C[k]}"></i>${n} ${k==='e'?'ETF':k==='f'?'fondo':'acción'}${n>1?(k==='s'?'es':'s'):''}</span>`).join('')}</div>
+    <div class="wd-grid"><div class="wd-p wd-l"><div class="wd-h"><span>${one?esc(rows[0].name):'Rentabilidad a 1 año'}</span></div><div class="wd-chips${one?' one':''}">${list}</div>
+        <p class="wd-src"><span>ⓢ</span>${one?'Datos: Yahoo Finance y fichas de la gestora':'Toca uno para ver su ficha'}</p></div>
+      <div class="wd-p wd-r"><div class="wd-h"><span>${one?'Precio':'Resumen'}</span><small>Gráfico: 3 meses</small></div>
+        ${top.map(x=>`<button class="wd-s" data-k="${x.k}" data-t="${esc(x.t)}" data-n="${x.node}" data-wd="${x.k}:${esc(x.t)}"><span class="wd-sl"><small><i style="--c:${KIND_C[x.k]}"></i>${esc(String(x.tk))}${one?'':' · '+esc(x.name)}</small><b class="wd-pr">…</b><span class="wd-ch">Cargando…</span></span><span class="wd-sp"></span></button>`).join('')}
+        ${one?`<button class="wd-more" data-k="${rows[0].k}" data-t="${esc(rows[0].t)}" data-n="${rows[0].node}">Ver ficha completa →</button>`:''}</div></div></div>`}
+function wdSpark(rows,col){const v=rows.map(r=>r[1]),mn=Math.min(...v),mx=Math.max(...v),rg=mx-mn||1,W=120,H=44;
+  const pts=v.map((y,i)=>`${(2+i/(v.length-1)*(W-4)).toFixed(1)},${(4+(mx-y)/rg*(H-8)).toFixed(1)}`).join(' ');
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`}
+function wdFillAll(card,rows){card.querySelectorAll('[data-wd]').forEach(async el=>{const x=rows.find(r=>r.k+':'+r.t===el.dataset.wd);if(!x)return;
+  let p=null;try{p=await loadPrice(priceKey(x.k,x.obj))}catch(_){}if(!el.isConnected)return;
+  const pr=el.querySelector('.wd-pr'),ch=el.querySelector('.wd-ch'),sp=el.querySelector('.wd-sp');
+  if(!p||!p.o||p.o.length<7){pr.textContent='—';ch.textContent='Sin precio diario';return}
+  const R=priceRows(p),last=R[R.length-1][1],wk=R[R.length-6][1],d=(last/wk-1)*100,cur=CUR_SYM[p.cur]||(p.cur?' '+p.cur:''),S=R.slice(-66),up3=S[S.length-1][1]>=S[0][1];
+  pr.textContent=`${cur==='$'?'$':''}${last.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})}${cur!=='$'?(cur==='€'?' €':cur):''}`;
+  ch.className='wd-ch '+(d<0?'dn':'up');ch.textContent=`${d<0?'▼':'▲'} ${wdPct(Math.abs(d),1).replace('+','')} en una semana`;
+  sp.innerHTML=wdSpark(S,up3?'#a6e35a':'#ff6a4d');sp.title='Últimos 3 meses'})}
 function litCity(c){if(!mapReady)return;const src=map.getSource('hq');if(src)src.setData({type:'FeatureCollection',features:c?[{type:'Feature',geometry:{type:'Point',coordinates:c},properties:{}}]:[]});
   if(map.getLayer('hq-glow'))map.setPaintProperty('hq-glow','circle-opacity',c?.32:0);if(map.getLayer('b3d')){map.setPaintProperty('b3d','fill-extrusion-color',c?B3D_LIT:B3D_DIM);if(map.hasImage('win-lit'))map.setPaintProperty('b3d','fill-extrusion-pattern',c?'win-lit':'win-dim');map.setPaintProperty('b3d','fill-extrusion-opacity',MBX?['interpolate',['linear'],['zoom'],12,0,12.7,c?.97:.9,14.9,c?.97:.9,15.5,0]:(c?.97:.9))}
   try{roadsLit(!!c)}catch(_){}if(!c){fxOrbit=false;try{map.setPaintProperty('hq-ring','circle-stroke-opacity',0)}catch(_){}}}
@@ -3292,7 +3322,7 @@ setTimeout(()=>{if(EXPERT())run()},3600);
 <script src="js/scenarios.js?v=3"></script>
 <script src="js/query.js?v=1"></script>
 <link rel="stylesheet" href="css/vault.css?v=2">
-<link rel="stylesheet" href="css/ui.css?v=9">
+<link rel="stylesheet" href="css/ui.css?v=10">
 <script src="js/vault.js?v=2"></script>
 <script src="js/kauai.js?v=3"></script>
 <script>if('serviceWorker' in navigator&&location.protocol.startsWith('http')){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}</script>

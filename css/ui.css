@@ -303,3 +303,37 @@ body.mapmode #app .right .pbody>[data-s]{flex-shrink:0;overflow:visible!importan
 
 /* filtro del mapa activo: la tarjeta de resumen deja ver la barra de resultados */
 @media (min-width:701px){body.flt-on #ovcard{top:calc(env(safe-area-inset-top,0px) + 186px);max-height:calc(100vh - 290px)}}
+
+/* ---- ficha del mapa estilo panel (puntos de color + resumen semanal) ---- */
+#mcard.wd-card{background:#14161f;border:1px solid rgba(255,255,255,.08);box-shadow:0 24px 60px -18px rgba(0,0,0,.75)}
+@media (min-width:1101px){#mcard.wd-card{width:min(660px,calc(100% - 36px));max-height:min(64%,560px)}}
+#mcard.wd-card .mc-h{background:rgba(20,22,31,.97);border-color:rgba(255,255,255,.06);padding:16px 16px 10px 18px}
+#mcard.wd-card .mc-h h3{font:600 17px/1.25 var(--ui);letter-spacing:-.01em}
+.wd{padding:4px 12px 14px}
+.wd-nav{display:flex;align-items:center;gap:16px;padding:6px 6px 12px;overflow-x:auto;scrollbar-width:none;font:500 12px var(--ui);color:rgba(220,228,240,.5);white-space:nowrap}.wd-nav::-webkit-scrollbar{display:none}
+.wd-nav span{display:inline-flex;align-items:center;gap:6px}.wd-nav span.on{color:#fff}.wd-nav i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+.wd-bolt{color:#a6e35a;font-size:15px}
+.wd-grid{display:grid;gap:10px}
+@media (min-width:640px){.wd-grid{grid-template-columns:1.1fr 1fr}}
+.wd-p{border-radius:14px;background:linear-gradient(160deg,#3a4058 0%,#2a2f42 100%);border:1px solid rgba(255,255,255,.06);padding:14px 14px 12px;min-width:0}
+.wd-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;font:500 11.5px var(--ui);color:rgba(230,236,248,.62)}.wd-h small{font-size:11px;color:rgba(230,236,248,.5)}
+.wd-h span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wd-chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:2px 6px}
+.wd-chips.one{grid-template-columns:1fr 1fr}
+.wd-c{display:flex;align-items:center;gap:6px;min-width:0;padding:8px 4px;border:0;border-radius:8px;background:none;color:#e9eef8;font:500 12px var(--ui);text-align:left;cursor:default}
+button.wd-c{cursor:pointer}button.wd-c:hover{background:rgba(255,255,255,.06)}
+.wd-c i{flex:none;width:6px;height:6px;border-radius:50%;background:var(--c);box-shadow:0 0 6px var(--c)}
+.wd-c b{font-weight:500;color:rgba(233,238,248,.82);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.wd-c em{margin-left:auto;font-style:normal;font-variant-numeric:tabular-nums;color:#e9eef8;white-space:nowrap}.wd-c em.up{color:#a6e35a}.wd-c em.dn{color:#ff6a4d}
+.wd-chips.one .wd-c{padding:9px 4px;border-bottom:1px solid rgba(255,255,255,.05);border-radius:0}
+.wd-src{display:flex;align-items:center;gap:8px;margin:10px 4px 0;font:500 11.5px var(--ui);color:rgba(230,236,248,.72)}.wd-src span{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;border:1px solid rgba(230,236,248,.5);font-size:10px}
+.wd-s{display:grid;grid-template-columns:minmax(0,1fr) 46%;align-items:center;gap:10px;width:100%;padding:10px 4px;border:0;border-top:1px solid rgba(255,255,255,.05);background:none;color:#fff;text-align:left;cursor:pointer;border-radius:0}
+.wd-h+.wd-s{border-top:0}.wd-s:hover .wd-pr{color:#b9f6ff}
+.wd-sl{display:flex;flex-direction:column;gap:3px;min-width:0}
+.wd-sl small{display:flex;align-items:center;gap:6px;font:500 10.5px var(--ui);color:rgba(230,236,248,.55);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.wd-sl small i{flex:none;width:6px;height:6px;border-radius:50%;background:var(--c)}
+.wd-pr{font:500 22px/1.1 var(--ui);letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wd-ch{font:500 11px var(--ui);color:rgba(230,236,248,.5)}.wd-ch.up{color:#a6e35a}.wd-ch.dn{color:#ff6a4d}
+.wd-sp{height:44px;display:block}.wd-sp svg{width:100%;height:100%;display:block}
+.wd-more{display:block;width:100%;margin-top:8px;padding:10px;border-radius:999px;border:0;background:#fff;color:#14161f;font:600 13px var(--ui);cursor:pointer}
+@media (max-width:639px){.wd{padding:2px 10px 12px}.wd-pr{font-size:20px}.wd-r{order:-1}}
+.wd-l{align-self:start}
