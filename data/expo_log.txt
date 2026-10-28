@@ -28,4 +28,4 @@ crumb ok
   e:URA: justETF IE000NDWFGA5 falló: sin composición
   e:x:EGLN.L: justETF IE00B4ND3602 falló: sin composición
   e:x:XEON.DE: justETF LU0290358497 falló: sin composición
-OK · 0 índices completos · 153 ETFs/fondos (0 por índice, 152 con datos de Yahoo)
+OK · 0 índices completos · 153 ETFs/fondos (0 por índice, 151 con datos de Yahoo)
